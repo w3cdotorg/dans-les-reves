@@ -368,16 +368,27 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 [data-theme=riso] #p-cortex{fill:color-mix(in srgb, var(--ink-rose) 45%, var(--papier));mix-blend-mode:normal}
 [data-theme=riso] :is(#p-frontal,#p-parietal,#p-occipital,#p-temporal,#p-cervelet){mix-blend-mode:normal}
 [data-theme=riso] .profond{opacity:.92;mix-blend-mode:normal}
-/* le visage, prêt pour les tâches suivantes :
-   - paupière et œil fermé brodé : cachés le jour (la nuit les allumera) ;
+/* le visage (états pilotés par le temps, Task 7 : variables sur :root, classes sur
+   l'élément, jamais de sélecteur d'ancêtre — RÈGLE DU <use>, section 7) :
+   - paupière et œil fermé brodé : --paupiere-op (0 le jour, 1 du soir à la fin de la nuit) ;
    - sourcil : .fronce l'abaisse côté nez, pivot à son bout arrière ;
-   - glande de la nuit : .allume lui donne une lueur douce. */
-#p-paupiere,#fil-oeil-ferme{opacity:0}
+   - glande de la nuit : .allume (allumée ou non) + --pineale-lueur (0..1, l'intensité). */
+#p-paupiere,#fil-oeil-ferme{opacity:var(--paupiere-op,0)}
+/* riso : la paupière est imprimée en réserve (sans multiply), sinon le bouton bleu de
+   l'œil se voit au travers en vert et l'œil « fermé » reste ouvert */
+#p-paupiere{mix-blend-mode:normal}
+/* … et le bouton de l'œil s'efface à mesure que la paupière se ferme : l'encre riso ne
+   couvre jamais tout (masque de bruit du filtre #riso), le bleu transparaissait encore
+   (en feutrine, la laine de la paupière le cache déjà : sans effet visible) */
+#p-oeil,#p-oeil~.trou,#p-oeil~.bord-bouton,#p-oeil+.trou+.trou+.fil{opacity:calc(1 - var(--paupiere-op,0))}
 #p-sourcil{transform-box:view-box;transform-origin:442px 218px;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
 #p-sourcil.fronce{transform:translateY(2.5px) rotate(13deg)}
 #p-pineale{transition:opacity .4s}
-#p-pineale.allume{opacity:1;filter:url(#woolLite) drop-shadow(0 0 3px var(--fil-blanc)) drop-shadow(0 0 8px var(--lueur-pineale)) drop-shadow(0 0 16px var(--p-pineale))}
-[data-theme=riso] #p-pineale.allume{filter:url(#riso) drop-shadow(0 0 5px var(--ink-rose))}
+#p-pineale.allume{opacity:1;filter:url(#woolLite)
+  drop-shadow(0 0 3px color-mix(in srgb, var(--fil-blanc) calc(var(--pineale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc(3px + 5px * var(--pineale-lueur,1)) var(--lueur-pineale))
+  drop-shadow(0 0 calc(6px + 10px * var(--pineale-lueur,1)) color-mix(in srgb, var(--p-pineale) calc(var(--pineale-lueur,1) * 100%), transparent))}
+[data-theme=riso] #p-pineale.allume{filter:url(#riso) drop-shadow(0 0 calc(2px + 4px * var(--pineale-lueur,1)) var(--ink-rose))}
 /* l'hippocampe gonflera par son GROUPE (#g-hippocampe), jamais par la pièce .w */
 #g-hippocampe{transform-box:fill-box;transform-origin:80% 70%}
 
@@ -391,7 +402,11 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 .oeil-lune,.nez-doudou{fill:var(--fil-brun)}
 [data-theme=riso] :is(.oeil-lune,.nez-doudou){fill:var(--ink-bleu)}
 #fil-lune-clin{opacity:0}          /* le clin d'œil de la lune le montrera un instant */
-#p-lampe-lueur{opacity:.55}        /* une lueur de laine, pas une ampoule */
+/* la lueur de la lampe : son opacité suit data-nuit (Task 7) ; elle doit rester CLAIRE
+   sur le lin assombri. Ordre des groupes oblige (la nuit est dans la toile, dessous),
+   elle est éclaircissante : mix-blend-mode:screen éclaire la toile et le sol au lieu de
+   se laisser salir (en normal à .55, la nuit transparaissait au travers). */
+#p-lampe-lueur{mix-blend-mode:screen;fill-opacity:.8}
 /* riso : le décor est imprimé en demi-teintes (encre sur papier) pour que les
    grandes surfaces (sol, vitres, expo, couverture) ne soient pas sombres ;
    .reserve = imprimé sans multiply (la lune et le soleil sur leur vitre) ;
@@ -412,6 +427,13 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 .toile-grain{fill:#fff;filter:url(#linenGrain);mix-blend-mode:multiply}
 [data-theme=riso] .toile-lin{fill:var(--papier)}
 [data-theme=riso] .toile-grain{filter:url(#paperGrain)}
+/* La nuit tombe sur la toile (Task 7) : un aplat uniforme --nuit-3 multiplié, la trame
+   reste visible dessous. --nuit (0..1) vient de la table du temps ; --nuit-max plafonne
+   l'assombrissement pour garder la trame et les contrastes (NOTES.md, Task 7). En riso,
+   tous les groupes de la scène se multiplient avec la toile : la nuit assombrit aussi
+   les pièces, d'où un plafond plus bas. */
+.nuit{fill:var(--nuit-3);mix-blend-mode:multiply;opacity:calc(var(--nuit,0) * var(--nuit-max,.8))}
+[data-theme=riso]{--nuit-max:.4}
 
 /* ===== 7 quinquies. Vue « Tout près » : à hauteur de neurones (Task 5) =====
    Un fond de laine rose pâle plein cadre (opaque : les autres vues ne transparaissent
@@ -509,6 +531,79 @@ html.loupe-active,#scene.loupe-active{--pres-play:paused}
 @keyframes pres-pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:.55}}
 /* après les raccourcis « animation » ci-dessus (qui remettent l'état à running) */
 :is(.glisse,.clignote,.influx,.rafale,.descend,.anneau){animation-play-state:var(--pres-play, running)}
+
+/* ===== 7 sexies. Le temps : la journée, le soir, les deux nuits, le matin (Task 7) =====
+   setTime(t) pose sur :root les variables interpolées (--nuit, --paupiere-op,
+   --pineale-lueur, --amygdale-lueur) et des classes sur les éléments eux-mêmes
+   (.allume, .lueur, .pulse, .cligne, .rem) : la tête reprise par <use> dans Dehors
+   suit (RÈGLE DU <use>, section 7). Le décor de Dehors, #g-zzz et les métiers de
+   Tout près reçoivent leur opacité en style (groupes et pièces jamais clonés seuls).
+
+   Animations d'ambiance : douces, lentes, sur des fils, des nœuds ou des groupes,
+   jamais une transform sur un .w. Même mécanique que Tout près (section 7 quinquies) :
+   - mouvement réduit : la règle globale (section 13) coupe tout ;
+   - version allégée : --amb-anim:none (animation-name), la pose de repos montre tout ;
+   - loupe : --amb-play:paused (animation-play-state), posée sur html ou #scene ;
+   des variables, pour qu'un clone <use> (Dehors, la loupe de Task 14) suive. */
+[data-lite="1"]{--amb-anim:none}
+html.loupe-active,#scene.loupe-active{--amb-play:paused}
+
+/* l'amygdale s'allume en rêve (--amygdale-lueur) et bat doucement (.pulse) :
+   --amygdale-pouls est une propriété enregistrée, donc interpolée par l'animation */
+@property --amygdale-pouls{syntax:'<number>';inherits:false;initial-value:0}
+#p-amygdale.lueur{filter:var(--w-lite-filter)
+  drop-shadow(0 0 calc((3px + 2px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, var(--fil-blanc) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((7px + 5px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, #ff3a26 calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((13px + 9px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, #ff6a3d calc(var(--amygdale-lueur,1) * 90%), transparent))}
+#p-amygdale.pulse{animation:var(--amb-anim, amygdale-bat) 1.8s ease-in-out infinite}
+@keyframes amygdale-bat{50%{--amygdale-pouls:1}}
+
+/* l'œil : il cligne le jour (la paupière passe un instant), il fait de petits
+   va-et-vient sous la paupière fermée dans la nuit des rêves (.rem, sur l'œil
+   fermé brodé : la paupière et le bouton sont des pièces .w, qu'on ne bouge pas) */
+#p-paupiere.cligne,#fil-oeil-ferme.cligne{animation:var(--amb-anim, cligne) 5.2s ease-in-out infinite}
+@keyframes cligne{0%,92%,100%{opacity:0}94.5%,96%{opacity:1}}
+#fil-oeil-ferme{transform-box:fill-box;transform-origin:center}
+#fil-oeil-ferme.rem{animation:var(--amb-anim, rem) 1.3s ease-in-out infinite}
+@keyframes rem{0%,100%{transform:translateX(0)}18%{transform:translateX(-1.6px)}40%{transform:translateX(1.5px)}55%{transform:translateX(-.6px)}78%{transform:translateX(1.7px)}}
+
+/* la tête respire (×1,01) : sur les groupes (Dedans entier, l'enfant de Dehors),
+   par la propriété « scale », qui se compose avec la transform posée en style
+   (fondu de Task 6, enfant couché) au lieu de la remplacer */
+#scene-inner>#g-dedans,#g-enfant-dehors{animation:var(--amb-anim, respire) 5s ease-in-out infinite}
+@keyframes respire{50%{scale:1.01}}
+
+/* les fils frémissent : le point de tige des sillons et du cervelet avance et recule
+   d'un rien (en riso, les fils sont pleins : rien ne bouge) */
+#fil-sillons>.fil,#fil-cervelet{animation:var(--amb-anim, fremit) 3.6s ease-in-out infinite}
+@keyframes fremit{50%{stroke-dashoffset:.9}}
+
+/* les nœuds-étoiles scintillent (on ne les voit que le soir et la nuit) */
+#g-etoiles circle{animation:var(--amb-anim, scintille) 2.8s ease-in-out infinite}
+#g-etoiles circle:nth-of-type(2n){animation-duration:3.4s;animation-delay:-1.2s}
+#g-etoiles circle:nth-of-type(3n){animation-delay:-2.1s}
+@keyframes scintille{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* « zzz » : chaque z monte en s'effaçant, l'un après l'autre ; au repos (allégé,
+   mouvement réduit), les trois sont là, immobiles */
+.fil.z{stroke-width:2.2;transform-box:fill-box;transform-origin:center}
+.fil.z{animation:var(--amb-anim, zzz) 4.5s ease-in-out infinite}
+.fil.z-2{animation-delay:-1.5s}
+.fil.z-3{animation-delay:-3s}
+@keyframes zzz{0%{opacity:0;transform:translate(-5px,9px) scale(.8)}25%,65%{opacity:1}100%{opacity:0;transform:translate(6px,-12px) scale(1.1)}}
+
+/* surprises (spec §2 « fun ») : une fois sur dix soirs, la lune fait un clin d'œil ;
+   au matin, l'enfant bâille (la bouche est un .fil : la transform est permise) */
+#fil-lune-clin.clin{animation:var(--amb-anim, clin-montre) 1.3s ease-in-out}
+#fil-lune-oeil.clin{animation:var(--amb-anim, clin-cache) 1.3s ease-in-out}
+@keyframes clin-montre{20%,70%{opacity:1}}
+@keyframes clin-cache{20%,70%{opacity:0}}
+#p-bouche.baille{animation:var(--amb-anim, baille) 1.8s ease-in-out}
+@keyframes baille{35%,62%{transform:scale(.8,2.6)}}
+
+/* après les raccourcis « animation » ci-dessus (qui remettent l'état à running) ;
+   #scene-inner>#g-dedans dans la liste donne à :is() la spécificité la plus forte */
+:is(#p-amygdale,#p-paupiere,#fil-oeil-ferme,#scene-inner>#g-dedans,#g-enfant-dehors,#fil-sillons>.fil,#fil-cervelet,#g-etoiles circle,.fil.z,#fil-lune-clin,#fil-lune-oeil,#p-bouche){animation-play-state:var(--amb-play, running)}
 
 /* ===== 7 ter. Avatar : garçon / fille, peau, cheveux (dans la feuille de réglages) =====
    Les pastilles sont des ronds plats de 56 px ; la choisie porte un anneau
@@ -789,10 +884,6 @@ html:not([data-pret]) *{transition:none!important}
             <feComposite in2="SourceGraphic" operator="in"/>
             <feBlend in="SourceGraphic" mode="multiply"/>
           </filter>
-          <!-- la nuit : blanc (neutre en multiply) jusqu'à 42 %, puis --nuit-1, -2, -3 -->
-          <linearGradient id="dusk" x1="0" x2="1" y1="0" y2="0">
-            <stop offset=".42" stop-color="#ffffff"/><stop offset=".58" stop-color="#8d8cae"/><stop offset=".72" stop-color="#3f3f74"/><stop offset="1" stop-color="#262a58"/>
-          </linearGradient>
 
           <!-- ===== Épingle plantée (v10, « parfaite », référence figée) ===== -->
           <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#8e949c"/><stop offset=".45" stop-color="#f4f6f8"/><stop offset="1" stop-color="#7d838b"/></linearGradient>
@@ -847,7 +938,8 @@ html:not([data-pret]) *{transition:none!important}
           <g id="g-toile">
             <rect class="toile-lin" width="900" height="560"/>
             <rect class="toile-grain" width="900" height="560"/>
-            <rect class="nuit" width="900" height="560" fill="url(#dusk)" style="mix-blend-mode:multiply" opacity="0"/>
+            <!-- la nuit : un aplat uniforme --nuit-3 multiplié (CSS .nuit) ; son opacité suit le temps (Task 7) -->
+            <rect class="nuit" width="900" height="560"/>
           </g>
           <!-- ===== Vue « Dehors » ===== -->
           <g id="g-dehors">
@@ -1013,6 +1105,14 @@ html:not([data-pret]) *{transition:none!important}
                 <circle cx="333" cy="128" r="1.9" fill="url(#knot)"/><circle cx="246" cy="177" r="1.9" fill="url(#knot)"/>
                 <circle cx="413" cy="276" r="1.9" fill="url(#knot)"/><circle cx="252" cy="222" r="1.9" fill="url(#knot)"/>
               </g>
+            </g>
+
+            <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui se repose la nuit
+                 (Task 7 : opacité par le temps, ils montent doucement) -->
+            <g id="g-zzz" style="--f:var(--nuit-2)">
+              <path class="fil z z-1" d="M368 134h9l-9 9h9"/>
+              <path class="fil z z-2" d="M379 110h12l-12 12h12"/>
+              <path class="fil z z-3" d="M392 82h15l-15 15h15"/>
             </g>
 
             <!-- l'oreille, en transparence par-dessus le cerveau : l'entrée des sons -->
@@ -1817,8 +1917,8 @@ function mesurerRendu(){
 
 /* ===== 5. Vue et temps : l'habillage suit les deux états =====
    #cut (0..200 = vue × 100) et #time (0..400 = moment × 100) restent les
-   états. setCut / setTime (Tasks 6–7, qui animent la scène) s'abonneront à
-   leurs événements « input » et appelleront aussi uiCut / uiTime, qui ne
+   états. setCut / setTime (Tasks 6–7, qui animent la scène) sont appelés par
+   leurs événements « input » et appellent aussi uiCut / uiTime, qui ne
    touchent qu'à l'habillage (pas aux valeurs des curseurs, pas à la scène) :
      uiCut(c)  c ∈ [0,2] : segment actif (aria-pressed), pouce indigo à c ;
      uiTime(t) t ∈ [0,4] : position du bouton du rail (--k = t/4), son icône
@@ -1875,6 +1975,7 @@ function setCut(c){
 function animateCut(cible, ms = 500){
   cible = borne(cible, 2);
   cancelAnimationFrame(animCut);
+  clearTimeout(posCut);   /* un clic sur un segment annule l'aimantation ↑↓ en attente */
   const c0 = cutCourant;
   if(REDUIT.matches || c0 === cible || ms <= 0){ setCut(cible); return; }
   const t0 = performance.now();
@@ -1909,12 +2010,143 @@ function uiTime(t){
   momentAffiche = n;
 }
 
+/* ----- Temps : la journée interpolée sur les trois vues (Task 7) -----
+   setTime(t), t ∈ [0,4] (0 la journée, 1 le soir, 2 la nuit profonde, 3 la nuit
+   des rêves, 4 le matin), est le seul point d'entrée : chaque table ci-dessous
+   donne la valeur aux cinq moments, lerpArr interpole entre eux.
+   Têtes (Dedans et l'enfant de Dehors, reprise par <use>) : variables sur :root
+   et classes sur les éléments eux-mêmes, jamais d'état posé sur un ancêtre. */
+const TEMPS = {
+  nuit:       [0, .55, 1, 1, .1],   /* .nuit de la toile (× --nuit-max, plafond CSS) */
+  jour:       [1, .3, 0, 0, .8],    /* [data-jour] : le soleil dans le ciel, l'expo */
+  chambre:    [0, 1, 1, 1, 1],      /* [data-chambre] : fenêtre, lampe, lit, couverture, doudou */
+  nuitDecor:  [0, .6, 1, 1, .2],    /* [data-nuit] : vitre de nuit, lune, étoiles, lueur de la lampe */
+  decor:      [1, .5, 0, 0, .6],    /* [data-decor] : décors des cartes (Task 8), sous le lit la nuit */
+  couche:     [0, .5, 1, 1, 0],     /* l'enfant de Dehors se couche (rotation ; 1 = sur l'oreiller) */
+  paupiere:   [0, 1, 1, 1, 0],      /* yeux fermés */
+  pineale:    [0, 1, .6, .4, 0],    /* la glande de la nuit */
+  rem:        [0, 0, 0, 1, 0],      /* les yeux bougent sous les paupières */
+  zzz:        [0, 0, 1, 1, 0],      /* le lobe frontal se repose */
+  amygdale:   [0, 0, .3, 1, 0],     /* l'amygdale s'allume en rêve */
+  phaseNuit:  [0, 0, 1, .2, 0],     /* Tout près : vagues, fuseaux, rinçage, cellule */
+  synapses:   [1, .5, .2, 1, .8]    /* Tout près : les étincelles du jour et des rêves */
+};
+/* L'enfant de Dehors (pivot au cou (359,440), transform CSS du groupe, jamais d'une pièce) :
+   « dans son lit » (translation + échelle) suit la table chambre, « couché » (rotation)
+   suit la table couche. Le soir il est assis dans son lit, à moitié allongé ; la nuit
+   couché, la tête sur l'oreiller, le col sous la couverture ; le matin assis, réveillé.
+   (Avec la translation sur la table couche, le matin l'enfant restait debout, en grand,
+   derrière la couverture qui lui cachait le menton.) Pose de nuit : Tasks 4 et 3b,
+   recalée (72,-74) pour rentrer le col sous la couverture (NOTES.md, Task 7). */
+const COUCHE = { x: 72, y: -74, rot: -80, echelle: .6 };
+const DECOR = [['jour', 'jour'], ['chambre', 'chambre'], ['nuit', 'nuitDecor'], ['decor', 'decor']];
+const PHASES_PRES = { nuit: 'phaseNuit', synapses: 'synapses' };
+const dehors = VUES[0], pres = VUES[2];
+const enfantDehors = document.getElementById('g-enfant-dehors');
+const zzz = document.getElementById('g-zzz');
+const tete = Object.fromEntries(['p-paupiere', 'fil-oeil-ferme', 'p-pineale', 'p-amygdale', 'p-bouche', 'fil-lune-oeil', 'fil-lune-clin']
+  .map(id => [id, document.getElementById(id)]));
+const montrer = (el, op) => {   /* opacité + visibility:hidden à 0 (rien à peindre, comme setCut) */
+  el.style.opacity = op;
+  el.style.visibility = op > 0 ? '' : 'hidden';
+};
+let tempsCourant = 0;
+let phaseCourante = null;
+function setTime(t){
+  t = borne(t, 4);
+  tempsCourant = t;
+  const v = Object.fromEntries(Object.entries(TEMPS).map(([k, arr]) => [k, lerpArr(arr, t)]));
+  /* la toile, et l'état de la tête (lu par des règles posées sur les pièces) */
+  root.style.setProperty('--nuit', v.nuit);
+  root.style.setProperty('--paupiere-op', v.paupiere);
+  root.style.setProperty('--pineale-lueur', v.pineale);
+  root.style.setProperty('--amygdale-lueur', v.amygdale);
+  tete['p-pineale'].classList.toggle('allume', v.pineale > .02);
+  tete['p-amygdale'].classList.toggle('lueur', v.amygdale > .02);
+  tete['p-amygdale'].classList.toggle('pulse', v.amygdale > .5);
+  /* clignement : seulement les yeux grands ouverts ; va-et-vient : la nuit des rêves */
+  tete['p-paupiere'].classList.toggle('cligne', v.paupiere < .02);
+  tete['fil-oeil-ferme'].classList.toggle('cligne', v.paupiere < .02);
+  tete['fil-oeil-ferme'].classList.toggle('rem', v.rem > .5);
+  /* Dehors : les trois familles du décor (et les décors des cartes, Task 8) */
+  for(const [attr, table] of DECOR){
+    dehors.querySelectorAll(`[data-${attr}="1"]`).forEach(el => montrer(el, v[table]));
+  }
+  const lit = v.chambre, k = v.couche;
+  enfantDehors.style.transform = lit > 0 || k > 0
+    ? `translate(${COUCHE.x * lit}px, ${COUCHE.y * lit}px) rotate(${COUCHE.rot * k}deg) scale(${1 + (COUCHE.echelle - 1) * lit})`
+    : '';
+  /* Dedans : le frontal se repose */
+  montrer(zzz, v.zzz);
+  /* Tout près : les métiers de la nuit et les étincelles */
+  pres.querySelectorAll('[data-phase]').forEach(el => montrer(el, v[PHASES_PRES[el.dataset.phase]] ?? 1));
+  /* l'état lisible, l'habillage, le curseur */
+  const n = Math.round(t);
+  document.body.dataset.temps = n;
+  timeRange.value = Math.round(t * 100);
+  uiTime(t);
+  if(n !== phaseCourante){
+    const avant = phaseCourante;
+    phaseCourante = n;
+    if(avant !== null){   /* pas au chargement : ce n'est pas un changement */
+      surprises(avant, n);
+      document.dispatchEvent(new CustomEvent('temps', { detail: { t, phase: n } }));
+    }
+  }
+}
+/* Petites surprises au changement de moment (spec §2 « fun »), coupées en mouvement
+   réduit : la lune fait un clin d'œil une fois sur dix quand le soir arrive, l'enfant
+   bâille au réveil. La classe est retirée à la fin, pour pouvoir rejouer. */
+function rejouer(els, cls, ms){
+  els.forEach(el => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); });
+  setTimeout(() => els.forEach(el => el.classList.remove(cls)), ms);
+}
+function surprises(avant, n){
+  if(REDUIT.matches) return;
+  if((n === 1 || n === 2) && (avant === 0 || avant === 4) && Math.random() < .1){
+    rejouer([tete['fil-lune-oeil'], tete['fil-lune-clin']], 'clin', 1400);
+  }
+  if(n === 4 && avant === 3) rejouer([tete['p-bouche']], 'baille', 1900);
+}
+/* Glisse jusqu'au moment `cible` (≈ 600 ms, ralentie en fin) ; immédiat en mouvement
+   réduit ; annule un glissé en cours, l'aimant du rail et l'aimantation ←→ en attente. */
+let animTemps = 0;
+let posTemps = 0;
+function animateTime(cible, ms = 600){
+  cible = borne(cible, 4);
+  cancelAnimationFrame(animTemps);
+  cancelAnimationFrame(aimant);
+  clearTimeout(posTemps);
+  const t0v = tempsCourant;
+  if(REDUIT.matches || t0v === cible || ms <= 0){ setTime(cible); return; }
+  const t0 = performance.now();
+  const pas = now => {
+    const x = Math.min(1, (now - t0) / ms);
+    setTime(t0v + (cible - t0v) * (1 - (1 - x) ** 3));
+    if(x < 1) animTemps = requestAnimationFrame(pas);
+  };
+  animTemps = requestAnimationFrame(pas);
+}
+/* ←→ : un pas de 0,25 puis, après un court répit, le moment voisin dans le sens de la touche */
+function pasTemps(d){
+  cancelAnimationFrame(animTemps);
+  cancelAnimationFrame(aimant);
+  clearTimeout(posTemps);
+  setTime(tempsCourant + d);
+  posTemps = setTimeout(() => animateTime(d > 0 ? Math.ceil(tempsCourant) : Math.floor(tempsCourant), 250), 450);
+}
+
 function poserCurseur(range, v){
   range.value = v;
   range.dispatchEvent(new Event('input'));
 }
-cutRange.addEventListener('input', () => { cancelAnimationFrame(animCut); setCut(Number(cutRange.value) / 100); });
-timeRange.addEventListener('input', () => uiTime(Number(timeRange.value) / 100));
+cutRange.addEventListener('input', () => { cancelAnimationFrame(animCut); clearTimeout(posCut); setCut(Number(cutRange.value) / 100); });
+/* le rail (glissé, aimant, clavier natif) : la main l'emporte sur un glissé ou une aimantation en attente */
+timeRange.addEventListener('input', () => {
+  cancelAnimationFrame(animTemps);
+  clearTimeout(posTemps);
+  setTime(Number(timeRange.value) / 100);
+});
 segs.forEach(b => b.addEventListener('click', () => animateCut(Number(b.dataset.cut))));
 
 /* Aimantation douce : continu pendant qu'on glisse ; au lâcher, le bouton
@@ -1939,6 +2171,8 @@ function aimanter(){
 let tire = false;
 timeRange.addEventListener('pointerdown', () => {
   cancelAnimationFrame(aimant);
+  cancelAnimationFrame(animTemps);
+  clearTimeout(posTemps);
   tire = true;
   rail.classList.add('tire');
 });
@@ -1958,7 +2192,7 @@ addEventListener('pointercancel', lacher);
 if(URL_ETAT.vue !== null) cutRange.value = URL_ETAT.vue * 100;
 if(URL_ETAT.temps !== null) timeRange.value = URL_ETAT.temps * 100;
 setCut(Number(cutRange.value) / 100);
-uiTime(Number(timeRange.value) / 100);
+setTime(Number(timeRange.value) / 100);
 
 /* ===== 6. Avatar : garçon / fille, peau, cheveux =====
    Valeurs reprises de « Dans mon corps » (carnation : [peau, ombre, fil du
@@ -2089,11 +2323,11 @@ feuille.addEventListener('click', e => {
 if(Q.get('reglages') === '1') ouvrirFeuille();
 requestAnimationFrame(() => requestAnimationFrame(() => { root.dataset.pret = '1'; }));
 
-/* Clavier : ←→ le temps (pas 0,25), ↑↓ la vue (pas 0,5 ; ↓ = on entre plus
-   profond), Échap ferme le volet. Partout sauf dans un champ de saisie et
-   quand la feuille de réglages est ouverte. Sur le rail lui-même, ces touches
-   remplacent celles du navigateur (un pas de 1/400 ne se verrait pas).
-   Tasks 6–7 reprendront ce gestionnaire (pastilles, setCut / setTime). */
+/* Clavier (le seul gestionnaire) : ←→ le temps (pas 0,25, puis le moment voisin
+   après un répit : pasTemps), ↑↓ la vue (pas 0,5, puis la vue voisine : pasCut ;
+   ↓ = on entre plus profond), Échap ferme le volet. Partout sauf dans un champ de
+   saisie et quand la feuille de réglages est ouverte. Sur le rail lui-même, ces
+   touches remplacent celles du navigateur (un pas de 1/400 ne se verrait pas). */
 const SAISIE = 'input:not([type=range]):not([type=checkbox]), textarea, select, [contenteditable]';
 document.addEventListener('keydown', e => {
   if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || feuille.open) return;
@@ -2103,12 +2337,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   if(e.key === 'ArrowUp' || e.key === 'ArrowDown'){ e.preventDefault(); pasCut(e.key === 'ArrowDown' ? 0.5 : -0.5); return; }
-  const PAS = { ArrowLeft: [timeRange, -25, 400], ArrowRight: [timeRange, 25, 400] }[e.key];
-  if(!PAS) return;
-  e.preventDefault();
-  const [range, pas, max] = PAS;
-  cancelAnimationFrame(aimant);
-  poserCurseur(range, Math.min(max, Math.max(0, Number(range.value) + pas)));
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowRight'){ e.preventDefault(); pasTemps(e.key === 'ArrowRight' ? 0.25 : -0.25); }
 });
 </script>
 </body>

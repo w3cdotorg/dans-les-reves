@@ -386,6 +386,14 @@ GABARIT = r"""
               </g>
             </g>
 
+            <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui se repose la nuit
+                 (Task 7 : opacité par le temps, ils montent doucement) -->
+            <g id="g-zzz" style="--f:var(--nuit-2)">
+              <path class="fil z z-1" d="M368 134h9l-9 9h9"/>
+              <path class="fil z z-2" d="M379 110h12l-12 12h12"/>
+              <path class="fil z z-3" d="M392 82h15l-15 15h15"/>
+            </g>
+
             <!-- l'oreille, en transparence par-dessus le cerveau : l'entrée des sons -->
             <!-- #g-oreille, #g-cheveux, #g-visage : regroupés pour être repris tels quels dans Dehors (<use>) -->
             <g id="g-oreille">

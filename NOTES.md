@@ -817,3 +817,55 @@ Contrôles : `node --test test/` 16/16 ; console 0 erreur / 0 avertissement (feu
 - **« Tourner de page »** : la vue qui s'efface grossit de 2 % (`scale(1 + .02·(1-op))`, transform CSS posé en style sur le groupe, `transform-box:view-box; transform-origin:center`), retiré à opacité 0 ou 1 et en mouvement réduit. Aucune pièce `.w` ne porte de transform.
 - À `vue=0.5` les deux têtes se superposent sans décalage (la tête est partagée) ; en riso, les groupes se multiplient et le résultat reste lisible (pas de fantôme décalé). `#g-pres` reste en `normal`, donc seule la vue 2 est opaque.
 - Contrôles : 16/16, console 0 erreur / 0 avertissement ; clic sur chaque segment, ↑↓ au clavier, `?vue=2` au chargement vérifiés (opacité, visibility, pointer-events, aria-pressed). Captures : `shots/t6-v0.png`, `t6-v1.png`, `t6-v2.png`, `t6-v05.png`, `t6-riso0.png`, `t6-riso05.png`.
+
+## Task 7 : curseur TEMPS (la journée, le soir, les deux nuits, le matin)
+
+- **`setTime(t)`** (global, t borné à [0,4]) est le seul point d'entrée. Les tables `TEMPS` (une ligne par effet, 5 valeurs `[jour, soir, profonde, rêves, matin]`) passent par `lerpArr`. Elles sont reprises telles quelles du brief et des décisions du contrôleur : nuit `[0,.55,1,1,.1]` ; `data-jour` `[1,.3,0,0,.8]` ; `data-chambre` `[0,1,1,1,1]` ; `data-nuit` `[0,.6,1,1,.2]` ; `data-decor` `[1,.5,0,0,.6]` (prête pour Task 8) ; couché `[0,.5,1,1,0]` ; paupière `[0,1,1,1,0]` ; pinéale `[0,1,.6,.4,0]` ; rem `[0,0,0,1,0]` ; zzz `[0,0,1,1,0]` ; amygdale `[0,0,.3,1,0]` ; Tout près `data-phase="nuit"` `[0,0,1,.2,0]` et `"synapses"` `[1,.5,.2,1,.8]`. setTime pose aussi `body.dataset.temps = round(t)`, `#time` (t × 100) et `uiTime(t)`.
+  - Il émet `temps` (`{t, phase}`) une fois par changement de phase arrondie. Rien n'est émis au chargement (ce n'est pas un changement) : un abonné lit `document.body.dataset.temps` ou `tempsCourant` à son initialisation.
+  - `?temps=` est lu au chargement.
+  - **`animateTime(cible, ms = 600)`** : même mécanique qu'`animateCut`.
+- **Têtes partagées.** Les variables sur `:root` sont `--paupiere-op`, `--pineale-lueur` et `--amygdale-lueur` (plus `--nuit` pour la toile). Les classes sont posées sur les éléments eux-mêmes : `.allume` (pinéale), `.lueur`/`.pulse` (amygdale), `.cligne` (paupière et œil fermé, le jour), `.rem` (œil fermé brodé, nuit des rêves). Aucun sélecteur d'ancêtre.
+  - Le va-et-vient `rem` est sur `#fil-oeil-ferme` et non sur `#p-oeil` : le bouton est une pièce `.w` cachée sous une paupière opaque, et une transform l'aurait privé de son décalage riso.
+  - La lueur de l'amygdale bat grâce à une propriété enregistrée (`@property --amygdale-pouls`) animée, lue dans les rayons des `drop-shadow`. Un filtre avec `url()` ne s'interpole pas.
+- **Nuit de la toile.** Le dégradé horizontal `#dusk` est supprimé. `.nuit` est un aplat `--nuit-3` en multiply, d'opacité `--nuit × --nuit-max`.
+  - Plafond feutrine **.8** : la trame du lin reste visible, et les pièces (en `normal`) gardent tout leur contraste.
+  - Plafond riso **.4** : tous les groupes s'y multiplient avec la toile. À .5, tout tournait au gris-mauve terne (tête ocre, draps boueux) ; à .4, c'est lisible.
+  - Le « `.nuit` en `normal` » proposé par la décision 4 n'aurait rien changé : les groupes au-dessus se multiplient de toute façon avec la toile.
+- **Lueur de la lampe** : `mix-blend-mode:screen`, `fill-opacity:.8`. Elle éclaire la toile assombrie au lieu d'être salie par elle. En `normal` à .55, la nuit transparaissait.
+- **Riso, œil fermé** : la paupière se multipliait avec le bouton bleu, et l'œil « fermé » restait vert et ouvert. La paupière est donc en réserve, et le bouton, ses trous et son liseré s'effacent avec `1 − --paupiere-op`. Le masque de bruit du filtre `#riso` ne couvre jamais tout.
+- **L'enfant de Dehors (écart assumé).** La translation et l'échelle (« dans son lit ») suivent la table **chambre** ; la rotation (« couché ») suit la table **couche**.
+  - En appliquant tout sur la table couche, le matin (chambre 1, couché 0) mettait l'enfant debout en grand, derrière la couverture qui lui cachait la bouche et le menton : un orphelin.
+  - Maintenant, le soir il est assis dans son lit à moitié allongé (−40°), la nuit couché, et le matin assis, réveillé, la couverture sous le menton.
+  - Pose de nuit recalée de (61,−90) à **(72,−74)** (rot −80°, échelle .6) pour rentrer le col sous la couverture. La tête s'enfonce un peu plus dans l'oreiller.
+- **`#g-zzz`** : trois z brodés (fil `--nuit-2`) sur le lobe frontal, entre le sillon central et les volutes. Ajouté aussi au gabarit de `tools/gen-tete.py`, pour qu'une régénération ne le perde pas (non relancée : shapely absent ici).
+- **Animations d'ambiance.** Même mécanique que Tout près, avec des variables propres : `--amb-anim:none` en allégé, `--amb-play:paused` sous `html.loupe-active` / `#scene.loupe-active`. Le mouvement réduit coupe tout par la règle globale. La liste :
+  - clignement de l'œil le jour ;
+  - respiration ×1,01 de `#g-dedans` et de `#g-enfant-dehors`, par la **propriété `scale`**, qui se compose avec la transform du fondu (Task 6) et du coucher au lieu de l'écraser ;
+  - frémissement du point des sillons et du cervelet (`stroke-dashoffset`) ;
+  - scintillement des 7 nœuds-étoiles ;
+  - pouls de l'amygdale ;
+  - « zzz » qui montent (au repos : immobiles et visibles) ;
+  - va-et-vient REM.
+  - ⚠ La règle `animation-play-state` inclut `#scene-inner>#g-dedans` pour que `:is()` soit plus spécifique que le raccourci `animation`.
+- **Surprises** (pas en mouvement réduit) :
+  - clin d'œil de la lune une fois sur dix en passant du jour (ou du matin) au soir ou à la nuit ;
+  - bâillement (`#p-bouche`, scale) au passage nuit des rêves → matin.
+  - Les classes sont posées sur les fils eux-mêmes et retirées à la fin de l'animation.
+- **Clavier et aimantation.**
+  - ←→ appellent `pasTemps(±.25)` ; après 450 ms, le moment voisin dans le sens de la touche (comme ↑↓).
+  - `animateCut` vide `posCut` : un clic sur un segment annule l'aimantation ↑↓ en attente (mineur de Task 6), et l'entrée `#cut` aussi.
+  - La saisie sur le rail et `pointerdown` annulent `animTemps`/`posTemps` ; l'aimant du rail passe par `setTime`.
+- **Ce qui a raté.**
+  - Lueur de l'amygdale en rose sur le cerveau rose : invisible. Elle est maintenant blanche + rouge vif.
+  - Pose de Task 4 (61,−90) : le col dépassait de la couverture.
+  - Translation sur la table couche : la couverture sur le visage le matin.
+  - `--virtual-time-budget` de Chrome avec des animations infinies ne rend jamais la main : ne pas l'utiliser pour lire la console.
+- **À surveiller.** Tout près reste rose la nuit : la vue est opaque, la toile assombrie ne s'y voit pas, et la nuit s'y lit par les métiers. La respiration redessine toute la tête filtrée à chaque image, comme les animations de Tout près ; si une tablette peine, c'est la première à couper.
+- **Contrôles.**
+  - `node --test test/` : 16/16.
+  - 15 captures `shots/t7-v{0..2}-t{0..4}.png`, plus `t7-riso-v0-t2.png` et `t7-riso-v1-t3.png`.
+  - Playwright (Firefox 156, http://127.0.0.1:8801, `lite=0`) : console 0 erreur / 0 avertissement ; `temps` émis une fois par phase (0→3,9 : 1, 2, 3, 4) ; `animateTime(3)` OK ; glissé du rail 2,19 → 2 au lâcher ; → sur le rail 2,25 puis 3.
+  - ↓ puis clic sur « Dehors » : on reste à Dehors.
+  - Loupe : `paused` ; allégé : `none`.
+  - Mouvement réduit : 0 animation, `animateTime` immédiat, pas de bâillement.
+  - 0 `.w[transform]`, un seul `keydown`.
