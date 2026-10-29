@@ -869,3 +869,11 @@ Contrôles : `node --test test/` 16/16 ; console 0 erreur / 0 avertissement (feu
   - Loupe : `paused` ; allégé : `none`.
   - Mouvement réduit : 0 animation, `animateTime` immédiat, pas de bâillement.
   - 0 `.w[transform]`, un seul `keydown`.
+- **Task 7, tour de correction 1.**
+  - Le sol et les touffes d'herbe tirent vers `--nuit-3` (à 40 % en feutrine, 20 % en riso, par `--sol-nuit`). La règle riso du sol passe par une variable (`--sol-base`).
+  - L'expo quitte la table du soleil : `#p-expo` a sa propre table, `[1,0,0,0,.3]`, par une entrée par id (`DECOR_ID`). Le balisage de Dehors ne change pas, et `gen-dehors.py` le reproduit toujours.
+  - Amygdale en rêve : liseré clair, deux anneaux serrés, deux couronnes rouges et un halo.
+    - ⚠ En riso, `url(#riso)` avale les `drop-shadow` qui le suivent (mesuré en Chrome). Les glandes allumées y sont donc imprimées à plat (`--glande-base:saturate(1)`). Cela explique aussi pourquoi la lueur riso de la pinéale de Task 3 ne s'est jamais vue.
+    - En riso, l'amygdale allumée est rose × jaune (`#ff4631`), avec des couronnes jaunes et un halo papier : rouge ou rose sur le rose du cerveau, rien ne se voyait.
+  - La pinéale bat (`@property --pineale-pouls`, intensité selon `--pineale-lueur`). Sa règle riso passe par des variables (`--pineale-c1..3` : papier et bleu pâle).
+  - `setCut` pose `--amb-play` et `--pres-play` à `paused` sur une vue à opacité 0, puis les retire quand elle revient, pour que l'héritage de la loupe reste intact. Mesuré : à Dedans, 8 animations en pause dans Dehors, 11 dans Tout près, 7 en cours dans Dedans.

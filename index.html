@@ -384,11 +384,15 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 #p-sourcil{transform-box:view-box;transform-origin:442px 218px;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
 #p-sourcil.fronce{transform:translateY(2.5px) rotate(13deg)}
 #p-pineale{transition:opacity .4s}
-#p-pineale.allume{opacity:1;filter:url(#woolLite)
-  drop-shadow(0 0 3px color-mix(in srgb, var(--fil-blanc) calc(var(--pineale-lueur,1) * 100%), transparent))
-  drop-shadow(0 0 calc(3px + 5px * var(--pineale-lueur,1)) var(--lueur-pineale))
-  drop-shadow(0 0 calc(6px + 10px * var(--pineale-lueur,1)) color-mix(in srgb, var(--p-pineale) calc(var(--pineale-lueur,1) * 100%), transparent))}
-[data-theme=riso] #p-pineale.allume{filter:url(#riso) drop-shadow(0 0 calc(2px + 4px * var(--pineale-lueur,1)) var(--ink-rose))}
+/* la lueur suit --pineale-lueur et bat doucement (--pineale-pouls, propriété enregistrée,
+   animée par .allume, section 7 sexies) ; le riso ne change que des variables posées sur
+   [data-theme=riso] (couleurs d'encre), lues ici : le clone <use> de la loupe suit */
+@property --pineale-pouls{syntax:'<number>';inherits:false;initial-value:0}
+#p-pineale.allume{opacity:1;filter:var(--glande-base, var(--w-lite-filter))
+  drop-shadow(0 0 calc(2px + 1.5px * var(--pineale-pouls)) color-mix(in srgb, var(--pineale-c1, var(--fil-blanc)) calc(var(--pineale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((3px + 5px * var(--pineale-lueur,1)) * (1 + .5 * var(--pineale-pouls))) color-mix(in srgb, var(--pineale-c2, var(--lueur-pineale)) calc(var(--pineale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((6px + 10px * var(--pineale-lueur,1)) * (1 + .5 * var(--pineale-pouls))) color-mix(in srgb, var(--pineale-c3, var(--p-pineale)) calc(var(--pineale-lueur,1) * 100%), transparent))}
+[data-theme=riso]{--pineale-c1:var(--papier);--pineale-c2:var(--papier);--pineale-c3:color-mix(in srgb, var(--ink-bleu) 45%, var(--papier))}   /* rose sur le rose du cerveau : invisible */
 /* l'hippocampe gonflera par son GROUPE (#g-hippocampe), jamais par la pièce .w */
 #g-hippocampe{transform-box:fill-box;transform-origin:80% 70%}
 
@@ -396,7 +400,11 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    data-jour / data-nuit : Task 7 en pilote l'opacité. L'enfant est la tête de
    Dedans reprise par <use> : #g-enfant-dehors pivote au cou pour se coucher. */
 #g-enfant-dehors{transform-box:view-box;transform-origin:359px 440px}
-.fil.herbe{--f:color-mix(in srgb, var(--p-sol) 55%, #2f4a1e);stroke-width:1.5}
+.fil.herbe{--f:color-mix(in srgb, color-mix(in srgb, var(--p-sol) 55%, #2f4a1e), var(--nuit-3) calc(var(--nuit,0) * var(--sol-nuit, 40%)));stroke-width:1.5}
+/* le sol s'assombrit avec la nuit (Task 7, fix 1) : la laine garde sa matière, sa couleur
+   tire vers --nuit-3 (pas de multiply). En riso, le sol se multiplie déjà avec la toile
+   assombrie : le mélange y est plus léger (--sol-nuit). */
+#p-sol{fill:color-mix(in srgb, var(--sol-base, var(--p-sol)), var(--nuit-3) calc(var(--nuit,0) * var(--sol-nuit, 40%)))}
 .fil.graffiti{--f:var(--fil-rouge);stroke-width:2.2}
 .fil.etoile{stroke-width:1.1}
 .oeil-lune,.nez-doudou{fill:var(--fil-brun)}
@@ -414,7 +422,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 [data-theme=riso] .w.pale{fill:color-mix(in srgb, var(--encre) 35%, var(--papier))}
 [data-theme=riso] .w.teinte{fill:color-mix(in srgb, var(--encre) 60%, var(--papier))}
 .w.reserve{mix-blend-mode:normal}
-[data-theme=riso] #p-sol{fill:color-mix(in srgb, color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-bleu)) 62%, var(--papier))}
+[data-theme=riso]{--sol-base:color-mix(in srgb, color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-bleu)) 62%, var(--papier));--sol-nuit:20%}
 [data-theme=riso] #g-enfant-dehors{isolation:isolate}
 
 /* La toile du SVG : lin + grain en feutrine, papier + grain en riso. */
@@ -551,12 +559,31 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
 /* l'amygdale s'allume en rêve (--amygdale-lueur) et bat doucement (.pulse) :
    --amygdale-pouls est une propriété enregistrée, donc interpolée par l'animation */
 @property --amygdale-pouls{syntax:'<number>';inherits:false;initial-value:0}
-#p-amygdale.lueur{filter:var(--w-lite-filter)
-  drop-shadow(0 0 calc((3px + 2px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, var(--fil-blanc) calc(var(--amygdale-lueur,1) * 100%), transparent))
-  drop-shadow(0 0 calc((7px + 5px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, #ff3a26 calc(var(--amygdale-lueur,1) * 100%), transparent))
-  drop-shadow(0 0 calc((13px + 9px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, #ff6a3d calc(var(--amygdale-lueur,1) * 90%), transparent))}
+/* « l'alarme est allumée » : un liseré clair serré, puis deux couronnes rouges et un halo
+   orangé (les ombres s'enchaînent : chacune élargit la précédente, une image fixe la
+   montre). Riso : liseré papier et rouge d'impression (rose + jaune) par variables. */
+#p-amygdale.lueur{opacity:1;--encre:var(--amygdale-encre);filter:var(--glande-base, var(--w-lite-filter))
+  drop-shadow(0 0 calc(1.2px * var(--amygdale-lueur,1)) color-mix(in srgb, var(--riso-papier, var(--fil-blanc)) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc(1.2px * var(--amygdale-lueur,1)) color-mix(in srgb, var(--riso-papier, var(--fil-blanc)) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc(1.5px * var(--amygdale-lueur,1)) color-mix(in srgb, var(--amygdale-rouge, #ff2d1a) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc(1.5px * var(--amygdale-lueur,1)) color-mix(in srgb, var(--amygdale-rouge, #ff2d1a) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((4px + 2px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, var(--amygdale-rouge, #ff2d1a) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((8px + 5px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, var(--amygdale-rouge, #ff2d1a) calc(var(--amygdale-lueur,1) * 100%), transparent))
+  drop-shadow(0 0 calc((15px + 9px * var(--amygdale-pouls)) * var(--amygdale-lueur,1)) color-mix(in srgb, var(--amygdale-halo, #ff7a3d) calc(var(--amygdale-lueur,1) * 90%), transparent))}
+/* riso : allumée, l'amygdale est imprimée rose PAR jaune (surimpression : #ff4fa8 × #ffe14a
+   = #ff4631, le rouge d'une riso) au lieu du rose sur rose, qui la faisait disparaître ;
+   ses couronnes sont jaunes et son halo en papier : rouge ou orangé sur le rose, rien ne se voyait ;
+   en feutrine --amygdale-encre n'existe pas : --encre est invalide, la pièce garde sa laine */
+/* ⚠ en riso, url(#riso) avale les drop-shadow qui le suivent (mesuré en Chrome : halo
+   présent sans lui, absent avec) : allumées, les deux glandes sont imprimées à plat
+   (--glande-base : un filtre neutre) pour que leur lueur se voie */
+[data-theme=riso]{--glande-base:saturate(1);--amygdale-encre:#ff4631;--amygdale-rouge:var(--ink-jaune);--amygdale-halo:var(--papier)}
 #p-amygdale.pulse{animation:var(--amb-anim, amygdale-bat) 1.8s ease-in-out infinite}
 @keyframes amygdale-bat{50%{--amygdale-pouls:1}}
+/* la glande de la nuit bat lentement tant qu'elle est allumée (le soir surtout : son
+   intensité suit --pineale-lueur) */
+#p-pineale.allume{animation:var(--amb-anim, pineale-bat) 3.2s ease-in-out infinite}
+@keyframes pineale-bat{50%{--pineale-pouls:1}}
 
 /* l'œil : il cligne le jour (la paupière passe un instant), il fait de petits
    va-et-vient sous la paupière fermée dans la nuit des rêves (.rem, sur l'œil
@@ -603,7 +630,7 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
 
 /* après les raccourcis « animation » ci-dessus (qui remettent l'état à running) ;
    #scene-inner>#g-dedans dans la liste donne à :is() la spécificité la plus forte */
-:is(#p-amygdale,#p-paupiere,#fil-oeil-ferme,#scene-inner>#g-dedans,#g-enfant-dehors,#fil-sillons>.fil,#fil-cervelet,#g-etoiles circle,.fil.z,#fil-lune-clin,#fil-lune-oeil,#p-bouche){animation-play-state:var(--amb-play, running)}
+:is(#p-amygdale,#p-pineale,#p-paupiere,#fil-oeil-ferme,#scene-inner>#g-dedans,#g-enfant-dehors,#fil-sillons>.fil,#fil-cervelet,#g-etoiles circle,.fil.z,#fil-lune-clin,#fil-lune-oeil,#p-bouche){animation-play-state:var(--amb-play, running)}
 
 /* ===== 7 ter. Avatar : garçon / fille, peau, cheveux (dans la feuille de réglages) =====
    Les pastilles sont des ronds plats de 56 px ; la choisie porte un anneau
@@ -1960,6 +1987,11 @@ function setCut(c){
     g.style.opacity = op;
     g.style.visibility = op > 0 ? 'visible' : 'hidden';
     g.style.transform = (op > 0 && op < 1 && !REDUIT.matches) ? `scale(${1 + 0.02 * (1 - op)})` : '';
+    /* une vue cachée met ses animations en pause (pas de recalcul de style pour rien) ;
+       visible, elle hérite de nouveau (loupe, allégé : règles de :root inchangées) */
+    for(const v of ['--amb-play', '--pres-play']){
+      if(op > 0) g.style.removeProperty(v); else g.style.setProperty(v, 'paused');
+    }
     g.classList.toggle('active', i === n);
   });
   const opFond = 1 - Math.max(0, c - 1);
@@ -2018,7 +2050,8 @@ function uiTime(t){
    et classes sur les éléments eux-mêmes, jamais d'état posé sur un ancêtre. */
 const TEMPS = {
   nuit:       [0, .55, 1, 1, .1],   /* .nuit de la toile (× --nuit-max, plafond CSS) */
-  jour:       [1, .3, 0, 0, .8],    /* [data-jour] : le soleil dans le ciel, l'expo */
+  jour:       [1, .3, 0, 0, .8],    /* [data-jour] : le soleil dans le ciel */
+  expo:       [1, 0, 0, 0, .3],     /* #p-expo (data-jour) : l'expo, c'est la journée ; à peine au matin */
   chambre:    [0, 1, 1, 1, 1],      /* [data-chambre] : fenêtre, lampe, lit, couverture, doudou */
   nuitDecor:  [0, .6, 1, 1, .2],    /* [data-nuit] : vitre de nuit, lune, étoiles, lueur de la lampe */
   decor:      [1, .5, 0, 0, .6],    /* [data-decor] : décors des cartes (Task 8), sous le lit la nuit */
@@ -2040,6 +2073,7 @@ const TEMPS = {
    recalée (72,-74) pour rentrer le col sous la couverture (NOTES.md, Task 7). */
 const COUCHE = { x: 72, y: -74, rot: -80, echelle: .6 };
 const DECOR = [['jour', 'jour'], ['chambre', 'chambre'], ['nuit', 'nuitDecor'], ['decor', 'decor']];
+const DECOR_ID = { 'p-expo': 'expo' };   /* une pièce dont la table n'est pas celle de sa famille */
 const PHASES_PRES = { nuit: 'phaseNuit', synapses: 'synapses' };
 const dehors = VUES[0], pres = VUES[2];
 const enfantDehors = document.getElementById('g-enfant-dehors');
@@ -2070,7 +2104,7 @@ function setTime(t){
   tete['fil-oeil-ferme'].classList.toggle('rem', v.rem > .5);
   /* Dehors : les trois familles du décor (et les décors des cartes, Task 8) */
   for(const [attr, table] of DECOR){
-    dehors.querySelectorAll(`[data-${attr}="1"]`).forEach(el => montrer(el, v[table]));
+    dehors.querySelectorAll(`[data-${attr}="1"]`).forEach(el => montrer(el, v[DECOR_ID[el.id] || table]));
   }
   const lit = v.chambre, k = v.couche;
   enfantDehors.style.transform = lit > 0 || k > 0
