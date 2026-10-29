@@ -2,3 +2,5 @@
 .remember/
 .playwright-mcp/
 .superpowers/
+# Copies locales des aînés (MIT), références de code : non versionnées
+refs/aines/

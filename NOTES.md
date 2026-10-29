@@ -229,3 +229,18 @@ aurait dû deviner. Toutes tranchées par le rédacteur et intégrées à la spe
 4. **Décor Dehors piloté par les cartes** : on ne voit dehors que ce qui entre dans la tête.
 5. **Loupe en laine complète**, animations d'ambiance en pause pendant la loupe ; budget de
    40 pièces filtrées hors lentille.
+
+## 2026-10-29 — Spec validée, plan écrit, réalisation en sous-agents
+
+Le propriétaire a validé la spec (« OK, tu peux y aller avec le plan détaillé et la
+réalisation en sous-agents »). Plan : `docs/superpowers/plans/2026-10-29-dans-les-reves.md`,
+19 tâches. Choix de fabrication fixés dans le plan :
+- **Zéro build** : `index.html` reste la seule source ; les données et fonctions pures sont
+  dans un bloc `/* PURE-BEGIN */ … /* PURE-END */` que `test/_load.js` extrait et exécute
+  dans `vm` → `node --test test/` sans dépendance (Node 26).
+- **Paramètres d'URL de test** `?vue=&temps=&theme=&lite=&cartes=` pour capturer n'importe
+  quel état en Chrome headless (`test/shot.sh`) : c'est ce qui rend les 15 combinaisons
+  × thèmes vérifiables à chaque tâche.
+- Copies locales des aînés dans `refs/aines/` (ignorées par git) pour les patterns de code.
+- Coordonnées anatomiques fixées en pixels de scène (dérivées de la recherche §2.8) pour que
+  le dessinateur ne place pas l'hippocampe « au centre ».
