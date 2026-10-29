@@ -99,9 +99,9 @@ out = {}
 # Task 3b : lisière réaliste — front dégagé, tempe, petite patte devant l'oreille,
 # par-dessus le haut du pavillon (y ≈ 176), derrière l'oreille, puis une courte
 # lisière de nuque (passe 2 : les cheveux s'arrêtent vers y 326).
-HAIRLINE = [(486, 100), (462, 108), (430, 116), (398, 128), (372, 146), (352, 170), (340, 196),
-            (335, 222), (324, 210), (314, 186), (296, 176), (274, 178), (258, 194), (250, 222),
-            (244, 262), (236, 292), (222, 314), (204, 330)]
+HAIRLINE = [(490, 112), (462, 112), (430, 118), (398, 130), (372, 150), (354, 176), (344, 204),
+            (338, 232), (326, 222), (314, 202), (296, 192), (274, 194), (258, 210), (250, 238),
+            (246, 270), (238, 298), (224, 318), (206, 332)]
 line = LineString(T.sample(HAIRLINE, closed=False, n=8))
 wavy = []                                    # bord ondulé (±2,6 px), comme une découpe à la main
 for i in range(int(line.length // 5) + 1):

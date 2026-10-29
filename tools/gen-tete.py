@@ -125,24 +125,23 @@ def rounded(g, r):
     return g.buffer(-r).buffer(r)
 
 # ---------------------------------------------------------------- formes de base
-# Tête (peau), de profil, regard vers la droite — profil d'enfant de 5 ans
-# (Task 3b) : sommet y 56, œil y 190 à mi-hauteur sommet → menton (y 348),
-# front bombé, arcade discrète, racine du nez en creux (486,194), nez court et
-# retroussé (bout (507,249)), base du nez (489,266), lèvre supérieure un peu en
-# avant de l'inférieure, jonction des lèvres (488,297), sillon sous la lèvre
-# (480,320), menton rond (484,333)/(472,348), dessous du menton puis gorge (422,374).
-# Passe 2 : crâne moins profond — l'occiput le plus en arrière à x 187 vers la
-# hauteur des yeux (y 190–232), voûte un peu aplatie ; le bas de l'occiput
-# (205,323)–(248,344) juste sous le cervelet, puis la nuque descend vers l'avant
-# et rejoint le bord arrière du cou (x 312) vers y 352 ; cou x 312–408.
-H_PTS = [(312,575),(312,500),(312,400),(310,355),(300,350),(276,347),(248,344),(222,338),(205,323),
-         (195,300),(190,268),(187,232),(187,190),(191,148),(206,110),(234,80),(276,62),(330,56),
-         (386,57),(434,68),(468,90),(488,118),(495,148),(494,170),(489,184),(486,194),
-         (489,210),(495,228),(503,241),(507,249),(503,258),(495,262),(489,266),(487,275),(492,284),
-         (492,292),(488,297),(491,303),(488,312),(480,320),(484,333),(472,348),(452,357),
-         (436,363),(422,374),(412,396),(408,440),(408,500),(408,575)]
+# Tête (peau), de profil, regard vers la droite — profil d'enfant de 5 ans.
+# Passe 3 : proportions mesurées sur la photo de référence du propriétaire
+# (NOTES.md) : œil à ~59 % de la hauteur (sommet des cheveux → menton), base du
+# nez ~78 %, bouche ~85 %. Œil (458,228), bout du nez (507,272), base du nez
+# (489,290), philtre court, jonction des lèvres (488,314), menton petit et rond,
+# un peu en retrait (482,349)/(472,362). Front en dôme continu (le plus en avant (499,162)),
+# sommet au-dessus de l'oreille (310,52), occiput rond (le plus en arrière
+# (186,228), à hauteur des yeux), bas de l'occiput (204,323)–(244,342), nuque
+# courte qui rejoint le cou en (290,360) ; cou x 292–428 (≈ 43 % de la hauteur).
+H_PTS = [(292,575),(292,500),(292,420),(293,374),(286,356),(268,348),(244,342),(221,337),(204,323),
+         (194,294),(188,262),(186,228),(188,194),(196,158),(212,122),(236,92),(270,66),(310,52),
+         (356,52),(404,60),(444,76),(474,100),(492,130),(499,162),(497,192),(492,210),(487,222),
+         (490,234),(496,248),(503,262),(507,272),(503,282),(495,287),(489,290),(488,297),(493,305),
+         (493,310),(488,314),(491,321),(488,330),(479,338),(482,349),(472,362),(454,370),
+         (436,376),(428,392),(428,440),(428,500),(428,575)]
 # Cerveau (hémisphère vu de côté, avant à droite).
-S_PTS = [(466,142),(463,157),(443,171),(428,193),(421,228),(431,240),(434,256),(424,278),
+S_PTS = [(466,142),(462,164),(442,180),(428,200),(421,228),(431,240),(434,256),(424,278),
          (398,294),(360,300),(328,296),(306,284),(290,266),(266,252),(240,247),(216,242),
          (202,228),(199,192),(210,156),(238,120),(280,95),(330,86),(380,85),(424,96),(452,115)]
 # Cervelet : corps ovale + bras (pédoncule) qui rejoint le tronc.
@@ -154,8 +153,9 @@ C_PTS = [(x + C_DX, y + C_DY) for x, y in
           (299,311),(282,316),(262,325),(236,327),(210,321),(198,306)]]
 # Oreille : un pavillon (hélix qui s'enroule, lobe, tragus devant le conduit),
 # de la ligne des sourcils (y 184) à la base du nez (y 286), conduit (300,250).
-E_PTS = [(306,196),(294,186),(278,186),(266,198),(261,218),(262,242),(267,264),(276,280),
-         (288,288),(297,284),(300,274),(306,266),(309,256),(306,244),(311,232),(313,214)]
+E_PTS = [(x, y + 12) for x, y in      # passe 3 : pavillon descendu de 12 px (sourcil → base du nez)
+         [(306,196),(294,186),(278,186),(266,198),(261,218),(262,242),(267,264),(276,280),
+          (288,288),(297,284),(300,274),(306,266),(309,256),(306,244),(311,232),(313,214)]]
 H = poly(H_PTS); S = poly(S_PTS); C = poly(C_PTS)
 
 # lobes : on découpe le cerveau par trois lignes (prolongées hors du cerveau)
@@ -193,7 +193,7 @@ liq = unary_union([S, C, tronc.intersection(box(0,0,900,330))]).buffer(14).buffe
 # OCCIPITAL sous l'oreille, par où le tronc sort vers la moelle.
 # Sous les cheveux, l'os monte jusqu'à 2 px de la peau (l'arrière du crâne est
 # mince) ; au front, sous la lisière, il laisse 7 px de peau.
-vault_keep = Polygon([(540,-20),(540,178),(482,178),(446,184),(400,232),(330,300),(300,362),
+vault_keep = Polygon([(540,-20),(540,188),(486,188),(452,194),(418,238),(330,300),(300,362),
                       (110,362),(110,-20)])
 foramen = box(309, 326, 337, 380)
 cap_keep = Polygon([(620,-60),(620,30),(486,100),(330,300),(210,390),(80,470),(-60,470),(-60,-60)])
@@ -215,7 +215,7 @@ for i in range(int(L//5)):
     if s0 is None: s0 = sd
     taper = max(0.0, min(1.0, (330 - p.y)/110))          # 1 en haut, 0 à la nuque
     arriere = max(0.0, min(1.0, (p.x - 187)/70))         # 0 tout à l'arrière : cheveux ras (bord x ≈ 183)
-    r = 3.6 + taper*arriere*(7.5 + 2.4*math.sin((sd-s0)/31*2*math.pi))
+    r = 3.6 + taper*arriere*(7.5 + 2.4*math.sin((sd-s0)/31*2*math.pi) + 1.6*math.sin((sd-s0)/13*2*math.pi + 1))   # ébouriffés
     blobs.append(p.buffer(r, 20))
 locks = [tube([(470,80,7),(482,96,4.6),(486,110,1.6)]), tube([(456,70,7),(468,88,4),(472,100,1.4)])]
 hair = unary_union([unary_union(blobs).difference(H.buffer(-2.5)).intersection(cap_keep)] + locks)
@@ -244,9 +244,10 @@ hippo = unary_union([tube([(345,243,6.4),(336,238,5.6),(325,232,4.6),(314,226,3.
                      Point(347,239).buffer(6,24)])
 amygdale = ellipse(356,248,6.6,4.8,-22)
 hypophyse = unary_union([tube([(354,228,1.6),(362,238,1.5),(369,248,1.7)]), Point(371,253).buffer(4.4,24)])
-nerf = unary_union([tube([(449,197,3.4),(426,206,3.1),(400,218,2.9),(380,229,2.7)]), ellipse(375,232,6.2,4.2,-10)])
+# passe 3 : l'œil est à hauteur du pôle temporal, le nerf file presque à l'horizontale
+nerf = unary_union([tube([(446,229,3.4),(424,231,3.1),(400,232,2.9),(381,232,2.7)]), ellipse(375,232,6.2,4.2,-10)])
 # la moelle sort par le trou occipital et descend dans la moitié ARRIÈRE du cou
-moelle = tube([(323,328,7.6),(328,380,7.2),(332,440,7),(334,500,7),(334,580,7)])   # passe 2 : cou x 312–408, moelle dans le tiers arrière
+moelle = tube([(322,328,7.6),(320,380,7.2),(318,440,7),(318,500,7),(318,580,7)])   # passe 3 : cou x 292–428, moelle dans le tiers arrière
 
 out = {}
 out['H'] = smooth_path(H_PTS)
@@ -289,9 +290,9 @@ for k, g in [('cerveau', S), ('cervelet', C), ('tronc', tronc), ('thalamus', tha
 GABARIT = r"""
             <!-- La tête de profil (regard vers la droite) et le cerveau à sa vraie
                  place (recherche §2.8). Repères (Task 3b, profil d'enfant de 5 ans) :
-                 œil (460,191), conduit auditif (300,250), bout du nez (506,247),
-                 bouche (481,299), menton (472,348), angle de la mâchoire (330,328),
-                 trou occipital (323,340), occiput x 187, nuque → cou à (312,352), cou x 312–408.
+                 œil (458,228), conduit auditif (300,250), bout du nez (507,272),
+                 bouche (481,316), menton (472,362), angle de la mâchoire (322,338),
+                 trou occipital (323,340), occiput x 186, nuque → cou à (290,360), cou x 292–428.
                  Ordre d'empilement = du plus profond au plus proche de l'œil, sauf
                  les régions profondes, posées PAR-DESSUS le cortex en transparence
                  (.profond : opacité .85 + bord cousu .couture) pour qu'on les lise
@@ -338,9 +339,9 @@ GABARIT = r"""
               <path id="p-oreille" class="w peau" style="--p:var(--skin)" data-ink="jaune" d="{{E}}"/>
               <g id="fil-oreille" style="--f:var(--skin-shade)">
                 <!-- le rebord de l'hélix qui s'enroule, l'anthélix, et la conque autour du conduit -->
-                <path class="fil" d="M303,199c-8-8-22-8-31 2-7 9-8 26-5 42 2 12 8 24 16 31"/>
-                <path class="fil" d="M296,206c-10-3-19 5-20 17-1 10 4 18 6 24M287,232c5-2 10 0 12 4"/>
-                <path class="fil" d="M292,262c-4 4-4 12 2 17"/>
+                <path class="fil" d="M303,211c-8-8-22-8-31 2-7 9-8 26-5 42 2 12 8 24 16 31"/>
+                <path class="fil" d="M296,218c-10-3-19 5-20 17-1 10 4 18 6 24M287,244c5-2 10 0 12 4"/>
+                <path class="fil" d="M292,274c-4 4-4 12 2 17"/>
                 <!-- le petit escargot (cochlée), juste au fond du conduit -->
                 <path class="fil" d="M303,251 c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"/>
               </g>
@@ -391,26 +392,27 @@ GABARIT = r"""
             <!-- le visage entier -->
             <g id="g-visage">
               <!-- la mâchoire : une fine ombre de laine sous son bord, du dessous du menton
-                   à l'angle sous l'oreille (333,363), puis le long de la branche qui remonte -->
-              <path id="p-ombre-cou" class="w lite" style="--p:var(--skin-shade)" data-ink="jaune" d="M452,357C420,349 372,337 333,327 325,317 320,305 317,294 314,307 317,320 324,331 366,342 410,353 442,363Z"/>
-              <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M439,270c0-6 6-9 13-9s13 3 13 9-6 9-13 9-13-3-13-9Z"/>
-              <!-- l'œil de profil : une amande (blanc de laine), le bouton cousu devant,
-                   le bord de la paupière et trois cils ; le creux du coin, vers le nez -->
-              <path id="p-oeil-blanc" class="w lite" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M443.5,191c5-5 13-7.5 21-7 3 2 4.6 4.6 4.6 7s-1.6 5-4.6 7c-8 .6-16-2-21-7Z"/>
-              <path id="p-oeil" class="w lite" style="--p:var(--p-oeil)" data-ink="bleu" d="M454,190.6a6.3,6.3 0 1 0 12.6,0a6.3,6.3 0 1 0-12.6,0Z"/>
-              <circle class="trou" cx="458.4" cy="189.4" r="1.25"/><circle class="trou" cx="462.2" cy="191.8" r="1.25"/>
-              <path class="fil" d="M458.4,189.4 L462.2,191.8"/>
+                   à l'angle sous l'oreille (322,338), puis le long de la branche qui remonte -->
+              <path id="p-ombre-cou" class="w lite" style="--p:var(--skin-shade)" data-ink="jaune" d="M452,370C420,362 372,348 330,338 322,326 318,312 315,300 312,314 314,330 322,342 364,354 410,366 442,377Z"/>
+              <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M434,288c0-7 7-11 15-11s15 4 15 11-7 11-15 11-15-4-15-11Z"/>
+              <!-- l'œil de profil (458,228), à hauteur du pôle temporal : une amande (blanc
+                   de laine), le bouton cousu devant, le bord de la paupière et trois cils ;
+                   le creux du coin, vers le nez -->
+              <path id="p-oeil-blanc" class="w lite" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M441.5,228c5-5 13-7.5 21-7 3 2 4.6 4.6 4.6 7s-1.6 5-4.6 7c-8 .6-16-2-21-7Z"/>
+              <path id="p-oeil" class="w lite" style="--p:var(--p-oeil)" data-ink="bleu" d="M452,227.6a6.3,6.3 0 1 0 12.6,0a6.3,6.3 0 1 0-12.6,0Z"/>
+              <circle class="trou" cx="456.4" cy="226.4" r="1.25"/><circle class="trou" cx="460.2" cy="228.8" r="1.25"/>
+              <path class="fil" d="M456.4,226.4 L460.2,228.8"/>
               <!-- liseré clair cousu au bord du bouton : l'œil reste lisible sur toutes les peaux -->
-              <circle class="fil bord-bouton" cx="460.3" cy="190.6" r="5.1"/>
-              <path class="fil cils" d="M443.5,191c6-5.4 14-7.8 21-7.2M460,184.2l2.6-4.4M464.6,184l3.6-3.6M467.6,185.4l4.4-2.2"/>
-              <path class="fil pli" d="M446,185.6c6-5 15-6.6 22-4.6M473.4,186.4c1.6 1.6 1.8 4 .6 5.8"/>
-              <path id="p-paupiere" class="w lite peau" style="--p:var(--skin)" data-ink="jaune" d="M441.5,191c5-6.4 14-9.4 23.6-8.4 3.4 2 5.2 5.4 5.2 8.4s-1.8 6.2-5.2 8.2c-9.6 1-18.6-1.8-23.6-8.2Z"/>
-              <path id="fil-oeil-ferme" class="fil" style="--f:var(--fil-brun)" d="M443,191.6Q456,199 469.6,192.4M450,195.4l-1.6 3.8M456.6,196.8v4.2M463.2,195.8l1.8 3.8"/>
+              <circle class="fil bord-bouton" cx="458.3" cy="227.6" r="5.1"/>
+              <path class="fil cils" d="M441.5,228c6-5.4 14-7.8 21-7.2M458,221.2l2.6-4.4M462.6,221l3.6-3.6M465.6,222.4l4.4-2.2"/>
+              <path class="fil pli" d="M444,222.6c6-5 15-6.6 22-4.6M471.4,223.4c1.6 1.6 1.8 4 .6 5.8"/>
+              <path id="p-paupiere" class="w lite peau" style="--p:var(--skin)" data-ink="jaune" d="M439.5,228c5-6.4 14-9.4 23.6-8.4 3.4 2 5.2 5.4 5.2 8.4s-1.8 6.2-5.2 8.2c-9.6 1-18.6-1.8-23.6-8.2Z"/>
+              <path id="fil-oeil-ferme" class="fil" style="--f:var(--fil-brun)" d="M441,228.6Q454,236 467.6,229.4M448,232.4l-1.6 3.8M454.6,233.8v4.2M461.2,232.8l1.8 3.8"/>
               <g id="p-sourcil">
-                <path class="w lite cheveux" style="--p:var(--hair)" data-ink="bleu" d="M443,179c5-8 18-12 29-9 2 1 2 3.6-.6 3.8-10-1.6-20 .6-25.6 7.4-1.6 1.8-3.8.6-2.8-2.2Z"/>
+                <path class="w lite cheveux" style="--p:var(--hair)" data-ink="bleu" d="M441,216c5-8 18-12 29-9 2 1 2 3.6-.6 3.8-10-1.6-20 .6-25.6 7.4-1.6 1.8-3.8.6-2.8-2.2Z"/>
               </g>
-              <path id="p-bouche" class="fil" d="M489.6,297.6c-4,5.4 -12.6,6.4 -17.6,.4c-1,-2 -.4,-4 1.4,-4.6"/>
-              <path class="fil narine" d="M497,255.4c-4,.6 -5.4,4 -3,6"/>
+              <path id="p-bouche" class="fil" d="M489.6,314.6c-4,5.4 -12.6,6.4 -17.6,.4c-1,-2 -.4,-4 1.4,-4.6"/>
+              <path class="fil narine" d="M497,281.4c-4,.6 -5.4,4 -3,6"/>
             </g>
 """
 

@@ -626,3 +626,61 @@ jour / nuit du brief pour ces pièces. Trois attributs, pilotés par Task 7 :
   - `.w:not(.lite)` = 14 Dehors + 4 de la tête reprise, soit 18.
   - 0 `.w[transform]`, console propre (riso et feutrine), 15/15 tests.
   - Les deux générateurs reproduisent `index.html` à l'octet.
+
+## 2026-10-29 — Task 3b, passe 3 : proportions mesurées sur photo
+
+Retour du propriétaire sur la passe 2 : « Ce n'est pas mieux ». Il a fourni deux photos de référence de profil (`refs/photos/`, ignorées par git). Elles n'ont servi qu'à mesurer : rien n'en est reproduit ni copié.
+
+**Rapports mesurés** (verticalement, du sommet des cheveux = 0 % au bas du menton = 100 %) :
+
+| repère | photo 1 | photo 2 | dessin |
+|---|---|---|---|
+| œil (centre) | 58 % | 60 % | 58 % |
+| sourcil | 54 % | 56 % | 54 % |
+| bout du nez | 64 % | 71 % | 72 % |
+| base du nez | 71 % | 78 % | 78 % |
+| bouche | 83 % | 89 % | 85 % |
+| haut de l'oreille | 66 % | 62 % | 49 % |
+| conduit de l'oreille | 77 % | 74 % | 65 % |
+| bas de l'oreille | 88 % | 86 % | 81 % |
+| occiput le plus en arrière | 47 % | 45 % | 58 % |
+| nuque → cou | 91 % | 94 % | ≈ 99 % |
+| longueur nuque → bout du nez / hauteur | 1,13 | 1,02 | 1,01 |
+| épaisseur du cou / hauteur | ≈ 54 % | ≈ 51 % | 42 % |
+
+- Sur la photo 1, la tête est renversée vers le haut d'environ 15 à 25° (le plan oreille–orbite monte vers l'avant). Le nez y remonte et l'oreille y descend : c'est ce qui explique l'écart entre les deux colonnes.
+- Le conduit de l'oreille reste en (300,250), fixé par décision, avec la boîte de cerveau : 65 % au lieu des 74–77 % mesurés. C'est l'écart principal qui reste (voir le rapport).
+- `shots/t3b-photo-vs-dessin.png` superpose ces rapports à la tête Dehors, sans rien reproduire de la photo.
+
+**Ce qui a changé.**
+- **Visage plus bas.** Repères (rapports au tableau) :
+  - œil (458,228), à hauteur du pôle temporal (434,252) ;
+  - nerf optique presque horizontal, de (446,229) au chiasma (375,232) ;
+  - sourcil vers y 207–219, pivot de `.fronce` (442,218) ;
+  - racine du nez (487,222), bout du nez (507,272), base du nez (489,290) ;
+  - philtre court, jonction des lèvres (488,314), bouche brodée de (472,315) à (490,315), centre ≈ (481,316) ;
+  - menton petit et rond, un peu en retrait : (482,349), bas (472,362) ;
+  - joue pleine (449,288) ;
+  - angle de la mâchoire (322,338).
+- **Front en dôme continu**, le plus en avant en (499,162) ; plus de front vertical. **Sommet au-dessus de l'oreille** (310,52), plus de sommet aplati.
+- **Occiput rond**, le plus en arrière en (186,228), à hauteur des yeux ; bas de l'occiput (204,323)–(244,342).
+- **Nuque courte** qui rejoint le cou en (290,360). **Cou** x 292–428 (42 % de la hauteur) ; pivot inchangé (359,440). **Moelle** x 311–325, dans le tiers arrière.
+- **Oreille** : pavillon descendu de 12 px (y 197–300) ; le conduit ne bouge pas.
+- **Os du front** : il s'arrête au-dessus de l'arcade (y 188), la peau va jusqu'à l'œil. Le lobe frontal reprend sa face orbitaire d'origine, puisque l'œil n'est plus dessous.
+- **Cheveux** :
+  - plus ébouriffés, par une seconde ondulation de période 13 px ;
+  - lisière haute sur le dôme (vers (490,112)) ;
+  - patte devant l'oreille, puis passage au-dessus du pavillon (y ≈ 192) ;
+  - courte lisière de nuque (vers (206,332)).
+
+**Ce qui a raté.**
+- **Os du front jusqu'à y 206** : quand le visage est descendu, un grand pan blanc couvrait le front. L'os s'arrête maintenant à l'arcade.
+- **Lecture des proportions du contrôleur** (nez à 74 %) : elle plaçait le nez trop bas par rapport aux mesures (64–71 %). Le nez a été remonté de 6 px.
+- **Captures « jour » Dehors** : masquer tous les `[data-chambre]` masquait aussi la fenêtre. On ne masque plus que le lit, la couverture, la lampe et le doudou.
+
+**Contrôles.**
+- `.w:not(.lite)` : 18 Dedans, 14 Dehors.
+- 0 `.w[transform]`, console propre, 15/15 tests.
+- Générateurs reproductibles (md5 identique).
+- Pose couchée à −80° et −90° : correcte.
+- Données `d` de `#g-dedans` : 27 140 octets.
