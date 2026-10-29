@@ -588,6 +588,331 @@ input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset
 </div>
 
 <script>
+/* PURE-BEGIN */
+/* ==========================================================================
+   DONNÉES ET FONCTIONS PURES
+   Aucun accès au DOM ici (ni document, ni window, ni localStorage) : ce bloc
+   est aussi exécuté tel quel par Node (test/_load.js, vm sans contexte).
+   Contenu :
+     A. Accord de genre : inflect
+     B. Interpolation : lerpArr
+     C. Cartes-souvenirs : CARTES
+     D. Modificateurs du rêve : MODIFS
+     E. Zones nommées : INFO
+     F. Mini-jeux : JEU_PARTIES, JEU_REVE
+     G. L'histoire du pouce : HISTOIRE
+     H. La télécommande : TRANSFOS
+     I. Gabarits de phrases : PHRASES
+   Règles d'écriture (recherche §5) : tutoiement, deux phrases, un fait qui
+   épate ; jamais « le cerveau se repose », jamais « chasser le monstre »,
+   jamais « ton cerveau s'est trompé » ; le cerveau « se rince » ; les
+   hypothèses sont dites « beaucoup de chercheurs pensent que ».
+   ========================================================================== */
+
+/* ===== A. Accord de genre =====
+   « {il|elle} est {terrorisé|terrorisée} » → première forme pour un garçon,
+   seconde pour une fille. Sans avatar choisi : forme du garçon (l'anecdote
+   d'origine). {PRENOM}, {BASE}… n'ont pas de « | » : ils ne sont pas touchés. */
+function inflect(str, genre){
+  const i = genre === 'fille' ? 1 : 0;
+  return String(str).replace(/\{([^{}|]*)\|([^{}|]*)\}/g, (_, a, b) => i ? b : a);
+}
+
+/* ===== B. Interpolation linéaire par morceaux sur [0 .. arr.length-1] =====
+   Copie de lerpArr du volcan, avec la borne écrite en ligne (pas de clamp
+   global ici). Tables à 5 valeurs = les 5 moments du curseur temps. */
+function lerpArr(arr, t){
+  const i = Math.min(Math.max(Math.floor(t), 0), arr.length - 2), f = t - i;
+  return arr[i] + (arr[i+1] - arr[i]) * f;
+}
+
+/* ===== C. Cartes-souvenirs (spec §4.3) =====
+   cat     : vu | mot | gens | ressenti | reconfort
+   charge  : peur 3, colère 2, joie 1, neutre 0, apaisante −2
+   entree  : par où la carte entre dans la tête (oeil | oreille)
+   base    : peut donner la grande forme du rêve (jamais un ressenti)
+   greffe  : ce que la carte devient quand elle se greffe sur la base
+             (forme = suffixe des dessins #g-base-<forme> / #g-greffe-<forme>)
+   g       : genre et nombre de `nom` et de `greffe.nom` (m | f | mp | fp),
+             pour accorder « est devenu(e)(s) » et le modificateur
+   ton     : cartes réconfort uniquement, le nom vu de l'enfant (« ta chanson »)
+   texte   : les deux phrases lues quand on touche la carte */
+const CARTES = [
+  // ---- Choses vues (entrent par l'œil)
+  { slug:'pouce', nom:'le pouce géant', g:'m', emoji:'👍', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'un pouce géant', forme:'pouce', g:'m' },
+    texte:"Un pouce géant en bronze, aussi haut qu'une maison de quatre étages ! Tes yeux le voient, et hop, il file dans ta tête." },
+  { slug:'glace', nom:'une glace', g:'f', emoji:'🍦', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'une glace', forme:'glace', g:'f' },
+    texte:"Une glace bien froide qui fond au soleil, miam ! Tes yeux l'ont vue, ta langue l'a goûtée, et ton cerveau la garde." },
+  { slug:'chien', nom:'un chien', g:'m', emoji:'🐶', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'un chien', forme:'chien', g:'m' },
+    texte:"Waf, waf : un chien tout content t'a dit bonjour en remuant la queue. Il entre dans ta tête par tes yeux, avec la queue qui remue et tout !" },
+  { slug:'velo', nom:'un vélo', g:'m', emoji:'🚲', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'un vélo', forme:'velo', g:'m' },
+    texte:"Tu as fait du vélo, et tu as tenu en équilibre comme {un champion|une championne} ! Ton cerveau garde ce souvenir pour que tu pédales encore mieux demain." },
+  { slug:'piscine', nom:'la piscine', g:'f', emoji:'🏊', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'une piscine', forme:'piscine', g:'f' },
+    texte:"Plouf, la piscine ! Tu as fait des bulles et des éclaboussures, et ton cerveau a tout vu." },
+  { slug:'gateau', nom:"un gâteau d'anniversaire", g:'m', emoji:'🎂', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'un gâteau', forme:'gateau', g:'m' },
+    texte:"Un gâteau avec des bougies, et on souffle très fort ! Le chocolat, la chanson, les rires : ton cerveau met tout ça dans le même souvenir." },
+  { slug:'tracteur', nom:'un tracteur', g:'m', emoji:'🚜', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'un tracteur', forme:'tracteur', g:'m' },
+    texte:"Un énorme tracteur est passé, avec des roues plus hautes que toi ! Vroum, il fait un bruit de géant, mais il reste bien sur son chemin." },
+  { slug:'orage', nom:'un orage', g:'m', emoji:'⛈️', cat:'vu', charge:3, entree:'oeil', base:true,
+    greffe:{ nom:"un nuage d'orage", forme:'orage', g:'m' },
+    texte:"Boum, l'orage ! Le tonnerre t'a fait sursauter, et l'alarme de la peur s'est allumée dans ta tête." },
+  { slug:'manege', nom:'un manège', g:'m', emoji:'🎠', cat:'vu', charge:0, entree:'oeil', base:true,
+    greffe:{ nom:'un manège', forme:'manege', g:'m' },
+    texte:"Tu as fait un tour de manège, et ça tourne, ça tourne ! Ton cerveau a adoré, même si ta tête tourne encore un tout petit peu." },
+  // ---- Mots entendus (entrent par l'oreille)
+  { slug:'ogre', nom:'le mot « ogre »', g:'m', emoji:'👹', cat:'mot', charge:3, entree:'oreille', base:false,
+    greffe:{ nom:'un ogre', forme:'ogre', g:'m' },
+    texte:"Un ogre, c'est un géant des contes : il n'existe que dans les histoires. Le mot est entré par tes oreilles, et ton alarme de la peur l'a bien entendu." },
+  { slug:'pirate', nom:'le mot « pirate »', g:'m', emoji:'🏴‍☠️', cat:'mot', charge:1, entree:'oreille', base:false,
+    greffe:{ nom:'un pirate', forme:'pirate', g:'m' },
+    texte:"Le mot « pirate » fait penser aux bateaux, aux trésors et aux chiens pirates qui chantent. Il entre par tes oreilles, et il donne envie de rigoler !" },
+  { slug:'dragon', nom:'le mot « dragon »', g:'m', emoji:'🐉', cat:'mot', charge:3, entree:'oreille', base:false,
+    greffe:{ nom:'un dragon', forme:'dragon', g:'m' },
+    texte:"Le mot « dragon » fait penser à de grandes ailes et à du feu. Les dragons n'existent que dans les histoires, mais le mot, lui, a réveillé ton alarme de la peur." },
+  { slug:'anniversaire', nom:'le mot « anniversaire »', g:'m', emoji:'🎉', cat:'mot', charge:1, entree:'oreille', base:false,
+    greffe:{ nom:"une fête d'anniversaire", forme:'anniversaire', g:'f' },
+    texte:"Quand on entend « anniversaire », on pense tout de suite aux cadeaux et aux bougies. Ce mot joyeux est entré par tes oreilles, et ton cerveau sourit déjà !" },
+  // ---- Gens (entrent par l'oreille : leur voix)
+  { slug:'copains', nom:'les copains', g:'mp', emoji:'🧒', cat:'gens', charge:1, entree:'oreille', base:true,
+    greffe:{ nom:'des copains', forme:'copains', g:'mp' },
+    texte:"Les copains ont joué et ri avec toi toute la journée. Leurs voix et leurs blagues entrent par tes oreilles, droit dans le sac à souvenirs !" },
+  { slug:'parents', nom:'papa et maman', g:'mp', emoji:'👨‍👩‍👧', cat:'gens', charge:1, entree:'oreille', base:true,
+    greffe:{ nom:'papa et maman', forme:'parents', g:'mp' },
+    texte:"Papa et maman t'ont fait un bisou et t'ont raconté une histoire. Leur voix, ton cerveau la reconnaît entre toutes, même quand tu es à moitié {endormi|endormie} !" },
+  { slug:'mamie', nom:'mamie', g:'f', emoji:'👵', cat:'gens', charge:1, entree:'oreille', base:true,
+    greffe:{ nom:'mamie', forme:'mamie', g:'f' },
+    texte:"Mamie est venue, avec ses histoires et ses gâteaux ! Ton cerveau range sa voix tout près des souvenirs qui font du bien." },
+  { slug:'maitresse', nom:'la maîtresse', g:'f', emoji:'👩‍🏫', cat:'gens', charge:1, entree:'oreille', base:true,
+    greffe:{ nom:'la maîtresse', forme:'maitresse', g:'f' },
+    texte:"La maîtresse t'a appris une nouvelle chanson à l'école. Cette nuit, ton cerveau va la rejouer pour bien la ranger !" },
+  // ---- Ce que j'ai ressenti (jamais base : greffe ou contexte seulement)
+  { slug:'ri', nom:"j'ai ri", g:'m', emoji:'😂', cat:'ressenti', charge:1, entree:'oreille', base:false,
+    greffe:{ nom:'un grand sourire', forme:'ri', g:'m' },
+    texte:"Tu as tellement ri que tu en avais mal au ventre ! Les souvenirs où l'on rit, ton cerveau les garde bien précieusement." },
+  { slug:'peur', nom:"j'ai eu peur", g:'m', emoji:'😱', cat:'ressenti', charge:3, entree:'oreille', base:false,
+    greffe:{ nom:'de grands yeux tout ronds', forme:'peur', g:'mp' },
+    texte:"Avoir peur, ça arrive à tout le monde, même aux grands ! Ton alarme de la peur a sonné, et cette nuit, ton cerveau va s'en occuper." },
+  { slug:'fache', nom:'je me suis {fâché|fâchée}', g:'m', emoji:'😠', cat:'ressenti', charge:2, entree:'oreille', base:false,
+    greffe:{ nom:'des sourcils fâchés', forme:'fache', g:'mp' },
+    texte:"Grrr, tu t'es {fâché|fâchée} tout rouge, ça arrive ! La colère aussi entre dans le sac à souvenirs, et la nuit, ton cerveau la range." },
+  /* Ledger : le câlin est un ressenti (joie), qui peut servir de réconfort
+     quand le parent le choisit dans les réglages (il passe alors à −2). */
+  { slug:'calin', nom:'un câlin', g:'m', emoji:'🤗', cat:'ressenti', charge:1, entree:'oreille', base:false,
+    greffe:{ nom:'deux grands bras', forme:'calin', g:'mp' }, ton:'un câlin',
+    texte:"Un gros câlin bien serré, ça réchauffe de partout ! Ton cerveau adore ce souvenir-là, et il le garde au chaud pour la nuit." },
+  // ---- Réconfort (cartes apaisantes, §4.6)
+  { slug:'chanson', nom:'ma chanson', g:'f', emoji:'🎵', cat:'reconfort', charge:-2, entree:'oreille', base:false,
+    greffe:{ nom:'des notes de musique', forme:'chanson', g:'fp' }, ton:'ta chanson',
+    texte:"C'est ta chanson préférée, celle qui fait du bien. Si un rêve fait peur, tu peux la chanter dans ta tête pour changer de chaîne !" },
+  { slug:'doudou', nom:'mon doudou', g:'m', emoji:'🧸', cat:'reconfort', charge:-2, entree:'oeil', base:true,
+    greffe:{ nom:'un doudou', forme:'doudou', g:'m' }, ton:'ton doudou',
+    texte:"Ton doudou tout doux sent bon la maison. Avec lui dans tes bras, ton cerveau sait que tu es en sécurité." }
+];
+
+/* ===== D. Modificateurs du rêve (spec §4.5-3) =====
+   nom = masculin singulier ; f, mp, fp = formes accordées à la greffe. */
+const MODIFS = {
+  gigantesque:{ nom:'gigantesque',         f:'gigantesque',         mp:'gigantesques',          fp:'gigantesques' },
+  envers:     { nom:"à l'envers",          f:"à l'envers",          mp:"à l'envers",            fp:"à l'envers" },
+  desobeit:   { nom:"qui n'obéit pas",     f:"qui n'obéit pas",     mp:"qui n'obéissent pas",   fp:"qui n'obéissent pas" },
+  multiplie:  { nom:'multiplié',           f:'multipliée',          mp:'multipliés',            fp:'multipliées' },
+  minuscule:  { nom:'tout petit',          f:'toute petite',        mp:'tout petits',           fp:'toutes petites' },
+  couleur:    { nom:"d'une autre couleur", f:"d'une autre couleur", mp:"d'une autre couleur",   fp:"d'une autre couleur" }
+};
+
+/* ===== E. Zones nommées (spec §5) =====
+   vue 0 = Dehors, 1 = Dedans, 2 = Tout près. Les ids sont repris tels quels par
+   les zones cliquables (data-id). Deux phrases, un fait qui épate. */
+const INFO = {
+  // ---- Dedans : le cerveau et ses voisins
+  'cortex':{ vue:1, emoji:'🧠', titre:'Le cortex, la grande couverture plissée',
+    texte:"Tout autour de ton cerveau, il y a une grande couverture toute plissée : le cortex. C'est là que tes souvenirs sont rangés pour longtemps, et si on la dépliait, elle serait grande comme une serviette de table !" },
+  'frontal':{ vue:1, emoji:'🧐', titre:'Le chef (le lobe de devant)',
+    texte:"Derrière ton front, il y a le chef : il réfléchit, il décide et il vérifie tout, « ça, c'est pour de vrai ? ». Pendant les rêves, le chef pique un gros somme, alors personne ne vérifie et tout devient possible !" },
+  'occipital':{ vue:1, emoji:'🖼️', titre:'Le lobe des yeux (occipital)',
+    texte:"Tes yeux sont devant, mais c'est tout à l'arrière de ta tête que ton cerveau fabrique les images. Même les images de tes rêves sont dessinées ici, alors que tes yeux sont fermés !" },
+  'temporal':{ vue:1, emoji:'🗣️', titre:'Le lobe des oreilles (temporal)',
+    texte:"Sur le côté, à la hauteur de ton oreille, ce lobe comprend les sons et les mots, comme « gâteau » ou « ogre ». Il a la forme d'un pouce couché, et il cache le sac à souvenirs !" },
+  'parietal':{ vue:1, emoji:'✋', titre:'Le lobe du toucher (pariétal)',
+    texte:"En haut de ta tête, ce lobe sent tout ce que touche ta peau : le chaud, le froid, les chatouilles. C'est aussi lui qui sait où sont tes mains et tes pieds, même les yeux fermés !" },
+  'hippocampe':{ vue:1, emoji:'🎒', titre:"L'hippocampe, le sac à souvenirs tout neufs",
+    texte:"Ce petit cheval de mer couché, c'est le sac à souvenirs tout neufs : toute ta journée tombe dedans. Le soir, il est plein à craquer, alors la nuit, il rejoue tes souvenirs pour les ranger dans la couverture plissée." },
+  'amygdale':{ vue:1, emoji:'🚨', titre:"L'amygdale, l'alarme de la peur",
+    texte:"Cette petite amande sonne l'alarme quand tu as peur : « attention ! ». Elle reste allumée pendant les rêves, et beaucoup de chercheurs pensent que les rêves aident à ranger les peurs de la journée." },
+  'thalamus':{ vue:1, emoji:'🚉', titre:'Le thalamus, la gare de triage',
+    texte:"Tout ce que voient tes yeux et entendent tes oreilles passe par cette gare, au milieu de ta tête : chaque image et chaque son y prend son billet. Puis tchou-tchou, la gare l'envoie vers le bon coin du cerveau !" },
+  'horloge':{ vue:1, emoji:'⏰', titre:"L'horloge de la tête (hypothalamus)",
+    texte:"Juste au-dessus du croisement des nerfs des yeux, une toute petite horloge regarde s'il fait jour ou nuit. Quand la lumière s'en va, elle prévient la petite glande de la nuit : « Il est l'heure de dormir ! »" },
+  'pineale':{ vue:1, emoji:'🌰', titre:'La petite glande de la nuit (pinéale)',
+    texte:"Au milieu de ta tête, juste derrière la gare, il y a une petite graine pas plus grosse qu'un petit pois. Quand il fait noir, elle envoie dans tout ton corps le message « c'est la nuit », avec l'hormone de la nuit : la mélatonine." },
+  'calleux':{ vue:1, emoji:'🌉', titre:'Le pont entre les deux moitiés (corps calleux)',
+    texte:"Ton cerveau a deux moitiés, une à droite et une à gauche, comme deux jumeaux. Ce gros pont les relie, et des millions de messages y passent pour qu'elles se racontent tout !" },
+  'cervelet':{ vue:1, emoji:'🤸', titre:'Le cervelet',
+    texte:"Le cervelet, tout rayé, t'aide à tenir en équilibre, à sauter à cloche-pied et à attraper un ballon. Il est petit, mais il a plus de neurones que tout le reste de ton cerveau !" },
+  'tronc':{ vue:1, emoji:'❤️', titre:'Le tronc cérébral',
+    texte:"Le tronc, c'est le gardien qui ne dort jamais : il fait respirer tes poumons et battre ton cœur, toute la nuit. Tu n'as même pas besoin d'y penser, il s'en occupe tout seul !" },
+  'moelle':{ vue:1, emoji:'🪢', titre:'La moelle épinière',
+    texte:"La moelle épinière descend dans ton dos, cachée dans les os de ta colonne, comme un gros câble. Elle porte les messages du cerveau jusqu'à tes pieds, et retour, plus vite qu'un train !" },
+  'nerf-optique':{ vue:1, emoji:'🔌', titre:"Le nerf de l'œil",
+    texte:"Derrière ton œil, un câble file vers l'arrière et le milieu de ta tête : c'est le nerf de l'œil. Il emporte tout ce que tu vois jusqu'à la gare, et il dit aussi à l'horloge s'il fait jour !" },
+  'oeil':{ vue:1, emoji:'👁️', titre:"L'œil et les paupières",
+    texte:"Tes yeux attrapent les images et les envoient à ton cerveau, comme un appareil photo. Pendant le sommeil paradoxal, le sommeil des rêves, ils bougent tout seuls sous tes paupières, comme s'ils regardaient le film !" },
+  'oreille':{ vue:1, emoji:'🐌', titre:"L'oreille et le petit escargot",
+    texte:"Au fond de ton oreille, il y a un tout petit escargot plein d'eau : la cochlée. Il change les sons en messages pour ton cerveau, et il écoute même la nuit : c'est pour ça qu'un gros bruit peut te réveiller !" },
+  'crane':{ vue:1, emoji:'⛑️', titre:"Le crâne, le casque d'os",
+    texte:"Ton cerveau est bien à l'abri dans un casque en os : le crâne. Et la nuit, pendant le grand sommeil calme, tout ton corps grandit un peu, tes os aussi !" },
+  'liquide':{ vue:1, emoji:'💧', titre:"Le coussin d'eau",
+    texte:"Ton cerveau flotte dans un coussin d'eau qui le protège des chocs, comme un œuf dans une boîte. Pendant le grand sommeil calme, cette eau passe entre les plis et ton cerveau se rince, comme sous une petite douche !" },
+
+  // ---- Dehors : la journée et la chambre
+  'soleil':{ vue:0, emoji:'☀️', titre:'Le soleil',
+    texte:"Quand le soleil brille, sa lumière entre dans tes yeux et dit à l'horloge de ta tête : « C'est le jour, debout ! » C'est la plus grosse lampe du monde, et elle remet ton horloge à l'heure tous les matins." },
+  'lune':{ vue:0, emoji:'🌙', titre:'La lune',
+    texte:"La lune ne fabrique pas de lumière : elle renvoie celle du soleil, comme un grand miroir dans le ciel. Sa lumière est si douce que ton horloge de la tête se dit quand même : c'est la nuit !" },
+  'lampe':{ vue:0, emoji:'💡', titre:'La lampe',
+    texte:"Pour l'horloge de ta tête, une lampe très forte, c'est presque du soleil : elle croit que c'est encore le jour ! Alors le soir, une petite lumière douce, c'est mieux pour s'endormir." },
+  'lit':{ vue:0, emoji:'🛏️', titre:'Le lit',
+    texte:"Dans ton lit, ton corps est tout mou et tout calme, mais ton cerveau se met au travail : il range, il rejoue et il mélange ! Un enfant de ton âge a besoin de dormir 10 à 13 heures : c'est à peu près la moitié de la journée !" },
+  'doudou':{ vue:0, emoji:'🧸', titre:'Le doudou',
+    texte:"Ton doudou garde ta place bien au chaud toute la nuit. Sa douceur et son odeur disent à ton cerveau : « Tout va bien, tu es en sécurité. »" },
+  'fenetre':{ vue:0, emoji:'🪟', titre:'La fenêtre',
+    texte:"Par la fenêtre, tu vois s'il fait jour ou nuit, et l'horloge de ta tête aussi. Le matin, la lumière qui entre est le plus doux des réveils !" },
+  'expo':{ vue:0, emoji:'🏛️', titre:"Le bâtiment de l'expo",
+    texte:"Ici, des artistes ont peint des dessins géants sur les murs : c'est une expo de street art. Ouvre grand les yeux, car tout ce que tu vois ici peut entrer dans ta tête !" },
+  'boite':{ vue:0, emoji:'📦', titre:'La boîte à souvenirs',
+    texte:"Dans cette boîte, il y a des souvenirs pour ta journée : des choses vues, des mots entendus, des gens et ce que tu as ressenti. Choisis-en quatre au plus, car ton cerveau ne peut pas tout garder !" },
+  'ecran':{ vue:0, emoji:'🎬', titre:"L'écran des rêves",
+    texte:"La nuit, ton cerveau projette ici le film de tes rêves, fabriqué avec des morceaux de ta journée tout mélangés. Ce film peut être drôle, bizarre ou faire peur, mais il n'est jamais pour de vrai." },
+
+  // ---- Dehors : le décor qui n'apparaît que si sa carte est choisie
+  'decor-pouce':{ vue:0, emoji:'👍', titre:'Le pouce de César',
+    texte:"C'est une statue en bronze de 12 mètres, faite par un artiste qui s'appelle César. Elle est très grande, mais elle ne bouge pas." },
+  'decor-glace':{ vue:0, emoji:'🍦', titre:'La glace',
+    texte:"Une glace qui fond au soleil : vite, avant que ça coule ! Ta langue envoie « froid et sucré » à ton cerveau, et il range ça avec les bons souvenirs." },
+  'decor-chien':{ vue:0, emoji:'🐶', titre:'Le chien',
+    texte:"Ce chien remue la queue pour te dire bonjour, il est content de te voir ! Son nez sent les odeurs des milliers de fois mieux que le tien." },
+  'decor-velo':{ vue:0, emoji:'🚲', titre:'Le vélo',
+    texte:"Pour tenir sur un vélo, ton cervelet travaille à toute vitesse et te garde en équilibre. La nuit, ton cerveau rejoue tes essais : c'est pour ça qu'on y arrive souvent mieux après une bonne nuit !" },
+  'decor-piscine':{ vue:0, emoji:'🏊', titre:'La piscine',
+    texte:"Plouf, dans l'eau, ton corps devient tout léger, comme un astronaute dans l'espace ! Nager, ça fatigue bien : ce soir, tu vas dormir comme un loir." },
+  'decor-gateau':{ vue:0, emoji:'🎂', titre:"Le gâteau d'anniversaire",
+    texte:"Un gâteau avec des bougies : on souffle fort et tout le monde chante ! Ton nez, ta langue et tes oreilles envoient tout ça à ton cerveau en même temps." },
+  'decor-tracteur':{ vue:0, emoji:'🚜', titre:'Le tracteur',
+    texte:"Vroum, le tracteur a des roues plus hautes que toi, et il fait un bruit de géant ! Tes yeux et tes oreilles l'envoient ensemble dans ta tête." },
+  'decor-orage':{ vue:0, emoji:'⛈️', titre:"L'orage",
+    texte:"Le tonnerre, c'est le bruit de l'éclair, une énorme étincelle dans les nuages. Il fait sursauter, mais à la maison, tu es bien à l'abri." },
+  'decor-manege':{ vue:0, emoji:'🎠', titre:'Le manège',
+    texte:"Le manège tourne, tourne, et ta tête aussi un peu ! C'est le fond de ton oreille qui sent que ça tourne, et ton cervelet qui t'aide à rester droit." },
+  'decor-copains':{ vue:0, emoji:'🧒', titre:'Les copains',
+    texte:"Avec les copains, on joue, on court et on invente des blagues rigolotes. Rire ensemble, c'est un souvenir que ton cerveau adore garder !" },
+  'decor-parents':{ vue:0, emoji:'👨‍👩‍👧', titre:'Papa et maman',
+    texte:"Papa et maman, c'est ton équipe, le jour comme la nuit. Si tu fais un cauchemar, tu peux les appeler, et à plusieurs, on change de chaîne !" },
+  'decor-mamie':{ vue:0, emoji:'👵', titre:'Mamie',
+    texte:"Mamie connaît plein d'histoires de quand tes parents étaient petits. Ses souvenirs à elle sont rangés depuis très longtemps dans sa couverture plissée !" },
+  'decor-maitresse':{ vue:0, emoji:'👩‍🏫', titre:'La maîtresse',
+    texte:"À l'école, la maîtresse t'apprend plein de choses nouvelles. La nuit, ton cerveau les rejoue pour bien les ranger : dormir aide à apprendre !" },
+
+  // ---- Tout près : à hauteur de neurones
+  'neurone':{ vue:2, emoji:'🌟', titre:'Un neurone',
+    texte:"Voici un neurone, une petite cellule du cerveau avec plein de branches, comme un arbre. Tu en as des milliards, bien plus qu'il n'y a de gens sur la Terre, et ils se parlent même pendant que tu dors !" },
+  'synapse':{ vue:2, emoji:'⚡', titre:'Une étincelle (synapse)',
+    texte:"Là où deux neurones se touchent presque, ils se parlent avec de toutes petites étincelles : c'est une synapse. Beaucoup de chercheurs pensent que, la nuit, ton cerveau garde les chemins qui servent et fait du tri dans les autres." },
+  'vague':{ vue:2, emoji:'🌊', titre:'Une grande vague lente',
+    texte:"Pendant le sommeil profond, le grand sommeil calme du début de la nuit, des milliards de neurones chantent ensemble comme une grande vague lente. Ces vagues aident à ranger les souvenirs et à rincer le cerveau, mais les chercheurs ne savent pas encore tout !" },
+  'fuseau':{ vue:2, emoji:'🧵', titre:'Une petite rafale qui colle (fuseau)',
+    texte:"Entre les grandes vagues, il y a de petites rafales très rapides, qu'on appelle des fuseaux. Elles aident à coller les souvenirs tout neufs dans la couverture plissée, comme de la colle à paillettes !" },
+  'cellule':{ vue:2, emoji:'🌱', titre:'Une cellule qui grandit',
+    texte:"Pendant le grand sommeil calme, ton corps fabrique une hormone qui aide à grandir. C'est pour ça qu'on dit qu'on grandit en dormant : un peu chaque nuit, sans même s'en rendre compte !" }
+};
+
+/* ===== F. Mini-jeux =====
+   JEU_PARTIES : « Trouve la bonne partie ! » — cible = id de zone (vue 1).
+   JEU_REVE    : « Rêve ou pour de vrai ? » — quatre vrais, quatre rêves. */
+const JEU_PARTIES = [
+  { q:'Où est le chef qui vérifie tout ?',                   cible:'frontal' },
+  { q:"Où est l'alarme de la peur ?",                        cible:'amygdale' },
+  { q:'Où est le sac à souvenirs tout neufs ?',              cible:'hippocampe' },
+  { q:'Où est la gare où passent les images et les sons ?',  cible:'thalamus' },
+  { q:"Où est celui qui t'aide à tenir en équilibre ?",      cible:'cervelet' },
+  { q:'Où est la petite graine qui dit « c\'est la nuit » ?', cible:'pineale' },
+  { q:"Où est le casque d'os qui protège ton cerveau ?",     cible:'crane' },
+  { q:'Où est le gardien qui fait respirer, même la nuit ?', cible:'tronc' }
+];
+const JEU_REVE = [
+  { q:'Devant une expo, il y a un pouce de 12 mètres, en bronze.',              emoji:'👍', reponse:'vrai' },
+  { q:'Dans ta chambre, un ogre gigantesque avec un pouce à la place du nez.',  emoji:'👹', reponse:'reve' },
+  { q:"Un chien qui fait du vélo en chantant à tue-tête.",                       emoji:'🐶', reponse:'reve' },
+  { q:'Ton cœur continue de battre pendant que tu dors.',                       emoji:'❤️', reponse:'vrai' },
+  { q:'Une glace géante qui parle et qui connaît ton prénom.',                  emoji:'🍦', reponse:'reve' },
+  { q:'Pendant les rêves, tes yeux bougent sous tes paupières.',               emoji:'👀', reponse:'vrai' },
+  { q:"La maîtresse qui vole au-dessus de l'école sur un tracteur.",            emoji:'🚜', reponse:'reve' },
+  { q:'Pendant que tu dors, ton cerveau range les souvenirs de ta journée.',    emoji:'🧠', reponse:'vrai' }
+];
+
+/* ===== G. L'histoire du pouce (spec §4.7) =====
+   { vue, temps, texte, action? } — action : 'reve' (rendre le rêve),
+   'telecommande' (appliquer la télécommande et ouvrir la chanson), 'fin'.
+   {PRENOM} : remplacé une seule fois par le prénom, ou par {il|elle} ; jamais
+   en début de phrase. Puis inflect accorde le reste. */
+const HISTOIRE = [
+  { vue:0, temps:0,
+    texte:"Un jour, {PRENOM} est {allé|allée} voir une expo de street art. Devant la porte, il y avait un pouce géant en bronze, haut de 12 mètres : une statue de l'artiste César !" },
+  { vue:0, temps:0,
+    texte:"Les copains ont rigolé : « C'est le pouce d'un ogre ! » Tout le monde a ri, et c'était vraiment drôle." },
+  { vue:1, temps:0,
+    texte:"Tout ça est entré dans sa tête : le pouce par les yeux, le mot « ogre » par les oreilles. Les souvenirs sont passés par la gare, puis ils sont tombés dans le sac à souvenirs tout neufs." },
+  { vue:0, temps:1,
+    texte:"Le soir, quand il a fait noir, la petite glande de la nuit a envoyé son message : « c'est la nuit ». Après un câlin et une chanson, {PRENOM} s'est {endormi|endormie} avec son doudou." },
+  { vue:1, temps:2,
+    texte:"D'abord, il y a eu le sommeil profond, le grand sommeil calme du début de la nuit. Son cerveau a travaillé dur : il a rejoué la journée, il a rangé les souvenirs dans la couverture plissée, et il s'est rincé." },
+  { vue:1, temps:3, action:'reve',
+    texte:"Ensuite est venu le sommeil paradoxal, le sommeil des rêves : le chef qui vérifie dormait, et l'alarme de la peur était allumée. Alors son cerveau a mélangé le pouce géant avec le mot « ogre »… et ça a fait un ogre gigantesque !" },
+  { vue:0, temps:3,
+    texte:"Cette nuit-là, {PRENOM} s'est {réveillé|réveillée} plusieurs fois, {terrorisé|terrorisée} par un ogre gigantesque. C'était un cauchemar : ça fait très peur, mais ce n'est pas pour de vrai." },
+  { vue:1, temps:3, action:'telecommande',
+    texte:"Alors ses parents sont venus et ils ont chanté « Hey, ho, les chiens pirates ! ». La chanson est entrée dans sa tête, et le film a changé de chaîne." },
+  { vue:1, temps:4,
+    texte:"Au matin, le film s'est arrêté. L'ogre gigantesque, c'était le pouce de bronze et la blague des copains, mélangés par son cerveau pendant la nuit." },
+  { vue:0, temps:4,
+    texte:"Le lendemain, {PRENOM} a raconté l'ogre gigantesque. Et maintenant, {il|elle} sait d'où il venait." },
+  { vue:0, temps:0, action:'fin',
+    texte:"À toi de faire ta journée !" }
+];
+
+/* ===== H. La télécommande (spec §4.6) =====
+   Trois transformations en rotation, ridicules ou gentilles, jamais « vaincu ».
+   Textes génériques : la télécommande sert pour tout cauchemar, pas seulement
+   l'ogre. Les grandes formes : « bronze » ramène la base comme dans la journée. */
+const TRANSFOS = [
+  { id:'bronze',
+    texte:"Pfffuiiit ! Ce qui faisait peur se dégonfle comme un vieux ballon, et tout redevient comme dans ta journée : tout sage, et ça ne bouge plus." },
+  { id:'lapin',
+    texte:"Pop, pop ! Ce qui faisait peur se retrouve avec deux grandes oreilles de lapin toutes roses, et grignote une carotte en remuant le nez." },
+  { id:'danse',
+    texte:"Les chiens pirates débarquent en chantant, et tout le rêve se met à danser. Ça danse très mal, ça se marche sur les pieds, et ça rigole !" }
+];
+
+/* ===== I. Gabarits de phrases (spec §4.5-5, §4.6) =====
+   Remplis par le générateur de rêve : {BASE} {GREFFE} {MODIF} {C1} {C2} {VRAI}
+   {RECONFORT}. Gabarits figés : les tests du rêve cherchent ces mots. */
+const PHRASES = {
+  reve: "Dans le rêve, {BASE} est devenu {GREFFE} {MODIF}, parce que ton cerveau a mélangé {C1} avec {C2}. Le chef qui vérifie dormait, alors personne n'a dit « mais non, c'est {VRAI} ! »",
+  seul: "Dans le rêve, {BASE} était {MODIF}, parce que ton cerveau l'a rejoué.",
+  flou: "Tu n'as rien mis dans ta journée : cette nuit, ton cerveau range et se rince, et le rêve est tout flou.",
+  finitBien: "… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul.",
+  cle: "C'est mon cerveau qui a mélangé. C'est un rêve. Je change de chaîne."
+};
+/* PURE-END */
+</script>
+
+<script>
 /* ==========================================================================
    DANS LES RÊVES — script principal
    Sections :

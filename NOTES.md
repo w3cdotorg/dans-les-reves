@@ -295,3 +295,52 @@ reprises au polish (Task 18) pour les retours des boutons et curseurs.
   carte (en riso, papier × papier → scène beige). *Onglet en arrière-plan* : rAF suspendus,
   donc la mesure d'allègement n'a lieu que page visible, et est refaite au retour au premier plan
   si la page se cache pendant le laps.
+
+## 2026-10-29 — Task 2 : données
+
+Bloc `/* PURE-BEGIN */ … /* PURE-END */` dans son propre `<script>`, avant le script
+principal : cartes, modificateurs, 46 zones, deux jeux, histoire du pouce, télécommande,
+gabarits de phrases, `inflect`, `lerpArr`. Aucun accès au DOM : Node l'exécute dans un
+`vm` vide (`test/_load.js`), `node --test test/` → 15 tests.
+
+**Choix non évidents.**
+- **23 cartes, pas 22.** Le brief dit « 22 » mais énumère 23 slugs, et la table du spec
+  §4.3 compte 23 cartes distinctes (« un câlin » est à la fois ressenti et réconfort). On
+  garde les 23 cartes nommées. Conséquence pour la tâche du rêve : « toutes les paires »
+  font 253, pas 231.
+- **Accords prêts pour le générateur de rêve.** Le gabarit figé « {BASE} est devenu
+  {GREFFE} {MODIF} » casse sur « la piscine », « les copains », « une glace tout petit ».
+  Champs ajoutés (en plus de l'interface) : `g` (m | f | mp | fp) sur chaque carte et sur
+  chaque `greffe`, et `f / mp / fp` dans chaque `MODIFS` (« toute petite », « multipliés »,
+  « qui n'obéissent pas »). Le gabarit lui-même reste mot pour mot celui du brief.
+- **`ton`** sur les cartes réconfort (« ta chanson », « ton doudou », « un câlin ») : la
+  carte dit « ma chanson » (voix de l'enfant), la phrase `finitBien` dit « ta chanson ».
+- **Toutes les cartes ont une `greffe`**, ressentis et réconfort compris (le plan dessine
+  une greffe pour chacune) : `peur` → « de grands yeux tout ronds », `fache` → « des
+  sourcils fâchés », `calin` → « deux grands bras », `chanson` → « des notes de musique ».
+- **Entrées** : les choses vues par l'œil, tout le reste par l'oreille (spec §4.3) ; le
+  doudou, chose qu'on voit et qu'on touche, par l'œil.
+- **Textes de la télécommande génériques** : elle sert pour tout cauchemar (dragon, orage,
+  j'ai eu peur…), donc « ce qui faisait peur » plutôt que « l'ogre ». Dans l'histoire du
+  pouce, « tout redevient comme dans ta journée » = le pouce de bronze.
+- **`{PRENOM}`** : une seule fois par étape et jamais en début de phrase, car l'appelant
+  fait un seul `replace` et met « {il|elle} » sans majuscule quand il n'y a pas de prénom
+  (testé). La phrase du matin utilise `{PRENOM}` pour « Le lendemain, … a raconté » : sans
+  prénom, le texte est exactement celui du spec.
+- **`inflect` sans avatar** → forme du garçon (celle de l'anecdote).
+- **Honnêteté testée** : aucun texte ne contient « se repose », « chass », « tromp »,
+  « poison », « vainc », « tué », « cassé », « erreur » ; « beaucoup de chercheurs pensent
+  que » (amygdale, synapse), « les chercheurs ne savent pas encore tout » (vague) ;
+  sommeil profond et sommeil paradoxal nommés une fois, puis « le grand sommeil calme » et
+  « le sommeil des rêves ».
+- **Faits qui épatent, vérifiés** : pouce 12 m ≈ maison de 4 étages ; cortex déplié ≈ une
+  serviette de table (~0,25 m²) ; cervelet = plus de neurones que tout le reste (~69 sur
+  86 milliards) ; des milliards de neurones, plus que de gens sur Terre ; 10 à 13 h de
+  sommeil à 3-5 ans (AASM) ; la lune renvoie la lumière du soleil ; pinéale grosse comme
+  un petit pois ; on grandit « un peu » en dormant (jamais « seulement »).
+
+**Laissé de côté exprès.** Pas de `{VRAI}` par carte : le brief de la tâche du rêve en
+décide (« c'est une statue » pour le pouce). Mais « c'est {VRAI} » rempli avec « ce n'est
+pas pour de vrai » donnerait « c'est ce n'est pas pour de vrai » : à régler là-bas. De
+même, les ressentis en `{C1}`/`{C2}` (« mélangé un vélo avec j'ai ri ») sonnent mal ;
+`greffe.nom` est probablement le meilleur choix pour eux.
