@@ -137,3 +137,47 @@ qui garde découpe + ombre + coutures et supprime fibres et bouloches.
   amygdale **devant** l'hippocampe ; pinéale sous le splénium ; NSC au-dessus du chiasma.
 - Trous : refrain exact des chiens pirates non vérifié en ligne ; épisode « 1 jour 1
   question » sur les rêves non confirmé.
+
+## 2026-10-29 — Feutrine « à l'aiguille » (v6 → v7), d'après le renard
+
+Le propriétaire a envoyé une référence : un **renard en laine feutrée à l'aiguille**
+(photo Etsy, copie locale `docs/refs/renard-laine-feutree-etsy.jpg`, à usage de
+référence de dessin uniquement). Ce qu'on en prend : pièces **bombées** (volume réel,
+pas une découpe plate), **halo de fibres** sur tout le contour, **broderies blanches**
+(volutes au point de tige + nœuds français) sur le corps, œil fermé brodé d'un trait,
+laine mate à teinture légèrement irrégulière. Le riso reste tel quel (v5), validé.
+
+Décisions du propriétaire : **la toile elle-même s'assombrit** pour la nuit (pas une
+pièce bleue posée) en surveillant les contrastes ; cartes-souvenirs **épinglées, oui**,
+avec des épingles plus grandes et plus réalistes.
+
+**Recette laine feutrée (filtre `wool`, v7, validée en capture)** :
+A. halo : `feMorphology dilate 1.3` sur SourceGraphic (garde la couleur de la pièce)
+   → `turbulence 1.5` + déplacement 4.5 → flou .35 → alpha ×.5. ⚠ En v6 (dilate 2.2,
+   déplacement 7) le halo faisait une bordure givrée trop large sur les petites cartes.
+B. corps : contour feutré (fractalNoise .05 → déplacement 2.6, puis turbulence .8 →
+   déplacement 1.4).
+C. laine : fibres `fractalNoise .75×.6, 4 octaves` → diffuse (surfaceScale 1.6,
+   230°/52°) ramenée par `feComponentTransfer` slope .4 / intercept .66, multipliée ;
+   teinture `fractalNoise .12` très discrète (slope .12 / intercept .9).
+D. bombé : alpha flouté σ 2.6 → diffuse surfaceScale 5 (225°/48°), slope .3 /
+   intercept .7 (**jamais > 1**, sinon liseré blanc brûlé), multiplié ; spéculaire
+   quasi nul (constante .12, exposant 6). ⚠ En v6, spéculaire .35 / exposant 22 et
+   surfaceScale 9 donnaient un rendu **brillant, pâte d'amande / gelée** : la laine est
+   mate, le reflet doit être à peine perceptible.
+E. bouloches rares (mêmes réglages que la v5).
+F. ombre portée (1.4, 3, σ 2, .4).
+Broderie : fil blanc 1.25 px, tirets 2.6/1 (point de tige), nœuds français = petits
+cercles à dégradé radial, filtre `thread` (déplacement .9 + ombre .35/.4).
+Toile : lin (`<pattern>` 7 px + grain) × dégradé `dusk` en `mix-blend-mode:multiply`
+(blanc jusqu'à 42 %, puis #8d8cae, #3f3f74, #262a58) : la trame reste visible dans la
+nuit, les pièces crème / le fil blanc / le halo clair gardent leur contraste.
+Épingles : groupe `#pin` (tige acier en dégradé + fil de lumière blanc, tête de verre
+en dégradé radial rouge/bleu/jaune avec reflet, ombre de la tête et de la tige), tourné
+à l'usage. ⚠ Les couleurs de tête par sélecteur CSS à travers `<use>` ne passent pas
+(arbre fantôme) : dans le vrai dessin, utiliser `currentColor` ou trois symboles.
+Œil fermé « comme le renard » côté nuit : un trait brodé courbe.
+
+Point de vigilance de dessin repéré sur la maquette : l'oreille et le cervelet se
+chevauchent dans la géométrie de test ; dans le vrai dessin, le cervelet est derrière et
+au-dessus du conduit auditif, l'oreille devant.
