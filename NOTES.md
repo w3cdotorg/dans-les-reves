@@ -1,4 +1,4 @@
-# Notes et trouvailles — « Dans ma tête » 🧠
+# Notes et trouvailles — « Dans les rêves » 🌙
 
 Journal des choix, des découvertes et des décisions, au fil de l'eau. Petit frère de
 [*Dans mon corps*](https://github.com/w3cdotorg/dans-mon-corps) et de
@@ -37,8 +37,10 @@ loisirs) pour lui changer les idées. Le lendemain matin il raconte encore l'ogr
   bonus « tourne le cerveau », sans rien redessiner.
 - **Anti-objectif n° 1 du propriétaire : « un style habituel dans les dessins ».**
   → Planche contact de styles à proposer avant toute spec (voir `docs/brainstorm/`).
-- Notes fréquentes ici, commits fréquents, dépôt public `w3cdotorg/dans-ma-tete`.
+- Notes fréquentes ici, commits fréquents, dépôt public `w3cdotorg/dans-les-reves`.
 
 **En cours.** Recherche de fond (Canopé, Inserm, INSV, science du sommeil et des rêves
 chez les 4-5 ans) lancée en arrière-plan ; résultat attendu dans
 `docs/recherche-cerveau-sommeil.md`.
+
+**Nom.** Le propriétaire a tranché : `dans-les-reves` (et non « dans ma tête »). Le titre affiché sera « Dans les rêves ».
