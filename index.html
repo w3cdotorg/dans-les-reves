@@ -43,6 +43,11 @@
   --p-crane:#f4ead6; --p-liquide:#cfe2ee; --p-calleux:#fbeef0; --p-nerf:#f4d58d;
   --p-hypothalamus:#93cdb3; --p-hypophyse:#f5a47e; --p-joue:#f3a39a; --p-oeil:#4b3a2e;
   --p-ecran:#fbf3e0; --p-carte:#fbf3e0; --p-pouce:#b9b2a0; --p-soleil:#f3c74a; --p-lune:#fff1c9;
+  /* vue Dehors : le monde de l'enfant (Task 4), feutres doux, rien de vif */
+  --p-sol:#a9c48a; --p-expo:#a8a6a1; --p-expo-toit:#87857f; --p-graffiti-1:#ef93b4; --p-graffiti-2:#79c4b5;
+  --p-ciel-jour:#a9d1ec; --p-ciel-nuit:#4a4d86; --p-soleil-rayons:#f3a34c; --p-fenetre:#c99463; --p-rideau:#eaa2a8;
+  --p-lit:#b8825a; --p-drap:#fbf3e0; --p-oreiller:#fffaf0; --p-couverture:#86a9dc;
+  --p-lampe:#f2b45e; --p-lueur:#ffe7a3; --p-doudou:#e8c9a6;
 
   /* fils de broderie */
   --fil-blanc:#fff6f1; --fil-brun:#7a4b3a; --fil-sable:#c9b58d; --fil-rouge:#e0493f;
@@ -185,27 +190,50 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
    une `transform` CSS sur .w pour le décalage d'encre, et une transform CSS
    REMPLACE l'attribut SVG. Dessiner en coordonnées absolues, ou envelopper la
    pièce dans un <g transform="…"> de positionnement. */
-.w{fill:var(--p)}
-[data-theme=feutrine] .w{filter:url(#wool)}
-/* l'ordre compte : la règle riso, plus bas et de même poids, l'emporte sur
-   [data-lite="1"] .w quand les deux s'appliquent */
-[data-theme=feutrine] .w.lite,
-[data-lite="1"] .w{filter:url(#woolLite)}
-[data-theme=riso] .w{filter:url(#riso)}
-[data-theme=riso] .w[data-ink=jaune]{fill:var(--ink-jaune);transform:translate(-1.6px,1.1px)}
-[data-theme=riso] .w[data-ink=rose]{fill:var(--ink-rose);transform:translate(1.5px,-1.3px)}
-[data-theme=riso] .w[data-ink=bleu]{fill:var(--ink-bleu);transform:translate(.6px,.4px)}
+/* ⚠ RÈGLE DU <use> (Task 4) : la tête de Dedans est reprise dans Dehors par
+   <use>. Chrome applique les règles AU CLONE, dans son arbre fantôme, où un
+   sélecteur d'ancêtre ([data-theme=riso] .w, [data-genre=fille] #x…) ne voit
+   rien. Le thème, l'allègement et le genre passent donc par des VARIABLES
+   posées sur <html> (elles, héritent à travers le <use>) ; les pièces les lisent
+   par des règles posées sur elles-mêmes. Tout ce qui est dans la tête se style
+   par une classe / un attribut de l'élément, ou par une variable : jamais par
+   un sélecteur d'ancêtre. <html data-theme/data-lite/data-genre> reste la source. */
+:root{
+  --w-filter:url(#wool);           /* pièces .w */
+  --w-lite-filter:url(#woolLite);  /* pièces .w.lite */
+  --w-blend:normal;
+  --off-jaune:none; --off-rose:none; --off-bleu:none;   /* décalage d'encre riso */
+  --fil-filter:url(#thread); --fil-dash:2.6 1; --fil-dash-couture:3.2 1.3;
+}
+/* l'ordre compte : riso, plus bas et de même poids, l'emporte sur l'allègement */
+[data-lite="1"]{--w-filter:url(#woolLite)}
+[data-theme=riso]{
+  --w-filter:url(#riso); --w-lite-filter:url(#riso); --w-blend:multiply;
+  --encre-jaune:var(--ink-jaune); --encre-rose:var(--ink-rose); --encre-bleu:var(--ink-bleu);
+  --off-jaune:translate(-1.6px,1.1px); --off-rose:translate(1.5px,-1.3px); --off-bleu:translate(.6px,.4px);
+  --fil-filter:url(#riso); --fil-dash:none; --fil-dash-couture:none;
+  --fil-encre:var(--ink-bleu);     /* tous les fils sont imprimés en bleu */
+  --riso-papier:var(--papier);     /* les petits points « en réserve » */
+}
+[data-genre=fille]{--cheveux-long:inline}
+
+/* Les pièces se multiplient entre elles en riso (--w-blend), sinon un jaune posé
+   sur un rose le cacherait. En feutrine, l'encre --encre-* n'existe pas : la
+   pièce garde sa laine --p. */
+.w{fill:var(--p);filter:var(--w-filter);mix-blend-mode:var(--w-blend)}
+.w.lite{filter:var(--w-lite-filter)}
+.w[data-ink=jaune]{--encre:var(--encre-jaune);fill:var(--encre, var(--p));transform:var(--off-jaune)}
+.w[data-ink=rose]{--encre:var(--encre-rose);fill:var(--encre, var(--p));transform:var(--off-rose)}
+.w[data-ink=bleu]{--encre:var(--encre-bleu);fill:var(--encre, var(--p));transform:var(--off-bleu)}
 /* Les groupes de la scène se superposent comme des passages d'encre.
    (#scene-inner>g et non #scene>g : tous les groupes vivent dans #scene-inner,
-   pour que la loupe clone la scène d'un seul <use>.) Les pièces elles-mêmes se
-   multiplient aussi entre elles, sinon un jaune posé sur un rose le cacherait. */
-[data-theme=riso] #scene-inner>g,
-[data-theme=riso] .w{mix-blend-mode:multiply}
+   pour que la loupe clone la scène d'un seul <use>.) Ces groupes ne sont jamais
+   repris par <use> : le sélecteur d'ancêtre est permis ici. */
+[data-theme=riso] #scene-inner>g{mix-blend-mode:multiply}
 
 /* Contours brodés .fil : fil blanc au point de tige par défaut ; --f change le fil. */
-.fil{fill:none;stroke:var(--f, var(--fil-blanc));stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
-[data-theme=feutrine] .fil{stroke-dasharray:2.6 1;filter:url(#thread)}
-[data-theme=riso] .fil{stroke:var(--ink-bleu);stroke-dasharray:none;filter:url(#riso)}
+.fil{fill:none;stroke:var(--fil-encre, var(--f, var(--fil-blanc)));stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:var(--fil-dash);filter:var(--fil-filter)}
 
 /* ===== 7 bis. Vue « Dedans » : la tête et le cerveau =====
    .peau / .cheveux suivent l'avatar (setAvatar écrit --skin, --skin-shade, --hair
@@ -214,19 +242,16 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
 .peau{fill:var(--skin)}      /* redondant avec .w{fill:var(--p)} + --p:var(--skin), voulu : le brief demande ces classes */
 .cheveux{fill:var(--hair)}  /* idem avec --p:var(--hair) */
 /* les cheveux longs n'existent que pour la fille */
-#p-cheveux-long{display:none}
-[data-genre=fille] #p-cheveux-long{display:inline}
+#p-cheveux-long{display:var(--cheveux-long, none)}
 /* régions profondes : en transparence, avec un bord cousu plus marqué */
 .profond{opacity:.85}
-.fil.couture{stroke-width:1.7}
-[data-theme=feutrine] .fil.couture{stroke-dasharray:3.2 1.3}
+.fil.couture{stroke-width:1.7;stroke-dasharray:var(--fil-dash-couture)}
 /* petits points sans laine : trous du bouton, conduit de l'oreille, œil du cheval de mer */
-.trou{fill:var(--skin-shade)}
-#p-oeil ~ .trou{fill:var(--skin)}
-[data-theme=riso] #p-oeil ~ .trou{fill:var(--papier)}
+.trou{fill:var(--riso-papier, var(--skin-shade))}
+#p-oeil ~ .trou{fill:var(--riso-papier, var(--skin))}
 .oeil-hippo{fill:var(--fil-brun)}
 /* l'oreille, à la surface, laisse voir le cerveau dessous ; la joue est un voile de laine rose */
-#p-oreille{opacity:.72}
+#p-oreille{opacity:.72;mix-blend-mode:normal}   /* riso : en réserve (en feutrine, normal de toute façon) */
 #p-joue{opacity:.75}
 .fil.epi{--f:var(--hair);stroke-width:3.4;stroke-dasharray:none}
 .fil.meches{--f:color-mix(in srgb, var(--hair) 55%, #fff);stroke-width:1.1}
@@ -234,9 +259,7 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
 /* #p-bouche est un fil (.fil), pas une pièce .w : une transform CSS posée plus
    tard (.triste, .baille) ne touche à aucun décalage d'encre riso. */
 #p-bouche{--f:var(--fil-bouche);stroke-width:1.9;transform-box:fill-box;transform-origin:center}
-.fil.bord-bouton{--f:var(--fil-blanc);stroke-width:1;opacity:.9}
-[data-theme=riso] .fil.bord-bouton{stroke:var(--papier)}
-[data-theme=riso] .trou{fill:var(--papier)}
+.fil.bord-bouton{stroke:var(--riso-papier, var(--fil-blanc));stroke-width:1;opacity:.9}
 [data-theme=riso] .oeil-hippo{fill:var(--ink-bleu)}
 [data-theme=riso] #p-liquide{opacity:.35}
 /* riso : les couches de rose se multiplieraient jusqu'au rouge sang et noieraient
@@ -250,7 +273,6 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
 [data-theme=riso] #p-cortex{fill:color-mix(in srgb, var(--ink-rose) 45%, var(--papier));mix-blend-mode:normal}
 [data-theme=riso] :is(#p-frontal,#p-parietal,#p-occipital,#p-temporal,#p-cervelet){mix-blend-mode:normal}
 [data-theme=riso] .profond{opacity:.92;mix-blend-mode:normal}
-[data-theme=riso] #p-oreille{mix-blend-mode:normal}
 /* le visage, prêt pour les tâches suivantes :
    - paupière et œil fermé brodé : cachés le jour (la nuit les allumera) ;
    - sourcil : .fronce l'abaisse côté nez, pivot à son bout arrière ;
@@ -263,6 +285,27 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
 [data-theme=riso] #p-pineale.allume{filter:url(#riso) drop-shadow(0 0 5px var(--ink-rose))}
 /* l'hippocampe gonflera par son GROUPE (#g-hippocampe), jamais par la pièce .w */
 #g-hippocampe{transform-box:fill-box;transform-origin:80% 70%}
+
+/* ===== 7 quater. Vue « Dehors » : le monde de jour et de nuit =====
+   data-jour / data-nuit : Task 7 en pilote l'opacité. L'enfant est la tête de
+   Dedans reprise par <use> : #g-enfant-dehors pivote au cou pour se coucher. */
+#g-enfant-dehors{transform-box:view-box;transform-origin:359px 440px}
+.fil.herbe{--f:color-mix(in srgb, var(--p-sol) 55%, #2f4a1e);stroke-width:1.5}
+.fil.graffiti{--f:var(--fil-rouge);stroke-width:2.2}
+.fil.etoile{stroke-width:1.1}
+.oeil-lune,.nez-doudou{fill:var(--fil-brun)}
+[data-theme=riso] :is(.oeil-lune,.nez-doudou){fill:var(--ink-bleu)}
+#fil-lune-clin{opacity:0}          /* le clin d'œil de la lune le montrera un instant */
+#p-lampe-lueur{opacity:.55}        /* une lueur de laine, pas une ampoule */
+/* riso : le décor est imprimé en demi-teintes (encre sur papier) pour que les
+   grandes surfaces (sol, vitres, expo, couverture) ne soient pas sombres ;
+   .reserve = imprimé sans multiply (la lune et le soleil sur leur vitre) ;
+   l'enfant est un groupe isolé : sa peau ne se multiplie pas avec le sol. */
+[data-theme=riso] .w.pale{fill:color-mix(in srgb, var(--encre) 35%, var(--papier))}
+[data-theme=riso] .w.teinte{fill:color-mix(in srgb, var(--encre) 60%, var(--papier))}
+.w.reserve{mix-blend-mode:normal}
+[data-theme=riso] #p-sol{fill:color-mix(in srgb, color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-bleu)) 62%, var(--papier))}
+[data-theme=riso] #g-enfant-dehors{isolation:isolate}
 
 /* La toile du SVG : lin + grain en feutrine, papier + grain en riso. */
 .toile-lin{fill:url(#linen)}
@@ -617,7 +660,125 @@ input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset
             <rect class="nuit" width="900" height="560" fill="url(#dusk)" style="mix-blend-mode:multiply" opacity="0"/>
           </g>
           <!-- ===== Vue « Dehors » ===== -->
-          <g id="g-dehors"></g>
+          <g id="g-dehors">
+            <!-- Le monde de l'enfant, de jour et de nuit. data-jour / data-nuit :
+                 Task 7 pilote leur opacité avec le temps. Les éléments sans
+                 attribut (sol, fenêtre, ciel de nuit, enfant) restent toujours.
+                 Tracés générés par tools/gen-dehors.py (NOTES.md, Task 4). -->
+
+            <!-- le sol : une colline douce, que la boîte à souvenirs recouvre en bas -->
+            <path id="p-sol" class="w" style="--p:var(--p-sol)" data-ink="bleu" d="M-12 404c27.3-2.7 54.5-8 82-8 33.4 0 66.6 7.7 100 8 40 .4 80-6 120-6 43.4 0 86.6 6.7 130 6 40.1-.6 79.9-9.3 120-10 40-.7 80 6.3 120 6 40.1-.3 79.9-7.7 120-8 44-.3 88 4 132 6V572H-12Z"/>
+            <path class="fil herbe" d="M35.6 430q-4-4-11-10 M37.8 430q-2-8-6-17 M40 430q0-10 1-20 M42.2 430q2-8 7-16 M44.4 430q4-4 12-9 M123.6 452q-4-4-11-10 M125.8 452q-2-8-6-17 M128 452q0-10 1-20 M130.2 452q2-8 7-16 M132.4 452q4-4 12-9 M231.6 424q-4-4-11-10 M233.8 424q-2-8-6-17 M236 424q0-10 1-20 M238.2 424q2-8 7-16 M240.4 424q4-4 12-9 M555.6 428q-4-4-11-10 M557.8 428q-2-8-6-17 M560 428q0-10 1-20 M562.2 428q2-8 7-16 M564.4 428q4-4 12-9 M695.6 446q-4-4-11-10 M697.8 446q-2-8-6-17 M700 446q0-10 1-20 M702.2 446q2-8 7-16 M704.4 446q4-4 12-9 M855.6 424q-4-4-11-10 M857.8 424q-2-8-6-17 M860 424q0-10 1-20 M862.2 424q2-8 7-16 M864.4 424q4-4 12-9 M465.6 456q-4-4-11-10 M467.8 456q-2-8-6-17 M470 456q0-10 1-20 M472.2 456q2-8 7-16 M474.4 456q4-4 12-9"/>
+
+            <!-- le bâtiment de l'expo de street art : feutre gris, fenêtres cousues, peintures -->
+            <g id="p-expo" data-jour="1">
+              <path class="w pale" style="--p:var(--p-expo)" data-ink="bleu" d="M578 212L668 211 672 194Q718 184 764 193L768 210 858 208Q861 306 857 404Q718 408 579 404Q575 308 578 212Z"/>
+              <path class="w lite teinte" style="--p:var(--p-expo-toit)" data-ink="bleu" d="M573 200h290a5 5 0 0 1 5 5v4a5 5 0 0 1 -5 5h-290a5 5 0 0 1 -5-5v-4a5 5 0 0 1 5-5Z"/>
+              <path class="w lite teinte" style="--p:var(--p-expo-toit)" data-ink="bleu" d="M700 406V372a18 18 0 0 1 36 0V406Z"/>
+              <path class="w lite" style="--p:var(--p-graffiti-1)" data-ink="rose" d="M650 318c-.3 5.7-6.7 9.2-10.6 13.4-4.1 4.5-7.3 12.4-13.4 12.6-6.1.2-10.1-7.3-14.1-11.9-3.7-4.1-9.2-8.5-8.9-14.1.3-5.4 6.6-8.7 10.3-12.7 4-4.4 6.8-11.8 12.7-12.3 6-.5 10.7 5.8 14.8 10.2 4.1 4.1 9.5 9 9.2 14.8Z"/>
+              <path class="w lite teinte" style="--p:var(--p-graffiti-2)" data-ink="bleu" d="M837 328.5c-1.5 6.1-3.1 14-8.9 16.5-5.6 2.5-11.9-2.8-17.7-4.8-5.4-1.9-12.8-2-15.6-7-2.8-5 .5-11.6 2.1-17.1 1.6-5.7 2-13.7 7.4-16.2 5.4-2.5 11.5 2.9 17 4.9 5.2 1.8 12 1.9 15 6.5 3.2 4.8 2.1 11.6.7 17.2Z"/>
+              <path class="w lite" style="--p:var(--p-soleil)" data-ink="jaune" d="M746 300c0 5.7-2.9 11.2-6.2 15.9-3.3 4.7-7.3 9.9-12.8 11.7-5.6 1.8-11.9 0-17.3-1.9-5.4-1.9-11-4.7-14.4-9.2-3.3-4.6-4.2-10.8-4.3-16.5-.1-5.8.1-12.4 3.5-17 3.4-4.7 9.6-7 15.2-8.7 5.4-1.6 11.6-2.7 17-.9 5.3 1.7 9.8 6.1 13.1 10.7 3.4 4.6 6.2 10.2 6.2 15.9Z"/>
+              <path class="fil" d="M596 226h26v26h-26Z M636 226h26v26h-26Z M800 226h26v26h-26Z M838 226h26v26h-26Z M684 202h24v18h-24Z M728 202h24v18h-24Z"/>
+              <path class="fil graffiti" d="M700 302Q718 322 736 302 M708 288v4 M728 288v4 M598 370l10-14 10 14 10-14 10 14 M786 366q10-16 20 0t20 0"/>
+              <path class="w lite" style="--p:var(--p-lit)" data-ink="rose" d="M718.3 148a2.3 2.3 0 0 1 2.3 2.3v37.4a2.3 2.3 0 0 1 -2.3 2.3a2.3 2.3 0 0 1 -2.3-2.3v-37.4a2.3 2.3 0 0 1 2.3-2.3Z"/>
+              <path class="w lite" style="--p:var(--fil-rouge)" data-ink="rose" d="M719 150l28 8-28 9Z"/>
+            </g>
+
+            <!-- la fenêtre de la chambre, en haut à gauche : derrière le cadre, le ciel
+                 de nuit (toujours là), puis le ciel de jour posé dessus -->
+            <g id="p-ciel-lune">
+              <path class="w teinte" style="--p:var(--p-ciel-nuit)" data-ink="bleu" d="M22 22h108v148h-108Z"/>
+              <!-- la lune : #g-lune l'enveloppe (clin d'œil, Task 7 / 18) ;
+                   #fil-lune-clin, caché, remplacera #fil-lune-oeil le temps du clin -->
+              <g id="g-lune">
+                <g id="p-lune" data-nuit="1">
+                  <path class="w reserve" style="--p:var(--p-lune)" data-ink="jaune" d="M93.2 62.8A25 25 0 1 0 93.2 105.2A22 22 0 0 1 93.2 62.8Z"/>
+                  <circle id="fil-lune-oeil" class="oeil-lune" cx="66" cy="79" r="2.2"/>
+                  <path id="fil-lune-clin" class="fil" style="--f:var(--fil-brun)" d="M62 79q4 3.5 8 0"/>
+                  <path class="fil" style="--f:var(--fil-brun)" d="M62 92q4 4.5 9 1"/>
+                </g>
+              </g>
+              <!-- les étoiles : une croix brodée et un nœud français -->
+              <g id="g-etoiles" data-nuit="1">
+                <path class="fil etoile" d="M41 42h10M46 37v10 M108 50h8M112 46v8 M38 140h8M42 136v8 M99 128h10M104 123v10 M66.5 154h7M70 150.5v7 M173 26h10M178 21v10 M218 52h8M222 48v8 M155.5 210h9M160 205.5v9 M22 214h8M26 210v8 M246.5 20h7M250 16.5v7"/>
+                <circle cx="46" cy="42" r="1.9" fill="url(#knot)"/>
+                <circle cx="112" cy="50" r="1.9" fill="url(#knot)"/>
+                <circle cx="42" cy="140" r="1.9" fill="url(#knot)"/>
+                <circle cx="104" cy="128" r="1.9" fill="url(#knot)"/>
+                <circle cx="70" cy="154" r="1.9" fill="url(#knot)"/>
+                <circle cx="178" cy="26" r="1.9" fill="url(#knot)"/>
+                <circle cx="222" cy="52" r="1.9" fill="url(#knot)"/>
+                <circle cx="160" cy="210" r="1.9" fill="url(#knot)"/>
+                <circle cx="26" cy="214" r="1.9" fill="url(#knot)"/>
+                <circle cx="250" cy="20" r="1.9" fill="url(#knot)"/>
+              </g>
+            </g>
+            <g id="p-ciel-soleil" data-jour="1">
+              <path class="w pale" style="--p:var(--p-ciel-jour)" data-ink="bleu" d="M22 22h108v148h-108Z"/>
+              <path class="w reserve" style="--p:var(--p-soleil-rayons)" data-ink="rose" d="M107 82c0 4.1-8 4-9.4 7.9-1.4 3.8 4.8 8.9 2.1 12-2.6 3.2-8.7-2-12.2 0-3.5 2.1-2.1 9.9-6.1 10.6-4 .7-5.4-7.1-9.4-7.8-4-.8-8 6.2-11.5 4.1-3.5-2 .5-8.9-2.1-12-2.6-3.1-10.1-.4-11.5-4.2-1.4-3.8 6.1-6.5 6.1-10.6 0-4.1-7.5-6.8-6.1-10.6 1.4-3.8 8.9-1.1 11.5-4.2 2.6-3.1-1.4-10 2.1-12 3.5-2.1 7.5 4.9 11.5 4.1 4-.7 5.4-8.5 9.4-7.8 4 .7 2.6 8.5 6.1 10.6 3.5 2 9.6-3.2 12.2 0 2.7 3.1-3.5 8.2-2.1 12 1.4 3.9 9.4 3.8 9.4 7.9Z"/>
+              <path class="w lite reserve" style="--p:var(--p-soleil)" data-ink="jaune" d="M95.5 82c0 4-1.4 8.2-3.7 11.5-2.4 3.2-6 5.8-9.8 7-3.8 1.3-8.2 1.3-12 0-3.8-1.2-7.4-3.8-9.8-7-2.3-3.3-3.7-7.5-3.7-11.5 0-4 1.4-8.2 3.7-11.5 2.4-3.2 6-5.8 9.8-7 3.8-1.3 8.2-1.3 12 0 3.8 1.2 7.4 3.8 9.8 7 2.3 3.3 3.7 7.5 3.7 11.5Z"/>
+              <path class="fil" style="--f:var(--fil-brun)" d="M67 79q3 3 6 0M79 79q3 3 6 0M70 88q6 6 12 0"/>
+            </g>
+            <g id="p-fenetre">
+              <path class="w" style="--p:var(--p-fenetre)" data-ink="jaune" fill-rule="evenodd" d="M22 14h108a8 8 0 0 1 8 8v148a8 8 0 0 1 -8 8h-108a8 8 0 0 1 -8-8v-148a8 8 0 0 1 8-8ZM30 26h92a4 4 0 0 1 4 4v132a4 4 0 0 1 -4 4h-92a4 4 0 0 1 -4-4v-132a4 4 0 0 1 4-4Z"/>
+              <path class="w lite" style="--p:var(--p-lit)" data-ink="rose" d="M9.5 19h133a2.5 2.5 0 0 1 2.5 2.5a2.5 2.5 0 0 1 -2.5 2.5h-133a2.5 2.5 0 0 1 -2.5-2.5a2.5 2.5 0 0 1 2.5-2.5Z"/>
+              <path class="w lite" style="--p:var(--p-rideau)" data-ink="rose" d="M20 24c2.4-9 23.7-8.3 28 0 7.1 13.6-1.8 30.8-4 46-1.8 12.2-8 23.7-8 36 0 14.3 5.2 28 8 42 1.2 6 8.9 14.3 4 18-7.5 5.6-24.8 8.8-28 0-6.9-18.9 6-39.9 6-60 0-27.4-13.1-55.5-6-82Z"/>
+              <path class="w lite" style="--p:var(--p-rideau)" data-ink="rose" d="M132 24c-2.4-9-23.7-8.3-28 0-7.1 13.6 1.8 30.8 4 46 1.8 12.2 8 23.7 8 36 0 14.3-5.2 28-8 42-1.2 6-8.9 14.3-4 18 7.5 5.6 24.8 8.8 28 0 6.9-18.9-6-39.9-6-60 0-27.4 13.1-55.5 6-82Z"/>
+              <path class="w lite" style="--p:var(--p-fenetre)" data-ink="jaune" d="M11 172h130a5 5 0 0 1 5 5v2a5 5 0 0 1 -5 5h-130a5 5 0 0 1 -5-5v-2a5 5 0 0 1 5-5Z"/>
+            </g>
+
+            <!-- Emplacements du décor des cartes (Task 8 y insère <use href="#d-slug">) :
+                 groupes vides, rien ne s'y voit tant qu'aucune carte n'est choisie.
+                 #slot-gens : les cartes « gens », à gauche de l'enfant. -->
+            <g id="slot-0" transform="translate(600,330)"></g>
+            <g id="slot-1" transform="translate(700,300)"></g>
+            <g id="slot-2" transform="translate(780,350)"></g>
+            <g id="slot-3" transform="translate(640,420)"></g>
+            <g id="slot-gens" transform="translate(120,380)"></g>
+
+            <!-- la lampe de chevet et sa lueur (pièce à part) -->
+            <g id="p-lampe" data-nuit="1">
+              <path id="p-lampe-lueur" class="w lite" style="--p:var(--p-lueur)" data-ink="jaune" d="M130 304c.1 12-7.7 23.1-14.7 32.9-7 9.9-14.8 21.5-26.4 25.1-11.6 3.6-24.5-1.7-35.9-5.7-11.1-3.9-23.6-8.2-30.7-17.6-7.3-9.5-9.2-22.7-9.3-34.7-.1-12.1 1.2-25.6 8.5-35.3 7.1-9.6 19.8-14.1 31.2-18 11.5-3.8 24.6-8.6 36.2-4.7 11.4 3.9 18.6 15.8 25.6 25.7 6.9 9.7 15.4 20.3 15.5 32.3Z"/>
+              <path class="w lite" style="--p:var(--p-lit)" data-ink="rose" d="M66 324h8l1 112c14 1 24 6 24 13h-58c0-7 10-12 24-13Z"/>
+              <path class="w" style="--p:var(--p-lampe)" data-ink="rose" d="M50 278c4.8-4.7 13.3-3 20-3 6.7 0 15.2-1.7 20 3 6.7 6.5 6.7 17.3 10 26 2.3 6 12.2 14.2 7 18-10 7.3-24.6 4-37 4-12.4 0-27 3.3-37-4-5.2-3.8 4.7-12 7-18 3.3-8.7 3.3-19.5 10-26Z"/>
+              <path class="fil" d="M37 316Q70 321 103 316"/>
+            </g>
+
+            <!-- le lit (sous l'enfant) : tête de lit, pied, matelas, oreiller -->
+            <g id="p-lit" data-nuit="1">
+              <path class="w" style="--p:var(--p-lit)" data-ink="rose" d="M132 470c-.7-36.7-3-73.3-2-110 .3-10.2 1.6-20.8 6-30 2.6-5.5 7.9-12 14-12 6.1 0 11.4 6.5 14 12 4.4 9.2 5.6 19.8 6 30 1.6 36.6 0 73.3 0 110Z"/>
+              <path class="w" style="--p:var(--p-lit)" data-ink="rose" d="M720 470c0-26-3.2-52.2 0-78 .6-5.1 5.8-11 11-11 5.2 0 10.4 5.9 11 11 3.2 25.8 0 52 0 78Z"/>
+              <path class="w pale" style="--p:var(--p-drap)" data-ink="jaune" d="M159 428h562a9 9 0 0 1 9 9v24a9 9 0 0 1 -9 9h-562a9 9 0 0 1 -9-9v-24a9 9 0 0 1 9-9Z"/>
+              <path class="w pale" style="--p:var(--p-oreiller)" data-ink="jaune" d="M176 404c15.4-10.1 35.6-10.5 54-12 23.3-1.9 46.8-.3 70 2 17.6 1.7 36.6 1.3 52 10 7.3 4.2 10.7 16 8 24-3 9-12.8 15.9-22 18-22.1 4.9-45.3 2-68 2-24.7 0-49.7 2.5-74-2-9.5-1.7-19.9-7.3-24-16-3.8-7.9-3.3-21.2 4-26Z"/>
+            </g>
+
+            <!-- l'enfant : la MÊME tête que Dedans, reprise par <use> (avatar, genre,
+                 paupière, sourcil suivent tout seuls). Pivot au cou (359,440) :
+                 Task 7 le couche par une transform CSS sur ce groupe. -->
+            <g id="g-enfant-dehors">
+              <use href="#p-cheveux-long"/>
+              <use href="#p-tete"/>
+              <path id="p-calotte" class="w cheveux reserve" style="--p:var(--hair)" data-ink="bleu" d="M146.9 255.4c-.9 4.1-1.2 8.3-.8 12.5.1 2.2 1.3 4.3 2.2 6.4.8 1.8 2.8 3.2 3 5.2.3 3.1-1.5 6-1.7 9-.3 2.7-.3 5.3.3 7.9.5 2.7 1.7 5.2 3 7.7 1 2.1 3.2 3.5 3.8 5.8.9 3.3.2 7 .7 10.5.3 2.5.8 5.1 1.7 7.6.7 1.9 1.7 3.8 2.9 5.5 1.3 2 3.4 3.4 4.5 5.5 2.7 4.9 4.1 10.5 6.7 15.5 1 1.9 2.5 3.6 4 5.1 3 3 6.7 5.3 9.7 8.3.5.5.4 1.5.9 2.1.6.7 1.7.8 2.3 1.5.6.6.5 1.7 1 2.3.7.7 1.9.8 2.6 1.5.7.7.8 1.9 1.6 2.6.6.6 1.8.5 2.5 1 .7.7 1 1.9 1.8 2.5.7.5 1.7.2 2.4.6.8.6.9 1.9 1.8 2.3 1.5.8 3.3 1.5 5 1.4 1 0 1.8-.9 2.4-1.8.4-.5.6-1.3.3-1.8-.4-.8-1.5-.8-2-1.4-.7-.7-.6-1.8-1.3-2.5-.5-.6-1.6-.4-2.1-.9-.8-.9-2.7-2.2-1.8-3 4-4.1 9.8-6 14.3-9.5 1.3-1 2.5-2.3 2.9-3.9.9-3.7.4-7.6.9-11.4.3-1.7.3-3.7 1.4-4.9 3.7-4 8.9-6.4 12.6-10.4 1.2-1.2 1.5-3.1 1.6-4.7.2-3.8-1-7.5-.9-11.3.1-1.7.5-3.4 1.5-4.7 2.2-3 5.4-5 7.8-7.9 1.1-1.3 2-2.8 2.4-4.5.4-1.7.2-3.5-.1-5.3-.6-3.6-2.2-7.1-2.4-10.8-.1-1.7.8-3.3 1.7-4.7 1.9-3.3 4.9-6 6.6-9.4.7-1.4.9-3.2.6-4.7-.6-3.7-2.6-7-3.4-10.6-.4-1.6-.8-3.4-.2-5 2.1-4.9 6.8-8.7 8-13.9 1.2-5.3-1.7-10.8-1.1-16.1.2-1.9 1.6-3.7 3.2-4.5 4.7-2.4 10.3-2.5 14.9-5 3.2-1.7 5.2-5.2 8.2-7.2 1.4-1 3.3-1.7 5.1-1.7 1.8-.1 3.7.4 5.2 1.5 2.9 2 4.8 5.2 7.6 7.5 1.2 1.1 2.7 2 4.2 2.4 1.9.5 3.9.6 5.8.2 1.6-.3 3-1.4 4.4-2.2 4.1-2.4 8.2-4.8 11.9-7.6 1.3-1 2.7-2.2 3.2-3.8 1.4-5.2.8-10.8 2.2-16.1.4-1.6 1.7-3 3-4 3-2.3 6.6-3.5 9.5-5.7 1.2-.9 2.4-2.1 2.9-3.5 1.5-3.6 1.7-7.5 3.1-11.1.6-1.6 1.5-3.2 2.8-4.3 1.4-1.2 3.2-1.8 4.9-2.3 3.5-1.2 7.3-1.3 10.7-2.8 1.5-.7 2.5-2.2 3.4-3.5 2.2-3.1 3.3-6.8 5.7-9.6 1.1-1.3 2.8-2.2 4.6-2.4 3.7-.4 7.4.6 11.2.5 1.6 0 3.4 0 4.7-1 4.4-3.2 7.5-8.1 11.9-11.3 1.4-1 3.4-.9 5.1-.9 3.8.2 7.6 1.6 11.4 1.5 1.7 0 3.3-.7 4.6-1.8 2.9-2.3 4.8-5.5 7.6-8 1.2-1.1 2.7-2.1 4.3-2.4 3.6-.6 7.3.2 10.8-.2 1.8-.2 3.6-.6 5.1-1.6 1.5-1 2.7-2.5 3.6-4.1 1.9-3.1 2.2-7.4 4.9-9.9.9-.9 1.7 1.9 2.3 3 2.9 5.8 5 12.1 8.1 17.8.3.5 1.3.4 1.9.2.5-.3 1.1-.8 1.2-1.5.1-3.7-2.1-7.6-.8-11.1.6-1.7 2.5 2.6 3.2 4.3 2.5 6.6 3.8 13.7 6.1 20.4.1.5.6 1 1.1 1.2.6.3 1.3.3 1.7-.1 1.6-1 2.6-2.8 4-3.9 3.2-2.6 6.8-4.6 10-7.1.5-.4.8-1 .7-1.5-.6-3.2-1.2-6.4-2.8-9.2-1.9-3.3-5.9-5.2-7.4-8.7-1.3-3.2.1-7-.7-10.3-.6-2.7-1.9-5.2-3.3-7.6-1.2-1.8-2.6-3.4-4.2-4.8-1.8-1.5-3.7-2.6-5.8-3.6-1.7-.9-4.2-.7-5.6-2.1-2.3-2.4-2.8-6.1-4.9-8.6-2.2-2.7-4.7-5.2-7.7-6.9-2.6-1.5-5.6-2.1-8.5-2.7-2.6-.5-5.6.5-8.1-.5-2.2-1-3.1-3.6-5-5-2.7-1.9-5.6-3.8-8.8-4.7-2.9-.9-6.2-1-9.3-.7-3 .2-5.9 2.6-9 2.1-3.5-.5-6.1-3.5-9.3-4.9-1.4-.6-2.8-1-4.3-1.1-3-.1-6.1-.2-9.1.4-3.1.7-5.7 3.6-9 3.6-2.9 0-5.1-2.7-7.8-3.7-1.3-.5-2.7-.9-4.1-1-3.1-.2-6.3-.5-9.3.2-3.6.9-6.5 4.3-10.2 4.5-3 .3-5.5-2.5-8.5-3.1-2.9-.6-6-.6-9-.4-1.8.1-3.5.7-5.2 1.4-3.1 1.5-5.6 4.6-9 5.2-2.8.5-5.5-1.7-8.4-2-2.7-.3-5.6-.5-8.2.1-3.3.7-6.3 2.2-9.2 3.9-2 1.1-3.1 3.6-5.3 4.2-2.4.6-5-.9-7.5-.9-3 0-6.1-.1-9 .8-3 .8-5.8 2.4-8.3 4.3-2.5 1.9-3.8 5.4-6.6 6.7-3.2 1.4-6.9.4-10.3.9-1.5.2-2.9.7-4.2 1.4-2.7 1.5-5.4 3.1-7.5 5.3-2.5 2.6-3.1 6.9-6 8.9-3.1 2.2-7.4 1.5-10.8 3.1-2.8 1.4-5.1 3.7-7.4 5.8-1.1 1-1.9 2.2-2.5 3.5-1.5 2.9-1.5 6.7-3.8 9.1-2.2 2.4-6.2 2.5-8.9 4.4-2.3 1.5-4.2 3.5-5.9 5.6-1.1 1.4-2.1 3-2.6 4.7-1.2 3.4-.7 7.5-2.6 10.6-1.7 2.6-5.2 3.2-7.4 5.2-2.3 2.1-4.4 4.4-5.9 7.1-1.4 2.7-2 5.7-2.5 8.7-.5 2.5.6 5.3-.5 7.6-1 2.1-3.7 2.7-5.2 4.5-2.1 2.6-4.2 5.3-5.5 8.4-1.2 2.8-1.5 5.9-1.6 8.9-.1 2.8 1.8 5.7.9 8.4-1 3.4-4.4 5.5-6.3 8.4-.8 1.3-1.4 2.7-1.7 4.2-.6 2.9-1.2 5.9-1 8.9.2 3.4 2.8 6.5 2.3 9.7-.5 3.1-3.5 5.1-4.9 7.8-.6 1.3-1.1 2.7-1.3 4.1-.5 3-1.1 6.1-.7 9.2.5 3.6 3.5 6.8 3.4 10.5-.1 3-3.3 5.2-4 8.2Z"/>
+              <use href="#g-cheveux"/>
+              <use href="#g-oreille"/>
+              <use href="#g-visage"/>
+            </g>
+
+            <!-- la couverture, PAR-DESSUS l'enfant couché (elle le borde) -->
+            <g id="p-couverture" data-nuit="1">
+              <path class="w teinte" style="--p:var(--p-couverture)" data-ink="bleu" d="M392 326c11.8-15.8 38.3-10.9 58-12 26.7-1.5 53.6-.3 80 4 27.3 4.4 53.9 12.9 80 22 24 8.3 47.6 18.1 70 30 13.1 6.9 30.6 12.2 36 26 9.3 23.6 28.7 70.1 4 76-105.1 25-218.4 22.8-324 0-23.7-5.1-9.3-47.8-10-72-.7-24.7-8.8-54.1 6-74Z"/>
+              <path class="w lite pale" style="--p:var(--p-drap)" data-ink="jaune" d="M392 326c17-10.1 38.3-10.9 58-12 26.7-1.5 54.3-3.3 80 4 6.5 1.9 10.7 18.6 4 20-26.8 5.5-54.7-5.6-82-4-19.1 1.1-37.1 14.5-56 12-6.7-.9-9.8-16.5-4-20Z"/>
+              <path class="fil couture" d="M440 360c40 6 80 6 120 4 M430 410c60 6 130 6 190 2 M500 352c-4 40-4 80 0 116 M610 362c-4 34-4 70 0 106"/>
+            </g>
+
+            <!-- le doudou : un petit lapin assis contre l'enfant -->
+            <g id="p-doudou" data-nuit="1">
+              <path class="w lite pale" style="--p:var(--p-doudou)" data-ink="rose" d="M551 292c-4.2-7.2-6.5-15.7-7-24-.2-3.7 1.3-10 5-10 4.1 0 6 6.1 7 10 2.1 7.8 3.6 16.1 2 24-.5 2.3-5.8 2-7 0ZM563 292c-.6-8.8 1.9-17.7 5-26 1.1-2.9 4.5-7.8 7-6 3.2 2.4 1.6 8 1 12-1.1 7.5-1.9 15.6-6 22-1.3 2-6.8.4-7-2Z"/>
+              <path class="w pale" style="--p:var(--p-doudou)" data-ink="rose" d="M560 288c5.4 0 11.6 1.8 15 6 2.9 3.7 2 9.4 1 14-.8 3.8-6.7 6.2-6 10 .9 5.1 8.6 7 10 12 1.5 5.2 1.8 12.2-2 16-4.3 4.3-11.9 4-18 4-6.1 0-13.7.3-18-4-3.8-3.8-3.5-10.8-2-16 1.4-5 9.1-6.9 10-12 .7-3.8-5.2-6.2-6-10-1-4.6-1.9-10.3 1-14 3.4-4.2 9.6-6 15-6Z"/>
+              <path class="fil" style="--f:var(--fil-brun)" d="M551 304q3 2.5 6 0M563 304q3 2.5 6 0M557 311q3 2.5 6 0"/>
+              <circle class="nez-doudou" cx="560" cy="309" r="2"/>
+            </g>
+          </g>
           <!-- ===== Vue « Dedans » ===== -->
           <g id="g-dedans">
             <!-- La tête de profil (regard vers la droite) et le cerveau à sa vraie
@@ -664,13 +825,16 @@ input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset
             </g>
 
             <!-- l'oreille, en transparence par-dessus le cerveau : l'entrée des sons -->
-            <path id="p-oreille" class="w peau" style="--p:var(--skin)" data-ink="jaune" d="M304 222c-4.8-4-10.7-8.2-17-8-6.1.2-12.5 4-16 9-4.4 6.2-5.7 14.4-6 22-.3 7.4 1.2 15.1 4 22 2.7 6.7 7.4 12.4 12 18 3.1 3.8 6.4 8.2 11 10 3.2 1.2 7.5.3 10-2 2.6-2.4 2.6-6.5 3-10 .3-3-1.9-6.1-1-9 .9-3.2 4.6-5 6-8 2-4.4 3.5-9.2 4-14 .5-5.3.7-10.9-1-16-1.8-5.3-4.8-10.4-9-14Z"/>
-            <g id="fil-oreille" style="--f:var(--skin-shade)">
-              <path class="fil" d="M302,231 C286,226 275,238 276,254 C277,268 285,278 293,284"/>
-              <!-- le petit escargot (cochlée), juste au fond du conduit -->
-              <path class="fil" d="M303,251 c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"/>
+            <!-- #g-oreille, #g-cheveux, #g-visage : regroupés pour être repris tels quels dans Dehors (<use>) -->
+            <g id="g-oreille">
+              <path id="p-oreille" class="w peau" style="--p:var(--skin)" data-ink="jaune" d="M304 222c-4.8-4-10.7-8.2-17-8-6.1.2-12.5 4-16 9-4.4 6.2-5.7 14.4-6 22-.3 7.4 1.2 15.1 4 22 2.7 6.7 7.4 12.4 12 18 3.1 3.8 6.4 8.2 11 10 3.2 1.2 7.5.3 10-2 2.6-2.4 2.6-6.5 3-10 .3-3-1.9-6.1-1-9 .9-3.2 4.6-5 6-8 2-4.4 3.5-9.2 4-14 .5-5.3.7-10.9-1-16-1.8-5.3-4.8-10.4-9-14Z"/>
+              <g id="fil-oreille" style="--f:var(--skin-shade)">
+                <path class="fil" d="M302,231 C286,226 275,238 276,254 C277,268 285,278 293,284"/>
+                <!-- le petit escargot (cochlée), juste au fond du conduit -->
+                <path class="fil" d="M303,251 c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"/>
+              </g>
+              <ellipse class="trou" cx="299" cy="251" rx="2.4" ry="3.2"/>
             </g>
-            <ellipse class="trou" cx="299" cy="251" rx="2.4" ry="3.2"/>
 
             <!-- le tronc cérébral (pont bombé vers l'avant) et la moelle dans le cou -->
             <path id="p-moelle" class="w profond" style="--p:var(--p-tronc)" data-ink="rose" d="M329.3 318.4c-1.9.2-3.7 1.1-4.9 2.5-1.3 1.3-2 3.3-2 5.1-.2 18 1.3 36 1.4 54 .1 23.3-.8 46.7-.8 70 0 23.3 1 46.7 1 70 0 20-1.3 40-1 60 0 1.8.8 3.7 2.1 4.9 1.2 1.3 3.1 2.1 4.9 2.1 1.8 0 3.7-.8 4.9-2.1 1.3-1.1 2-2.9 2.1-4.6.9-20.1 1-40.2 1-60.3 0-23.3-1-46.7-1-70 0-23.3 1.1-46.7 1.2-70 .1-18.4.4-36.8-.7-55.1-.1-2-1.4-3.8-3-5-1.4-1.1-3.4-1.6-5.2-1.5Z"/>
@@ -705,24 +869,30 @@ input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset
             <path class="fil" style="--f:var(--fil-brun)" d="M372,229.6 L378,234.4 M378,229.6 L372,234.4"/>
 
             <!-- les cheveux courts : une calotte bouclée, et un épi sur le dessus -->
-            <path id="p-cheveux" class="w cheveux" style="--p:var(--hair)" data-ink="bleu" d="M146.9 255.4c-.9 4.1-1.2 8.3-.9 12.4.2 2.3 1.3 4.4 2.3 6.5.8 1.8 2.8 3.2 3 5.2.3 3.1-1.5 6-1.7 9.1-.3 2.6-.3 5.2.3 7.8.5 2.7 1.7 5.3 3 7.7 1 2.1 3.2 3.6 3.8 5.8.9 3.3.2 7 .7 10.5.3 2.6.8 5.2 1.7 7.6.7 2 1.7 3.8 2.9 5.5 1.3 2 3.4 3.4 4.5 5.5 2.7 4.9 4.1 10.4 6.7 15.4 1 1.9 2.4 3.6 3.9 5.1 3.1 3 6.7 5.4 9.8 8.4.6.5.4 1.6 1 2.2.6.6 1.7.7 2.3 1.4.5.6.4 1.7 1 2.3.6.7 1.8.8 2.5 1.5.7.7.8 1.9 1.5 2.5.7.7 1.8.6 2.6 1.1.8.7 1 1.9 1.8 2.5.7.5 1.7.2 2.4.6.7.5.8 1.7 1.5 2.1.8.5 1.9.3 2.7.7.7.3 1 1.7 1.7 1.6 1.7-.4 3.8-1.3 4.2-3 .4-1.2-1.9-1.7-2.6-2.7-.6-.7-.5-1.7-1.1-2.3-.6-.6-1.7-.5-2.3-1.1-.6-.7-.6-1.8-1.2-2.5-.6-.6-1.7-.6-2.3-1.2-.6-.6-.6-1.7-1.2-2.4-.6-.6-1.7-.6-2.4-1.3-.6-.5-.6-1.5-1.2-2.1-1.6-1.8-4-2.7-5.4-4.7-2.1-3-3-6.7-4.9-9.9-2.9-5.1-6.9-9.7-9.5-15-2.1-4.4-3.1-9.3-4.4-14.1-1.5-5.6-3-11.4-4.1-17.1-1.3-7.2-2.2-14.4-3-21.6-.5-5.1-.8-10.3-.9-15.6-.2-6.5-.1-13 .2-19.5.3-6.6.8-13.1 1.6-19.6 1-7.8 2.2-15.6 3.7-23.4 1.3-6.4 2.8-12.7 4.6-19 1.4-5 3-9.9 4.9-14.8 2.4-6.1 5.1-12.2 8.1-18.1 3.1-6 6.4-11.9 10.1-17.6 3.6-5.7 7.6-11.2 11.8-16.5 3.2-4.2 6.6-8.2 10.3-11.9 5.1-5.1 10.4-10.1 16.1-14.6 5.8-4.5 11.9-8.5 18.1-12.2 5.2-3.1 10.6-5.9 16.1-8.3 6.8-2.8 13.7-5.2 20.7-7.1 9.6-2.6 19.3-4.6 29.1-6.3 8.5-1.5 17-2.5 25.6-3.2 8.6-.6 17.2-.9 25.8-.8 11.3 0 22.5.4 33.8 1.1 6 .4 12.1 1.1 18.1 2.2 5 .9 10.1 1.6 14.7 3.8 1.2.6.4 2.8 1.2 3.9 4.4 6.3 10 11.8 14.2 18.3 2.7 4.3 3.9 9.4 6.3 13.8.3.5 1.2.7 1.7.5.6-.1 1.2-.7 1.2-1.3 0-4.6-5.8-13.4-1.2-13.6 5.5-.4 7.3 8.3 10.1 13.1 3.3 5.7 5 12.2 7.9 18.1.2.5.9 1.1 1.5 1 .8-.2 1.8-.8 1.9-1.7.3-4-2.1-8.2-.9-12 .5-1.8 2.6 2.6 3.2 4.3 2.6 7.3-.8 19.4 6.4 22.2 6.7 2.6 13.4-6.8 17.3-12.8 1.8-2.8-1.2-6.7-2.9-9.6-1.9-3.3-5.9-5.2-7.4-8.7-1.3-3.2.1-7-.7-10.4-.6-2.6-1.9-5.1-3.3-7.4-1.1-1.9-2.6-3.5-4.2-4.9-1.7-1.5-3.7-2.6-5.7-3.6-1.8-.9-4.3-.7-5.7-2.1-2.3-2.4-2.8-6.1-4.9-8.6-2.2-2.7-4.7-5.2-7.7-6.9-2.6-1.5-5.6-2.1-8.5-2.7-2.7-.5-5.6.5-8.1-.5-2.2-1-3.1-3.6-5-5-2.7-1.9-5.6-3.8-8.8-4.7-3-.9-6.1-1-9.2-.7-3.1.2-6 2.6-9.1 2.1-3.5-.5-6.1-3.5-9.3-4.9-1.4-.6-2.8-1-4.3-1.1-3-.1-6.1-.2-9.1.4-3.1.7-5.7 3.6-9 3.6-2.8 0-5.1-2.7-7.8-3.7-1.3-.5-2.7-.9-4.1-1-3.1-.2-6.2-.5-9.2.2-3.7.9-6.6 4.3-10.3 4.5-3 .3-5.5-2.5-8.4-3.1-3-.6-6.1-.6-9.1-.4-1.8.1-3.6.7-5.2 1.4-3.1 1.5-5.6 4.6-9 5.2-2.9.5-5.6-1.7-8.4-2-2.7-.3-5.5-.5-8.2.1-3.3.7-6.3 2.2-9.3 3.9-1.9 1.1-3 3.6-5.2 4.2-2.4.6-5-.9-7.5-.9-3 0-6.2-.1-9.1.8-2.9.8-5.7 2.4-8.2 4.3-2.5 1.9-3.7 5.4-6.6 6.7-3.2 1.4-6.9.4-10.3.9-1.5.2-2.9.6-4.2 1.4-2.7 1.5-5.4 3.1-7.5 5.3-2.5 2.6-3.1 6.9-6 8.9-3.1 2.2-7.5 1.5-10.8 3.1-2.8 1.4-5.1 3.6-7.4 5.8-1 .9-1.9 2.2-2.5 3.4-1.5 3-1.5 6.8-3.8 9.2-2.2 2.4-6.2 2.5-8.9 4.4-2.3 1.5-4.2 3.5-5.9 5.6-1.1 1.4-2.1 3-2.7 4.7-1.1 3.4-.6 7.5-2.5 10.6-1.7 2.5-5.2 3.2-7.5 5.2-2.2 2.1-4.3 4.4-5.8 7.1-1.4 2.7-2 5.8-2.5 8.7-.5 2.5.6 5.3-.5 7.6-1 2.1-3.7 2.7-5.1 4.4-2.2 2.6-4.3 5.4-5.6 8.5-1.2 2.8-1.5 5.9-1.6 8.9-.1 2.8 1.8 5.7.9 8.4-1 3.4-4.4 5.5-6.3 8.5-.8 1.2-1.4 2.6-1.7 4-.6 3-1.2 6.1-1 9.1.2 3.3 2.8 6.4 2.3 9.6-.5 3.1-3.5 5.1-4.9 7.9-.7 1.2-1.1 2.6-1.3 4-.5 3-1.1 6.2-.7 9.2.5 3.7 3.5 6.8 3.4 10.5-.1 3-3.3 5.3-4 8.2Z"/>
-            <path class="fil meches" d="M493.6 105.2c-2.1-4.6-3.7-9.4-6.3-13.6-2.6-4.3-6.1-7.9-9.2-11.8 M465.9 69.5c-4.3-2.6-8.4-5.5-12.8-7.7-4.5-2.2-9.3-3.8-13.9-5.6 M423.6 52.5c-5-.6-9.9-1.4-14.9-1.8-5-.5-10-.6-15-.8 M377.8 49.5c-5 0-10-.1-15 0-5 .1-10 .4-15 .6 M331.8 51.7c-4.9.8-9.8 1.4-14.8 2.3-4.9.9-9.8 2-14.7 3 M286.8 60.9c-4.7 1.6-9.5 2.9-14.2 4.8-4.6 1.8-9.1 4.1-13.6 6.2 M245.1 79.9c-4.1 2.9-8.3 5.6-12.2 8.7-4 3-7.6 6.5-11.4 9.7 M210.4 109.8c-3.2 3.9-6.5 7.7-9.4 11.7-3 4-5.7 8.2-8.6 12.3 M184.3 147.6c-2.2 4.5-4.6 8.9-6.6 13.5-2.1 4.5-3.8 9.2-5.6 13.9 M167.4 190.2c-1.2 4.9-2.4 9.8-3.4 14.7-1 4.9-1.7 9.8-2.6 14.7 M159.4 235.5c-.4 5-.9 10-1.1 15-.3 4.9-.2 10-.3 15 M158.7 281.4c.5 5 .9 10 1.6 14.9.7 5 1.6 9.9 2.4 14.8"/>
-            <path class="fil epi" d="M352,44 C350,32 356,24 364,26 C371,28 370,37 363,37 C358,37 358,31 362,31"/>
+            <!-- les cheveux courts et leurs fils -->
+            <g id="g-cheveux">
+              <path id="p-cheveux" class="w cheveux" style="--p:var(--hair)" data-ink="bleu" d="M146.9 255.4c-.9 4.1-1.2 8.3-.9 12.4.2 2.3 1.3 4.4 2.3 6.5.8 1.8 2.8 3.2 3 5.2.3 3.1-1.5 6-1.7 9.1-.3 2.6-.3 5.2.3 7.8.5 2.7 1.7 5.3 3 7.7 1 2.1 3.2 3.6 3.8 5.8.9 3.3.2 7 .7 10.5.3 2.6.8 5.2 1.7 7.6.7 2 1.7 3.8 2.9 5.5 1.3 2 3.4 3.4 4.5 5.5 2.7 4.9 4.1 10.4 6.7 15.4 1 1.9 2.4 3.6 3.9 5.1 3.1 3 6.7 5.4 9.8 8.4.6.5.4 1.6 1 2.2.6.6 1.7.7 2.3 1.4.5.6.4 1.7 1 2.3.6.7 1.8.8 2.5 1.5.7.7.8 1.9 1.5 2.5.7.7 1.8.6 2.6 1.1.8.7 1 1.9 1.8 2.5.7.5 1.7.2 2.4.6.7.5.8 1.7 1.5 2.1.8.5 1.9.3 2.7.7.7.3 1 1.7 1.7 1.6 1.7-.4 3.8-1.3 4.2-3 .4-1.2-1.9-1.7-2.6-2.7-.6-.7-.5-1.7-1.1-2.3-.6-.6-1.7-.5-2.3-1.1-.6-.7-.6-1.8-1.2-2.5-.6-.6-1.7-.6-2.3-1.2-.6-.6-.6-1.7-1.2-2.4-.6-.6-1.7-.6-2.4-1.3-.6-.5-.6-1.5-1.2-2.1-1.6-1.8-4-2.7-5.4-4.7-2.1-3-3-6.7-4.9-9.9-2.9-5.1-6.9-9.7-9.5-15-2.1-4.4-3.1-9.3-4.4-14.1-1.5-5.6-3-11.4-4.1-17.1-1.3-7.2-2.2-14.4-3-21.6-.5-5.1-.8-10.3-.9-15.6-.2-6.5-.1-13 .2-19.5.3-6.6.8-13.1 1.6-19.6 1-7.8 2.2-15.6 3.7-23.4 1.3-6.4 2.8-12.7 4.6-19 1.4-5 3-9.9 4.9-14.8 2.4-6.1 5.1-12.2 8.1-18.1 3.1-6 6.4-11.9 10.1-17.6 3.6-5.7 7.6-11.2 11.8-16.5 3.2-4.2 6.6-8.2 10.3-11.9 5.1-5.1 10.4-10.1 16.1-14.6 5.8-4.5 11.9-8.5 18.1-12.2 5.2-3.1 10.6-5.9 16.1-8.3 6.8-2.8 13.7-5.2 20.7-7.1 9.6-2.6 19.3-4.6 29.1-6.3 8.5-1.5 17-2.5 25.6-3.2 8.6-.6 17.2-.9 25.8-.8 11.3 0 22.5.4 33.8 1.1 6 .4 12.1 1.1 18.1 2.2 5 .9 10.1 1.6 14.7 3.8 1.2.6.4 2.8 1.2 3.9 4.4 6.3 10 11.8 14.2 18.3 2.7 4.3 3.9 9.4 6.3 13.8.3.5 1.2.7 1.7.5.6-.1 1.2-.7 1.2-1.3 0-4.6-5.8-13.4-1.2-13.6 5.5-.4 7.3 8.3 10.1 13.1 3.3 5.7 5 12.2 7.9 18.1.2.5.9 1.1 1.5 1 .8-.2 1.8-.8 1.9-1.7.3-4-2.1-8.2-.9-12 .5-1.8 2.6 2.6 3.2 4.3 2.6 7.3-.8 19.4 6.4 22.2 6.7 2.6 13.4-6.8 17.3-12.8 1.8-2.8-1.2-6.7-2.9-9.6-1.9-3.3-5.9-5.2-7.4-8.7-1.3-3.2.1-7-.7-10.4-.6-2.6-1.9-5.1-3.3-7.4-1.1-1.9-2.6-3.5-4.2-4.9-1.7-1.5-3.7-2.6-5.7-3.6-1.8-.9-4.3-.7-5.7-2.1-2.3-2.4-2.8-6.1-4.9-8.6-2.2-2.7-4.7-5.2-7.7-6.9-2.6-1.5-5.6-2.1-8.5-2.7-2.7-.5-5.6.5-8.1-.5-2.2-1-3.1-3.6-5-5-2.7-1.9-5.6-3.8-8.8-4.7-3-.9-6.1-1-9.2-.7-3.1.2-6 2.6-9.1 2.1-3.5-.5-6.1-3.5-9.3-4.9-1.4-.6-2.8-1-4.3-1.1-3-.1-6.1-.2-9.1.4-3.1.7-5.7 3.6-9 3.6-2.8 0-5.1-2.7-7.8-3.7-1.3-.5-2.7-.9-4.1-1-3.1-.2-6.2-.5-9.2.2-3.7.9-6.6 4.3-10.3 4.5-3 .3-5.5-2.5-8.4-3.1-3-.6-6.1-.6-9.1-.4-1.8.1-3.6.7-5.2 1.4-3.1 1.5-5.6 4.6-9 5.2-2.9.5-5.6-1.7-8.4-2-2.7-.3-5.5-.5-8.2.1-3.3.7-6.3 2.2-9.3 3.9-1.9 1.1-3 3.6-5.2 4.2-2.4.6-5-.9-7.5-.9-3 0-6.2-.1-9.1.8-2.9.8-5.7 2.4-8.2 4.3-2.5 1.9-3.7 5.4-6.6 6.7-3.2 1.4-6.9.4-10.3.9-1.5.2-2.9.6-4.2 1.4-2.7 1.5-5.4 3.1-7.5 5.3-2.5 2.6-3.1 6.9-6 8.9-3.1 2.2-7.5 1.5-10.8 3.1-2.8 1.4-5.1 3.6-7.4 5.8-1 .9-1.9 2.2-2.5 3.4-1.5 3-1.5 6.8-3.8 9.2-2.2 2.4-6.2 2.5-8.9 4.4-2.3 1.5-4.2 3.5-5.9 5.6-1.1 1.4-2.1 3-2.7 4.7-1.1 3.4-.6 7.5-2.5 10.6-1.7 2.5-5.2 3.2-7.5 5.2-2.2 2.1-4.3 4.4-5.8 7.1-1.4 2.7-2 5.8-2.5 8.7-.5 2.5.6 5.3-.5 7.6-1 2.1-3.7 2.7-5.1 4.4-2.2 2.6-4.3 5.4-5.6 8.5-1.2 2.8-1.5 5.9-1.6 8.9-.1 2.8 1.8 5.7.9 8.4-1 3.4-4.4 5.5-6.3 8.5-.8 1.2-1.4 2.6-1.7 4-.6 3-1.2 6.1-1 9.1.2 3.3 2.8 6.4 2.3 9.6-.5 3.1-3.5 5.1-4.9 7.9-.7 1.2-1.1 2.6-1.3 4-.5 3-1.1 6.2-.7 9.2.5 3.7 3.5 6.8 3.4 10.5-.1 3-3.3 5.3-4 8.2Z"/>
+              <path class="fil meches" d="M493.6 105.2c-2.1-4.6-3.7-9.4-6.3-13.6-2.6-4.3-6.1-7.9-9.2-11.8 M465.9 69.5c-4.3-2.6-8.4-5.5-12.8-7.7-4.5-2.2-9.3-3.8-13.9-5.6 M423.6 52.5c-5-.6-9.9-1.4-14.9-1.8-5-.5-10-.6-15-.8 M377.8 49.5c-5 0-10-.1-15 0-5 .1-10 .4-15 .6 M331.8 51.7c-4.9.8-9.8 1.4-14.8 2.3-4.9.9-9.8 2-14.7 3 M286.8 60.9c-4.7 1.6-9.5 2.9-14.2 4.8-4.6 1.8-9.1 4.1-13.6 6.2 M245.1 79.9c-4.1 2.9-8.3 5.6-12.2 8.7-4 3-7.6 6.5-11.4 9.7 M210.4 109.8c-3.2 3.9-6.5 7.7-9.4 11.7-3 4-5.7 8.2-8.6 12.3 M184.3 147.6c-2.2 4.5-4.6 8.9-6.6 13.5-2.1 4.5-3.8 9.2-5.6 13.9 M167.4 190.2c-1.2 4.9-2.4 9.8-3.4 14.7-1 4.9-1.7 9.8-2.6 14.7 M159.4 235.5c-.4 5-.9 10-1.1 15-.3 4.9-.2 10-.3 15 M158.7 281.4c.5 5 .9 10 1.6 14.9.7 5 1.6 9.9 2.4 14.8"/>
+              <path class="fil epi" d="M352,44 C350,32 356,24 364,26 C371,28 370,37 363,37 C358,37 358,31 362,31"/>
+            </g>
 
             <!-- le visage : joue, œil-bouton, paupière (fermée la nuit), sourcil, sourire -->
-            <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M434,266 C434,258 442,255 450,255 C459,255 463,260 463,266 C463,272 457,276 449,276 C441,276 434,273 434,266 Z"/>
-            <path id="p-oeil" class="w lite" style="--p:var(--p-oeil)" data-ink="bleu" d="M446,194 C446,188 450,184 456,184 C462,184 466,188 466,194 C466,200 462,204 456,204 C450,204 446,200 446,194 Z"/>
-            <circle class="trou" cx="452.6" cy="192.2" r="1.7"/><circle class="trou" cx="459.4" cy="195.8" r="1.7"/>
-            <path class="fil" d="M452.6,192.2 L459.4,195.8"/>
-            <!-- liseré clair cousu au bord du bouton : l'œil reste lisible sur toutes les peaux -->
-            <circle class="fil bord-bouton" cx="456" cy="194" r="7.9"/>
-            <path id="p-paupiere" class="w lite peau" style="--p:var(--skin)" data-ink="jaune" d="M443,195 C443,186 449,181 456,181 C463,181 469,186 469,195 C469,201 463,205 456,205 C449,205 443,201 443,195 Z"/>
-            <path id="fil-oeil-ferme" class="fil" style="--f:var(--fil-brun)" d="M446,195 Q456,204 466,195 M449.5,199.5 L447.4,203 M456,201.2 L456,205.4 M462.5,199.5 L464.6,203"/>
-            <g id="p-sourcil">
-              <path class="w lite cheveux" style="--p:var(--hair)" data-ink="bleu" d="M441,182 C445,171 460,165 471,170 C473,172 472,175 469,175 C460,172 451,175 446,184 C444,186 440,185 441,182 Z"/>
+            <!-- le visage entier -->
+            <g id="g-visage">
+              <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M434,266 C434,258 442,255 450,255 C459,255 463,260 463,266 C463,272 457,276 449,276 C441,276 434,273 434,266 Z"/>
+              <path id="p-oeil" class="w lite" style="--p:var(--p-oeil)" data-ink="bleu" d="M446,194 C446,188 450,184 456,184 C462,184 466,188 466,194 C466,200 462,204 456,204 C450,204 446,200 446,194 Z"/>
+              <circle class="trou" cx="452.6" cy="192.2" r="1.7"/><circle class="trou" cx="459.4" cy="195.8" r="1.7"/>
+              <path class="fil" d="M452.6,192.2 L459.4,195.8"/>
+              <!-- liseré clair cousu au bord du bouton : l'œil reste lisible sur toutes les peaux -->
+              <circle class="fil bord-bouton" cx="456" cy="194" r="7.9"/>
+              <path id="p-paupiere" class="w lite peau" style="--p:var(--skin)" data-ink="jaune" d="M443,195 C443,186 449,181 456,181 C463,181 469,186 469,195 C469,201 463,205 456,205 C449,205 443,201 443,195 Z"/>
+              <path id="fil-oeil-ferme" class="fil" style="--f:var(--fil-brun)" d="M446,195 Q456,204 466,195 M449.5,199.5 L447.4,203 M456,201.2 L456,205.4 M462.5,199.5 L464.6,203"/>
+              <g id="p-sourcil">
+                <path class="w lite cheveux" style="--p:var(--hair)" data-ink="bleu" d="M441,182 C445,171 460,165 471,170 C473,172 472,175 469,175 C460,172 451,175 446,184 C444,186 440,185 441,182 Z"/>
+              </g>
+              <path id="p-bouche" class="fil" d="M488,301 C484,308 474,309 468,299 C467,297 467.6,295 469.4,294.4"/>
+              <path class="fil narine" d="M497,257 C493,257.6 491.6,261 494,263"/>
             </g>
-            <path id="p-bouche" class="fil" d="M488,301 C484,308 474,309 468,299 C467,297 467.6,295 469.4,294.4"/>
-            <path class="fil narine" d="M497,257 C493,257.6 491.6,261 494,263"/>
           </g>
           <!-- ===== Vue « Tout près » ===== -->
           <g id="g-pres"></g>

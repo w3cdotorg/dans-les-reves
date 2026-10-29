@@ -302,13 +302,16 @@ GABARIT = r"""
             </g>
 
             <!-- l'oreille, en transparence par-dessus le cerveau : l'entrée des sons -->
-            <path id="p-oreille" class="w peau" style="--p:var(--skin)" data-ink="jaune" d="{{E}}"/>
-            <g id="fil-oreille" style="--f:var(--skin-shade)">
-              <path class="fil" d="M302,231 C286,226 275,238 276,254 C277,268 285,278 293,284"/>
-              <!-- le petit escargot (cochlée), juste au fond du conduit -->
-              <path class="fil" d="M303,251 c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"/>
+            <!-- #g-oreille, #g-cheveux, #g-visage : regroupés pour être repris tels quels dans Dehors (<use>) -->
+            <g id="g-oreille">
+              <path id="p-oreille" class="w peau" style="--p:var(--skin)" data-ink="jaune" d="{{E}}"/>
+              <g id="fil-oreille" style="--f:var(--skin-shade)">
+                <path class="fil" d="M302,231 C286,226 275,238 276,254 C277,268 285,278 293,284"/>
+                <!-- le petit escargot (cochlée), juste au fond du conduit -->
+                <path class="fil" d="M303,251 c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"/>
+              </g>
+              <ellipse class="trou" cx="299" cy="251" rx="2.4" ry="3.2"/>
             </g>
-            <ellipse class="trou" cx="299" cy="251" rx="2.4" ry="3.2"/>
 
             <!-- le tronc cérébral (pont bombé vers l'avant) et la moelle dans le cou -->
             <path id="p-moelle" class="w profond" style="--p:var(--p-tronc)" data-ink="rose" d="{{moelle}}"/>
@@ -343,24 +346,30 @@ GABARIT = r"""
             <path class="fil" style="--f:var(--fil-brun)" d="M372,229.6 L378,234.4 M378,229.6 L372,234.4"/>
 
             <!-- les cheveux courts : une calotte bouclée, et un épi sur le dessus -->
-            <path id="p-cheveux" class="w cheveux" style="--p:var(--hair)" data-ink="bleu" d="{{cheveux}}"/>
-            <path class="fil meches" d="{{meches}}"/>
-            <path class="fil epi" d="M352,44 C350,32 356,24 364,26 C371,28 370,37 363,37 C358,37 358,31 362,31"/>
+            <!-- les cheveux courts et leurs fils -->
+            <g id="g-cheveux">
+              <path id="p-cheveux" class="w cheveux" style="--p:var(--hair)" data-ink="bleu" d="{{cheveux}}"/>
+              <path class="fil meches" d="{{meches}}"/>
+              <path class="fil epi" d="M352,44 C350,32 356,24 364,26 C371,28 370,37 363,37 C358,37 358,31 362,31"/>
+            </g>
 
             <!-- le visage : joue, œil-bouton, paupière (fermée la nuit), sourcil, sourire -->
-            <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M434,266 C434,258 442,255 450,255 C459,255 463,260 463,266 C463,272 457,276 449,276 C441,276 434,273 434,266 Z"/>
-            <path id="p-oeil" class="w lite" style="--p:var(--p-oeil)" data-ink="bleu" d="M446,194 C446,188 450,184 456,184 C462,184 466,188 466,194 C466,200 462,204 456,204 C450,204 446,200 446,194 Z"/>
-            <circle class="trou" cx="452.6" cy="192.2" r="1.7"/><circle class="trou" cx="459.4" cy="195.8" r="1.7"/>
-            <path class="fil" d="M452.6,192.2 L459.4,195.8"/>
-            <!-- liseré clair cousu au bord du bouton : l'œil reste lisible sur toutes les peaux -->
-            <circle class="fil bord-bouton" cx="456" cy="194" r="7.9"/>
-            <path id="p-paupiere" class="w lite peau" style="--p:var(--skin)" data-ink="jaune" d="M443,195 C443,186 449,181 456,181 C463,181 469,186 469,195 C469,201 463,205 456,205 C449,205 443,201 443,195 Z"/>
-            <path id="fil-oeil-ferme" class="fil" style="--f:var(--fil-brun)" d="M446,195 Q456,204 466,195 M449.5,199.5 L447.4,203 M456,201.2 L456,205.4 M462.5,199.5 L464.6,203"/>
-            <g id="p-sourcil">
-              <path class="w lite cheveux" style="--p:var(--hair)" data-ink="bleu" d="M441,182 C445,171 460,165 471,170 C473,172 472,175 469,175 C460,172 451,175 446,184 C444,186 440,185 441,182 Z"/>
+            <!-- le visage entier -->
+            <g id="g-visage">
+              <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M434,266 C434,258 442,255 450,255 C459,255 463,260 463,266 C463,272 457,276 449,276 C441,276 434,273 434,266 Z"/>
+              <path id="p-oeil" class="w lite" style="--p:var(--p-oeil)" data-ink="bleu" d="M446,194 C446,188 450,184 456,184 C462,184 466,188 466,194 C466,200 462,204 456,204 C450,204 446,200 446,194 Z"/>
+              <circle class="trou" cx="452.6" cy="192.2" r="1.7"/><circle class="trou" cx="459.4" cy="195.8" r="1.7"/>
+              <path class="fil" d="M452.6,192.2 L459.4,195.8"/>
+              <!-- liseré clair cousu au bord du bouton : l'œil reste lisible sur toutes les peaux -->
+              <circle class="fil bord-bouton" cx="456" cy="194" r="7.9"/>
+              <path id="p-paupiere" class="w lite peau" style="--p:var(--skin)" data-ink="jaune" d="M443,195 C443,186 449,181 456,181 C463,181 469,186 469,195 C469,201 463,205 456,205 C449,205 443,201 443,195 Z"/>
+              <path id="fil-oeil-ferme" class="fil" style="--f:var(--fil-brun)" d="M446,195 Q456,204 466,195 M449.5,199.5 L447.4,203 M456,201.2 L456,205.4 M462.5,199.5 L464.6,203"/>
+              <g id="p-sourcil">
+                <path class="w lite cheveux" style="--p:var(--hair)" data-ink="bleu" d="M441,182 C445,171 460,165 471,170 C473,172 472,175 469,175 C460,172 451,175 446,184 C444,186 440,185 441,182 Z"/>
+              </g>
+              <path id="p-bouche" class="fil" d="M488,301 C484,308 474,309 468,299 C467,297 467.6,295 469.4,294.4"/>
+              <path class="fil narine" d="M497,257 C493,257.6 491.6,261 494,263"/>
             </g>
-            <path id="p-bouche" class="fil" d="M488,301 C484,308 474,309 468,299 C467,297 467.6,295 469.4,294.4"/>
-            <path class="fil narine" d="M497,257 C493,257.6 491.6,261 494,263"/>
 """
 
 # ---------------------------------------------------------------- écriture

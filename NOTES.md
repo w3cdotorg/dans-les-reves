@@ -430,3 +430,73 @@ palette du plan. Pastilles de 44 px (cible au pouce), pompons de laine.
 - Pinéale agrandie (7 × 5,6) et cousue ; coutures aussi pour l'hypothalamus et l'hypophyse ; liseré clair (`.bord-bouton`, `--fil-blanc`) autour de l'œil-bouton.
 - Sillons central et pariéto-occipital ondulés : un point d'onde (±4 px, alternant de côté) entre deux ancres du plan, les ancres sont inchangées.
 - Budget inchangé : 18 `.w:not(.lite)`.
+
+## 2026-10-29 — Task 4 : la vue Dehors, le monde de jour et de nuit
+
+- **`<use>` de la tête : ce qui marche et ce qui ne marche pas (Chrome 156, mesuré).** Chrome
+  style les clones d'un `<use>` en appliquant les règles du document AU CLONE, dans son arbre
+  fantôme : un combinateur descendant ne voit pas les ancêtres hors de l'arbre fantôme.
+  Banc d'essai minimal (`html .x{filter}` : rien sur le clone ; `.x{filter}`, attribut
+  `filter=`, `style=` : oui ; `[data-x] #e{fill}` et `#orig #d{fill}` : rien). Conséquence
+  pour l'enfant repris par `<use>` : **pas de laine** (`[data-theme=feutrine] .w{filter}`),
+  **pas de riso** (encre, décalage, multiply), **pas de cheveux longs** pour la fille
+  (`[data-genre=fille] #p-cheveux-long`), pas de version allégée. Ce qui suit bien : les
+  règles posées sur l'élément lui-même (`.peau`, `#p-paupiere{opacity:0}`), les changements
+  de classe / d'attribut / de style sur l'original (Chrome reclone), `#p-oeil ~ .trou` à
+  l'intérieur du groupe cloné, et **les propriétés personnalisées** (héritées à travers le
+  `<use>`) : un second banc d'essai montre `filter`, `transform`, `fill` et `display` pilotés
+  par des variables posées sur `<html>` qui passent dans le clone.
+- **Décision (contrôleur) : on garde `<use>`, et le thème, l'allègement et le genre passent
+  par des variables CSS.** `<html data-theme / data-lite / data-genre>` reste la source (JS
+  inchangé) ; ces attributs posent des variables (`--w-filter`, `--w-lite-filter`,
+  `--w-blend`, `--encre-jaune/rose/bleu`, `--off-jaune/rose/bleu`, `--fil-filter`,
+  `--fil-dash`, `--fil-dash-couture`, `--fil-encre`, `--riso-papier`, `--cheveux-long`), et
+  les pièces les lisent par des règles posées sur elles-mêmes (`.w`, `.w.lite`,
+  `.w[data-ink=…]`, `.fil`, `.fil.couture`, `.fil.bord-bouton`, `.trou`, `#p-cheveux-long`).
+  Les exceptions riso de Task 3 qui visent des pièces NON reprises (cortex, lobes, `.profond`,
+  liquide, `.oeil-hippo`, pinéale) gardent leur `[data-theme=riso]`. `#p-oreille`, repris,
+  passe à `mix-blend-mode:normal` sans condition (en feutrine, c'était déjà normal).
+  **Parité vérifiée** : Dedans avant (commit b159d89) / après, feutrine et riso, avec et sans
+  allègement, garçon et fille : **0 pixel de différence** dans la scène (capture Chrome avec
+  `--virtual-time-budget=4000` ; sans lui, deux captures riso du MÊME fichier diffèrent déjà,
+  car la bascule de thème se fait par transition CSS et la capture part pendant la transition).
+  Dehors : la tête reprise prend la laine, l'allégement, les encres riso avec leur décalage, et
+  les cheveux longs de la fille. Vérifié aussi dans Firefox 156 (le navigateur du MCP Playwright).
+
+### ⚠ Discipline de la tête partagée (à suivre par toutes les tâches suivantes)
+
+Tout ce qui est DANS la tête (pièces de `#p-tete`, `#g-oreille`, `#g-cheveux`, `#g-visage` :
+œil, paupière, sourcil, bouche, joue…) se style **soit par une classe / un attribut posé sur
+l'élément original, soit par une variable CSS posée sur `:root`**, **jamais par un sélecteur
+d'ancêtre** (`[data-temps="2"] #p-paupiere`, `body.nuit #p-oeil`, `#g-dedans .x`…) : le
+clone `<use>` de `#g-dehors` ne le suivrait pas. Les deux têtes partagent donc toujours leur
+état (œil fermé dans les deux vues, sourcil froncé dans les deux), et c'est voulu.
+Pour un nouveau rendu par thème : une variable de plus sur `[data-theme=…]`, lue par une
+règle sur l'élément.
+- **Groupes ajoutés dans Dedans** (dans `index.html` ET dans le gabarit de `tools/gen-tete.py`,
+  qui reproduit toujours le fichier à l'octet) : `#g-oreille`, `#g-cheveux`, `#g-visage`, pour
+  reprendre l'oreille, les cheveux et le visage entier en trois `<use>`.
+- **Tête chauve Dehors** : Dedans, les cheveux courts sont une BANDE autour du crâne (le cerveau
+  remplit le reste). Dehors, sans cerveau, l'enfant était chauve. Ajout de `#p-calotte` :
+  la tête H au-dessus d'une ligne de cheveux ondulée qui passe au-dessus de l'oreille, unie
+  à la bande ; générée par `tools/gen-dehors.py`, qui charge la géométrie de `gen-tete.py`.
+- **Fil droit invisible** : un `.fil` parfaitement vertical ou horizontal (hampe du drapeau,
+  tringle) disparaît en feutrine : sa boîte englobante a une largeur nulle, donc la région du
+  filtre `#thread` (en % de la boîte) aussi. Ces deux-là sont devenus de petites pièces `.w.lite`.
+- **Composition** : fenêtre de la chambre en haut à gauche (l'écran du rêve occupera le haut
+  droit, centré (700,170)) ; derrière le cadre, le ciel de nuit (`#p-ciel-lune` : vitre bleu
+  nuit, `#g-lune > #p-lune`, `#g-etoiles`), et PAR-DESSUS le ciel de jour (`#p-ciel-soleil` :
+  vitre bleu clair + soleil) que la nuit éteint — c'est ce que dit la zone « fenêtre » (« par
+  la fenêtre, tu vois s'il fait jour ou nuit »). L'expo à droite, devant elle les quatre
+  emplacements. La nuit : lampe à gauche, lit en bas, l'enfant couché tête sur l'oreiller.
+- **Riso du décor** : les grandes surfaces en encre pleine étaient sombres (vitres, sol,
+  expo, couverture bleu pétrole). Deux demi-teintes, `.pale` (35 % d'encre sur papier) et
+  `.teinte` (60 %), lues par `--encre` que chaque `.w[data-ink]` pose sur lui-même ; le sol
+  est un vert d'impression (jaune 55 % + bleu, à 62 % sur papier) ; `.w.reserve` (sans
+  multiply) pour la lune, le soleil et la calotte, sinon le jaune sur bleu tourne au vert ;
+  `#g-enfant-dehors` est isolé en riso, pour que la peau ne se multiplie pas avec le sol.
+  Reste pour Task 7 : en riso, `#scene-inner>g` se multiplie avec la toile, donc la nuit
+  assombrit aussi les pièces (en feutrine, non).
+- **Couché (pour Task 7)** : pivot au cou (359,440) ; essai validé en capture :
+  `#g-enfant-dehors{transform:translate(61px,-90px) rotate(-80deg) scale(.6)}`. La couverture
+  `#p-couverture` est dessinée PAR-DESSUS l'enfant (elle le borde), le lit `#p-lit` dessous.
