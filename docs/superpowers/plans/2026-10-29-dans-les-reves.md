@@ -154,7 +154,7 @@
 - Modify: `index.html` (JS)
 
 **Interfaces:**
-- Produces : `setCut(c)` (c ∈ [0,2], clampé) — opacités `#g-dehors = 1-min(1,c)`, `#g-dedans = 1-|c-1|`, `#g-pres = max(0,c-1)` ; `document.body.dataset.vue = Math.round(c)` ; `.pill.active` ; `#cut` synchronisé ; `#g-ecran` et `#g-boite` visibles pour vues 0 et 1 (opacité `1-max(0,c-1)`) ; `pointer-events` : seule la vue arrondie reçoit les clics (classe `.active` sur le groupe). Clavier ↑↓ (pas 0.5, pastilles 1). Lecture de `?vue=` au chargement.
+- Produces : `setCut(c)` (c ∈ [0,2], clampé) — opacités `#g-dehors = 1-min(1,c)`, `#g-dedans = 1-|c-1|`, `#g-pres = max(0,c-1)` ; `document.body.dataset.vue = Math.round(c)` ; `uiCut(c)` (Task 1b : segment actif ; `#cut` est un input caché 0..200 = c×100, à synchroniser) ; `#g-ecran` et `#g-boite` visibles pour vues 0 et 1 (opacité `1-max(0,c-1)`) ; `pointer-events` : seule la vue arrondie reçoit les clics (classe `.active` sur le groupe). Clavier ↑↓ (pas 0.5, segments 1) : reprendre le gestionnaire clavier provisoire de Task 1b, ne pas en ajouter un second. Lecture de `?vue=` au chargement.
 
 - [ ] **Step 1 : Implémenter** d'après le volcan l.2116-2150 (adapter les ids).
 - [ ] **Step 2 : Vérifier** — captures `vue=0`, `vue=1`, `vue=2`, `vue=0.5` ; `browser_press_key ArrowDown` ; console propre.
@@ -170,7 +170,7 @@
   - `#g-toile .nuit` opacité `[0, .55, 1, 1, .1]` ; `#p-ciel-soleil` `[1,.3,0,0,.8]` ; `data-nuit` `[0,.6,1,1,.2]` ; `#g-enfant-dehors` couché (`rotate(-80)` + translation vers le lit) `[0,.5,1,1,0]` ;
   - `#p-paupiere` fermée `[0,1,1,1,0]` ; `#p-pineale` lueur `[0,1,.6,.4,0]` (classe `.allume`) ; `#p-oeil` mouvements rapides (animation `rem`) actif `[0,0,0,1,0]` ; `#p-frontal` « zzz » (`#g-zzz`) `[0,0,1,1,0]` ; `#p-amygdale` lueur `[0,0,.3,1,0]` ;
   - `#g-vagues/#g-fuseaux/#g-rincage/#p-cellule` `[0,0,1,.2,0]` ; `#g-synapses` `[1,.5,.2,1,.8]` ;
-  - `document.body.dataset.temps = Math.round(t)` ; `.moment.active` ; `#time` synchronisé ; clavier ←→ (pas 0.25, pastilles 1) ; lecture de `?temps=`.
+  - `document.body.dataset.temps = Math.round(t)` ; `uiTime(t)` (Task 1b : icône et position du bouton du rail) ; `#time` synchronisé (0..400 = t×100) ; clavier ←→ (pas 0.25, crans 1) repris du gestionnaire provisoire de Task 1b ; lecture de `?temps=`.
   - Émet `document.dispatchEvent(new CustomEvent('temps', {detail:{t, phase:Math.round(t)}}))` à chaque changement de phase arrondie — Tasks 9, 10, 11 s'y abonnent.
 - Animations d'ambiance (CSS, coupées par reduced-motion) : clignement de l'œil le jour, respiration de la tête (scale 1.01), frémissement des fils, scintillement des nœuds-étoiles la nuit, pulsation de l'amygdale en rêves, « zzz » qui montent.
 
