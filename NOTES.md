@@ -590,3 +590,39 @@ Retour du contrôleur sur la passe 1 : la tête restait un œuf, pour deux raiso
 - 0 `.w[transform]`, console propre, 15/15 tests.
 - Pose couchée à −80° et −90° : la tête repose sur l'oreiller.
 - Données `d` de `#g-dedans` : 27 021 octets.
+
+## 2026-10-29 — Task 4, tour de correction 1 : la chambre, le soleil dehors, le riso
+
+**Décision du contrôleur : la fenêtre appartient à la chambre.** Elle remplace le partage
+jour / nuit du brief pour ces pièces. Trois attributs, pilotés par Task 7 :
+
+| attribut | quand | pièces |
+|---|---|---|
+| `data-jour="1"` | le jour seul (t = 0) | `#p-ciel-soleil`, `#p-expo` |
+| `data-chambre="1"` | du soir au matin (t ≥ 1) | `#p-fenetre` (cadre, tringle, rideaux, rebord), `#p-lampe`, `#p-lit`, `#p-couverture`, `#p-doudou` |
+| `data-nuit="1"` | ce qui n'est QUE la nuit | `#p-ciel-lune` (la vitre de nuit, une pièce), `#p-lune`, `#g-etoiles`, `#p-lampe-lueur` |
+| (aucun) | toujours | `#p-sol`, `#g-enfant-dehors`, les emplacements |
+
+- `#p-lampe-lueur` est dans `#p-lampe` : son opacité s'ajoute à celle de la lampe (la lueur ne
+  se voit que si la chambre ET la nuit sont là).
+- **Le soleil est dans le ciel ouvert**, en haut à gauche ; plus de vitre de jour. La fenêtre de
+  la chambre se pose au même endroit dès le soir. Le matin (soleil .8, chambre 1), on voit le
+  soleil À TRAVERS la fenêtre, comme le dit la zone « fenêtre ».
+- La lune et les 7 étoiles sont toutes DANS la vitre, entre les rideaux. Les 5 étoiles qui
+  étaient hors du cadre ont été rentrées ou retirées.
+- **Riso.** La vitre de jour (`.pale` multipliée sur la vitre de nuit) imprimait plus sombre que
+  la nuit ; elle n'existe plus. La vitre de nuit est à pleine encre bleue, la lune en réserve
+  dessus. Couverture, revers, matelas, oreiller et doudou passent en `.reserve` (sans
+  multiply) : avant, le cou se voyait à travers la couverture et l'herbe à travers le matelas.
+  Le grain du filtre `#riso` laisse toujours passer un peu de ce qui est dessous ; c'est le
+  grain de l'encre, comme partout ailleurs.
+- **Expo.** La fenêtre la plus à droite (x 838) dépassait du mur : elle est à x 826. Les deux
+  fenêtres du toit chevauchaient la corniche (y 200–214) : elles sont passées dans la rangée,
+  sous la corniche (y 226–248).
+- **Jetons.** `--p-bois` pour la tringle, la hampe et le pied de lampe ; `--p-drapeau` pour le
+  drapeau (avant : `--fil-rouge`, un jeton de fil). `--p-ciel-jour` est retiré, il ne sert plus.
+- Mode d'emploi de `gen-dehors.py` : il renvoie au venv décrit dans `gen-tete.py`.
+- **Contrôles.**
+  - `.w:not(.lite)` = 14 Dehors + 4 de la tête reprise, soit 18.
+  - 0 `.w[transform]`, console propre (riso et feutrine), 15/15 tests.
+  - Les deux générateurs reproduisent `index.html` à l'octet.

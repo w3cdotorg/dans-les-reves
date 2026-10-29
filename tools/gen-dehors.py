@@ -9,9 +9,10 @@
 # {{nom}} reçoit un tracé.
 #
 # Usage (depuis la racine du dépôt) :
-#   (même venv que tools/gen-tete.py : la calotte de cheveux reprend la tête H)
-#   /tmp/venv/bin/python tools/gen-dehors.py          # réécrit #g-dehors
-#   /tmp/venv/bin/python tools/gen-dehors.py --sec    # n'écrit rien, affiche les octets
+#   Il faut shapely (la calotte de cheveux reprend la tête de gen-tete.py) :
+#   créer le venv comme l'indique l'en-tête de tools/gen-tete.py, puis
+#   <venv>/bin/python tools/gen-dehors.py          # réécrit #g-dehors
+#   <venv>/bin/python tools/gen-dehors.py --sec    # n'écrit rien, affiche les octets
 import contextlib, importlib.util, io, math, os, re, sys
 from shapely.geometry import Polygon, LineString
 
@@ -129,8 +130,9 @@ out['expo'] = ("M578 212L668 211 672 194Q718 184 764 193L768 210 858 208Q861 306
 out['expo-toit'] = rrect(568, 200, 868, 214, 5)
 out['expo-porte'] = "M700 406V372a18 18 0 0 1 36 0V406Z"
 # fenêtres cousues (rectangles au point de tige) : rangée du haut, + deux hublots
-out['expo-fen'] = ' '.join(rect(x, 226, x+26, 252) for x in (596, 636, 800, 838 - 0)) \
-    + ' ' + rect(684, 202, 708, 220) + ' ' + rect(728, 202, 752, 220)
+# (toutes SOUS la corniche y 200–214, et dans le mur, qui finit vers x 857)
+out['expo-fen'] = ' '.join(rect(x, 226, x+26, 252) for x in (596, 636, 790, 826)) \
+    + ' ' + rect(684, 226, 706, 248) + ' ' + rect(730, 226, 752, 248)
 # street art : trois taches de peinture et un grand sourire peint
 out['tache-1'] = smooth(polar(626, 318, [24, 19, 26, 20, 23, 18, 25, 21]))
 out['tache-2'] = smooth(polar(816, 322, [22, 26, 19, 24, 20, 25, 18, 23], .3))
@@ -138,10 +140,12 @@ out['tache-3'] = smooth(polar(718, 300, [28, 27, 29, 27, 28, 27, 29, 27, 28, 27]
 out['graffiti'] = ("M700 302Q718 322 736 302 M708 288v4 M728 288v4 "
                    "M598 370l10-14 10 14 10-14 10 14 M786 366q10-16 20 0t20 0")
 
-# ---------------------------------------------------------------- la fenêtre
-# Coin haut gauche. Derrière le cadre : le ciel de nuit (vitre bleu nuit + lune +
-# étoiles), puis PAR-DESSUS le ciel de jour (vitre bleu clair + soleil), que la
-# nuit éteint. « Par la fenêtre, tu vois s'il fait jour ou nuit » (zone fenetre).
+# ---------------------------------------------------------------- le soleil, la fenêtre
+# Coin haut gauche. Le jour (data-jour) : le soleil dans le ciel ouvert, sans
+# fenêtre. Dès le soir, la chambre arrive (data-chambre) : la fenêtre se pose au
+# même endroit ; la nuit (data-nuit), sa vitre bleu nuit, la lune et les étoiles
+# DANS la vitre. Le matin, le soleil revient et se voit à travers la fenêtre
+# (« par la fenêtre, tu vois s'il fait jour ou nuit », zone fenetre).
 FX0, FY0, FX1, FY1 = 14, 14, 138, 178
 out['vitre'] = rect(FX0+8, FY0+8, FX1-8, FY1-8)
 out['cadre'] = rrect(FX0, FY0, FX1, FY1, 8) + rrect(FX0+12, FY0+12, FX1-12, FY1-12, 4)
@@ -154,11 +158,11 @@ out['rideau-d'] = smooth([(FX1-6, FY0+10), (FX1-34, FY0+10), (FX1-30, FY0+56), (
 #  la tringle et la hampe sont donc de petites pièces de laine)
 out['tringle'] = rrect(FX0-7, FY0+5, FX1+7, FY0+10, 2.5)
 out['hampe'] = rrect(716, 148, 720.6, 190, 2.3)
-SX, SY = 76, 82
-out['soleil-rayons'] = smooth(polar(SX, SY, [31, 23] * 9))
-out['soleil'] = smooth(polar(SX, SY, [19.5] * 10))
-out['soleil-visage'] = (f"M{nums([SX-9, SY-3])}q3 3 6 0M{nums([SX+3, SY-3])}q3 3 6 0"
-                        f"M{nums([SX-6, SY+6])}q6 6 12 0")
+SX, SY = 76, 84
+out['soleil-rayons'] = smooth(polar(SX, SY, [36, 27] * 9))
+out['soleil'] = smooth(polar(SX, SY, [23] * 10))
+out['soleil-visage'] = (f"M{nums([SX-11, SY-4])}q3.5 3.5 7 0M{nums([SX+4, SY-4])}q3.5 3.5 7 0"
+                        f"M{nums([SX-7, SY+7])}q7 7 14 0")
 LX, LY = 80, 84
 out['lune'] = crescent(LX, LY, 25, 58, 22)
 # œil ouvert (point) / œil qui fait un clin (trait), sourire, sur le corps du croissant
@@ -166,11 +170,11 @@ out['lune-oeil'] = (LX-14, LY-5)
 out['lune-clin'] = f"M{nums([LX-18, LY-5])}q4 3.5 8 0"
 out['lune-sourire'] = f"M{nums([LX-18, LY+8])}q4 4.5 9 1"
 
-# étoiles : croix brodée + nœud au centre ; dans la vitre et autour de la fenêtre
-ETOILES = [(46, 42, 5), (112, 50, 4), (42, 140, 4), (104, 128, 5), (70, 154, 3.5),
-           (178, 26, 5), (222, 52, 4), (160, 210, 4.5), (26, 214, 4), (250, 20, 3.5)]
+# étoiles : croix brodée + nœud au centre, toutes DANS la vitre, entre les rideaux
+ETOILES = [(62, 38, 4.5), (97, 34, 3.5), (58, 128, 4.5), (100, 124, 4), (82, 152, 3.5),
+           (70, 114, 3), (99, 150, 3)]
 out['etoiles-fil'] = ' '.join(f"M{nums([x-s, y])}h{f(2*s)}M{nums([x, y-s])}v{f(2*s)}" for x, y, s in ETOILES)
-out['etoiles-noeuds'] = '\n'.join(f'                <circle cx="{f(x)}" cy="{f(y)}" r="1.9" fill="url(#knot)"/>' for x, y, s in ETOILES)
+out['etoiles-noeuds'] = '\n'.join(f'              <circle cx="{f(x)}" cy="{f(y)}" r="1.9" fill="url(#knot)"/>' for x, y, s in ETOILES)
 
 # ---------------------------------------------------------------- la lampe
 # À gauche du lit, près de l'oreiller. Abat-jour, pied, et sa lueur à part
@@ -210,9 +214,11 @@ out['doudou-nez'] = (DX, DY + 5)
 
 # ---------------------------------------------------------------- gabarit SVG
 GABARIT = r"""
-            <!-- Le monde de l'enfant, de jour et de nuit. data-jour / data-nuit :
-                 Task 7 pilote leur opacité avec le temps. Les éléments sans
-                 attribut (sol, fenêtre, ciel de nuit, enfant) restent toujours.
+            <!-- Le monde de l'enfant, de jour et de nuit. Task 7 pilote l'opacité :
+                 data-jour = le jour seul (soleil, expo) ; data-chambre = la chambre,
+                 du soir au matin (fenêtre, lampe, lit, couverture, doudou) ;
+                 data-nuit = ce qui n'est que la nuit (vitre de nuit, lune, étoiles,
+                 lueur de la lampe). Sans attribut (sol, enfant) : toujours là.
                  Tracés générés par tools/gen-dehors.py (NOTES.md, Task 4). -->
 
             <!-- le sol : une colline douce, que la boîte à souvenirs recouvre en bas -->
@@ -229,39 +235,37 @@ GABARIT = r"""
               <path class="w lite" style="--p:var(--p-soleil)" data-ink="jaune" d="{{tache-3}}"/>
               <path class="fil" d="{{expo-fen}}"/>
               <path class="fil graffiti" d="{{graffiti}}"/>
-              <path class="w lite" style="--p:var(--p-lit)" data-ink="rose" d="{{hampe}}"/>
-              <path class="w lite" style="--p:var(--fil-rouge)" data-ink="rose" d="M719 150l28 8-28 9Z"/>
+              <path class="w lite" style="--p:var(--p-bois)" data-ink="rose" d="{{hampe}}"/>
+              <path class="w lite" style="--p:var(--p-drapeau)" data-ink="rose" d="M719 150l28 8-28 9Z"/>
             </g>
 
-            <!-- la fenêtre de la chambre, en haut à gauche : derrière le cadre, le ciel
-                 de nuit (toujours là), puis le ciel de jour posé dessus -->
-            <g id="p-ciel-lune">
-              <path class="w teinte" style="--p:var(--p-ciel-nuit)" data-ink="bleu" d="{{vitre}}"/>
-              <!-- la lune : #g-lune l'enveloppe (clin d'œil, Task 7 / 18) ;
-                   #fil-lune-clin, caché, remplacera #fil-lune-oeil le temps du clin -->
-              <g id="g-lune">
-                <g id="p-lune" data-nuit="1">
-                  <path class="w reserve" style="--p:var(--p-lune)" data-ink="jaune" d="{{lune}}"/>
-                  <circle id="fil-lune-oeil" class="oeil-lune" cx="{{lune-oeil-x}}" cy="{{lune-oeil-y}}" r="2.2"/>
-                  <path id="fil-lune-clin" class="fil" style="--f:var(--fil-brun)" d="{{lune-clin}}"/>
-                  <path class="fil" style="--f:var(--fil-brun)" d="{{lune-sourire}}"/>
-                </g>
-              </g>
-              <!-- les étoiles : une croix brodée et un nœud français -->
-              <g id="g-etoiles" data-nuit="1">
-                <path class="fil etoile" d="{{etoiles-fil}}"/>
-{{etoiles-noeuds}}
+            <!-- en haut à gauche : la vitre de nuit, la lune et les étoiles (dans la
+                 fenêtre), le soleil (ciel ouvert le jour, derrière la fenêtre le matin),
+                 puis la fenêtre de la chambre -->
+            <path id="p-ciel-lune" class="w" style="--p:var(--p-ciel-nuit)" data-ink="bleu" data-nuit="1" d="{{vitre}}"/>
+            <!-- la lune : #g-lune l'enveloppe (clin d'œil, Task 7 / 18) ;
+                 #fil-lune-clin, caché, remplacera #fil-lune-oeil le temps du clin -->
+            <g id="g-lune">
+              <g id="p-lune" data-nuit="1">
+                <path class="w reserve" style="--p:var(--p-lune)" data-ink="jaune" d="{{lune}}"/>
+                <circle id="fil-lune-oeil" class="oeil-lune" cx="{{lune-oeil-x}}" cy="{{lune-oeil-y}}" r="2.2"/>
+                <path id="fil-lune-clin" class="fil" style="--f:var(--fil-brun)" d="{{lune-clin}}"/>
+                <path class="fil" style="--f:var(--fil-brun)" d="{{lune-sourire}}"/>
               </g>
             </g>
+            <!-- les étoiles : une croix brodée et un nœud français -->
+            <g id="g-etoiles" data-nuit="1">
+              <path class="fil etoile" d="{{etoiles-fil}}"/>
+{{etoiles-noeuds}}
+            </g>
             <g id="p-ciel-soleil" data-jour="1">
-              <path class="w pale" style="--p:var(--p-ciel-jour)" data-ink="bleu" d="{{vitre}}"/>
               <path class="w reserve" style="--p:var(--p-soleil-rayons)" data-ink="rose" d="{{soleil-rayons}}"/>
               <path class="w lite reserve" style="--p:var(--p-soleil)" data-ink="jaune" d="{{soleil}}"/>
               <path class="fil" style="--f:var(--fil-brun)" d="{{soleil-visage}}"/>
             </g>
-            <g id="p-fenetre">
+            <g id="p-fenetre" data-chambre="1">
               <path class="w" style="--p:var(--p-fenetre)" data-ink="jaune" fill-rule="evenodd" d="{{cadre}}"/>
-              <path class="w lite" style="--p:var(--p-lit)" data-ink="rose" d="{{tringle}}"/>
+              <path class="w lite" style="--p:var(--p-bois)" data-ink="rose" d="{{tringle}}"/>
               <path class="w lite" style="--p:var(--p-rideau)" data-ink="rose" d="{{rideau-g}}"/>
               <path class="w lite" style="--p:var(--p-rideau)" data-ink="rose" d="{{rideau-d}}"/>
               <path class="w lite" style="--p:var(--p-fenetre)" data-ink="jaune" d="{{rebord}}"/>
@@ -277,19 +281,19 @@ GABARIT = r"""
             <g id="slot-gens" transform="translate(120,380)"></g>
 
             <!-- la lampe de chevet et sa lueur (pièce à part) -->
-            <g id="p-lampe" data-nuit="1">
-              <path id="p-lampe-lueur" class="w lite" style="--p:var(--p-lueur)" data-ink="jaune" d="{{lueur}}"/>
-              <path class="w lite" style="--p:var(--p-lit)" data-ink="rose" d="{{pied}}"/>
+            <g id="p-lampe" data-chambre="1">
+              <path id="p-lampe-lueur" class="w lite" style="--p:var(--p-lueur)" data-ink="jaune" data-nuit="1" d="{{lueur}}"/>
+              <path class="w lite" style="--p:var(--p-bois)" data-ink="rose" d="{{pied}}"/>
               <path class="w" style="--p:var(--p-lampe)" data-ink="rose" d="{{abat-jour}}"/>
               <path class="fil" d="{{abat-jour-fil}}"/>
             </g>
 
             <!-- le lit (sous l'enfant) : tête de lit, pied, matelas, oreiller -->
-            <g id="p-lit" data-nuit="1">
+            <g id="p-lit" data-chambre="1">
               <path class="w" style="--p:var(--p-lit)" data-ink="rose" d="{{tete-lit}}"/>
               <path class="w" style="--p:var(--p-lit)" data-ink="rose" d="{{pied-lit}}"/>
-              <path class="w pale" style="--p:var(--p-drap)" data-ink="jaune" d="{{matelas}}"/>
-              <path class="w pale" style="--p:var(--p-oreiller)" data-ink="jaune" d="{{oreiller}}"/>
+              <path class="w pale reserve" style="--p:var(--p-drap)" data-ink="jaune" d="{{matelas}}"/>
+              <path class="w pale reserve" style="--p:var(--p-oreiller)" data-ink="jaune" d="{{oreiller}}"/>
             </g>
 
             <!-- l'enfant : la MÊME tête que Dedans, reprise par <use> (avatar, genre,
@@ -305,16 +309,16 @@ GABARIT = r"""
             </g>
 
             <!-- la couverture, PAR-DESSUS l'enfant couché (elle le borde) -->
-            <g id="p-couverture" data-nuit="1">
-              <path class="w teinte" style="--p:var(--p-couverture)" data-ink="bleu" d="{{couverture}}"/>
-              <path class="w lite pale" style="--p:var(--p-drap)" data-ink="jaune" d="{{revers}}"/>
+            <g id="p-couverture" data-chambre="1">
+              <path class="w teinte reserve" style="--p:var(--p-couverture)" data-ink="bleu" d="{{couverture}}"/>
+              <path class="w lite pale reserve" style="--p:var(--p-drap)" data-ink="jaune" d="{{revers}}"/>
               <path class="fil couture" d="{{couverture-fil}}"/>
             </g>
 
             <!-- le doudou : un petit lapin assis contre l'enfant -->
-            <g id="p-doudou" data-nuit="1">
-              <path class="w lite pale" style="--p:var(--p-doudou)" data-ink="rose" d="{{doudou-oreilles}}"/>
-              <path class="w pale" style="--p:var(--p-doudou)" data-ink="rose" d="{{doudou}}"/>
+            <g id="p-doudou" data-chambre="1">
+              <path class="w lite pale reserve" style="--p:var(--p-doudou)" data-ink="rose" d="{{doudou-oreilles}}"/>
+              <path class="w pale reserve" style="--p:var(--p-doudou)" data-ink="rose" d="{{doudou}}"/>
               <path class="fil" style="--f:var(--fil-brun)" d="{{doudou-fil}}"/>
               <circle class="nez-doudou" cx="{{doudou-nez-x}}" cy="{{doudou-nez-y}}" r="2"/>
             </g>
