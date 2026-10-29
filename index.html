@@ -422,6 +422,8 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    scène par <use>, où un sélecteur d'ancêtre ne voit rien. Thème, allègement et pause
    passent donc par des VARIABLES posées sur [data-theme=riso], [data-lite="1"] ou
    html/#scene.loupe-active, lues par des règles posées sur les éléments eux-mêmes. */
+#scene-inner>#g-dehors,#scene-inner>#g-dedans,#scene-inner>#g-pres{transform-box:view-box;transform-origin:center}
+#scene-inner>#g-dehors:not(.active),#scene-inner>#g-dedans:not(.active),#scene-inner>#g-pres:not(.active){pointer-events:none}   /* Task 6 : seule la vue arrondie reçoit les clics */
 #g-pres{isolation:isolate}
 /* riso : la vue n'est pas multipliée avec les vues du dessous (elle les cacherait mal) ;
    ses pièces se multiplient entre elles, sur la sous-couche de papier. (Seule règle à
@@ -1837,6 +1839,60 @@ function uiCut(c){
   segs.forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.cut) === n)));
 }
 
+/* ----- Vue : fondu entre Dehors, Dedans et Tout près (Task 6) -----
+   setCut(c), c ∈ [0,2], est le seul point d'entrée : opacités, visibilité,
+   pointer-events, data-vue, habillage (uiCut) et #cut en découlent.
+   Une vue à opacité 0 est aussi visibility:hidden (jamais display:none, qui
+   relancerait les animations CSS) : seules les vues visibles sont rendues, donc
+   le budget des filtres de laine reste réel. Léger « tourner de page » : la
+   vue qui s'efface grossit de 2 % (1 → 1,02) ; coupé en mouvement réduit. */
+const VUES = ['g-dehors', 'g-dedans', 'g-pres'].map(id => document.getElementById(id));
+const FONDS = ['g-ecran', 'g-boite'].map(id => document.getElementById(id));
+let cutCourant = 0;
+let animCut = 0;
+function setCut(c){
+  c = borne(c, 2);
+  cutCourant = c;
+  const n = Math.round(c);
+  const ops = [1 - Math.min(1, c), 1 - Math.abs(c - 1), Math.max(0, c - 1)];
+  VUES.forEach((g, i) => {
+    const op = ops[i];
+    g.style.opacity = op;
+    g.style.visibility = op > 0 ? 'visible' : 'hidden';
+    g.style.transform = (op > 0 && op < 1 && !REDUIT.matches) ? `scale(${1 + 0.02 * (1 - op)})` : '';
+    g.classList.toggle('active', i === n);
+  });
+  const opFond = 1 - Math.max(0, c - 1);
+  FONDS.forEach(g => {
+    g.style.opacity = opFond;
+    g.style.visibility = opFond > 0 ? 'visible' : 'hidden';
+  });
+  document.body.dataset.vue = n;
+  cutRange.value = Math.round(c * 100);
+  uiCut(c);
+}
+/* Glisse jusqu'à la vue `cible` (≈ 500 ms, ralentie en fin) ; immédiat en mouvement réduit. */
+function animateCut(cible, ms = 500){
+  cible = borne(cible, 2);
+  cancelAnimationFrame(animCut);
+  const c0 = cutCourant;
+  if(REDUIT.matches || c0 === cible || ms <= 0){ setCut(cible); return; }
+  const t0 = performance.now();
+  const pas = now => {
+    const x = Math.min(1, (now - t0) / ms);
+    setCut(c0 + (cible - c0) * (1 - (1 - x) ** 3));
+    if(x < 1) animCut = requestAnimationFrame(pas);
+  };
+  animCut = requestAnimationFrame(pas);
+}
+let posCut = 0;   /* ↑↓ : un pas de 0,5 puis, après un court répit, le segment le plus proche */
+function pasCut(d){
+  cancelAnimationFrame(animCut);
+  clearTimeout(posCut);
+  setCut(cutCourant + d);
+  posCut = setTimeout(() => animateCut(d > 0 ? Math.ceil(cutCourant) : Math.floor(cutCourant), 250), 450);   /* vers la vue voisine, dans le sens de la touche */
+}
+
 let momentAffiche = -1;
 function uiTime(t){
   t = borne(t, 4);
@@ -1857,9 +1913,9 @@ function poserCurseur(range, v){
   range.value = v;
   range.dispatchEvent(new Event('input'));
 }
-cutRange.addEventListener('input', () => uiCut(Number(cutRange.value) / 100));
+cutRange.addEventListener('input', () => { cancelAnimationFrame(animCut); setCut(Number(cutRange.value) / 100); });
 timeRange.addEventListener('input', () => uiTime(Number(timeRange.value) / 100));
-segs.forEach(b => b.addEventListener('click', () => poserCurseur(cutRange, Number(b.dataset.cut) * 100)));
+segs.forEach(b => b.addEventListener('click', () => animateCut(Number(b.dataset.cut))));
 
 /* Aimantation douce : continu pendant qu'on glisse ; au lâcher, le bouton
    « tombe » dans le cran le plus proche (280 ms, léger dépassement). */
@@ -1901,7 +1957,7 @@ addEventListener('pointercancel', lacher);
 
 if(URL_ETAT.vue !== null) cutRange.value = URL_ETAT.vue * 100;
 if(URL_ETAT.temps !== null) timeRange.value = URL_ETAT.temps * 100;
-uiCut(Number(cutRange.value) / 100);
+setCut(Number(cutRange.value) / 100);
 uiTime(Number(timeRange.value) / 100);
 
 /* ===== 6. Avatar : garçon / fille, peau, cheveux =====
@@ -2046,7 +2102,8 @@ document.addEventListener('keydown', e => {
     if(infoBox.classList.contains('open')){ closeInfo(); e.preventDefault(); }
     return;
   }
-  const PAS = { ArrowLeft: [timeRange, -25, 400], ArrowRight: [timeRange, 25, 400], ArrowUp: [cutRange, -50, 200], ArrowDown: [cutRange, 50, 200] }[e.key];
+  if(e.key === 'ArrowUp' || e.key === 'ArrowDown'){ e.preventDefault(); pasCut(e.key === 'ArrowDown' ? 0.5 : -0.5); return; }
+  const PAS = { ArrowLeft: [timeRange, -25, 400], ArrowRight: [timeRange, 25, 400] }[e.key];
   if(!PAS) return;
   e.preventDefault();
   const [range, pas, max] = PAS;
