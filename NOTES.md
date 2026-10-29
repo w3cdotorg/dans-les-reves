@@ -71,3 +71,68 @@ page sans dépendance.
 
 Explicitement écarté : le planétarium néon / verre dépoli du corps et du volcan
 (« le style habituel » de la famille, anti-objectif du propriétaire).
+
+## 2026-10-29 — Choix du style : feutrine, avec un second thème riso
+
+Le propriétaire a choisi **H · Feutrine et fil** (« c'est top ») et demande un rendu
+textile travaillé : doux **mais avec du volume**, « comme si on avait découpé et posé les
+éléments », avec des **imperfections (des bouloches, mais pas vilaines)**. Il veut aussi
+un **second thème risographe** (A), commutable.
+
+**Architecture retenue pour les deux thèmes.** Le dessin est écrit une seule fois (mêmes
+`<path>`). Un thème = un jeu de couleurs + un filtre de matière + un traitement des
+contours : en feutrine les contours sont des **coutures** (traits pointillés, fil avec
+relief), en riso ils sont la **passe d'encre bleue** décalée. Interrupteur 🧶 / 🖨️ en
+haut de page, mémorisé en `localStorage`.
+
+**Recette du filtre feutrine (v4, validée en capture)**, dans l'ordre :
+1. découpe aux ciseaux : `feTurbulence` basse fréquence (.04) + `feDisplacementMap` 2.4 ;
+2. bord pelucheux fin : turbulence 1.1 + déplacement 1.1 ;
+3. fibres **mates** : bump map (`fractalNoise` 1.5×1.1, 3 octaves) → `feDiffuseLighting`
+   (surfaceScale 1, lumière 225°/60°) **ramené vers le blanc** par `feComponentTransfer`
+   (slope .3, intercept .78) puis `multiply` — sans cet aplatissement, la v2 ressemblait à
+   du tissu-éponge / crochet ;
+4. volume « coussin » : érosion 3.2 + flou 2.2 → le pourtour est un peu plus sombre (.16) ;
+5. épaisseur : anneau érodé 1.2, liseré blanc (.5) décalé haut-gauche, liseré sombre (.3)
+   décalé bas-droite, légèrement floutés ;
+6. bouloches : `fractalNoise` .16 à 1 octave, **seuil alpha très dur** (40·a − 27.5) → une
+   poignée de blobs par pièce, dilatés .9, floutés .45, blancs à .42 avec une ombre
+   minuscule. ⚠ En v3 le seuil (14·a − 8.4) donnait de la neige partout : les bouloches
+   doivent rester rares ;
+7. ombre portée douce (1.3, 2.6, σ 1.9, .34) : la pièce est posée sur la toile.
+Toile de fond : motif de lin (`<pattern>` 7 px) + grain multiplié. Fil : filtre `thread`
+(déplacement .9 + petite ombre) pour un point un peu irrégulier.
+
+**Recette riso (v2)** : trois passes `mix-blend-mode:multiply` (jaune #ffe14a décalée
+(−1.6, 1.1), rose #ff4fa8 (1.5, −1.3), bleu #0f6fb8 (.6, .4)), couverture d'encre
+irrégulière par masque de bruit, bord qui bave (déplacement 1.4), étoiles en réserve.
+
+**Coût** : chaque pièce feutrine porte un filtre à ~35 primitives. À surveiller sur
+tablette ; prévoir une version allégée (`prefers-reduced-motion` ou détection de lenteur)
+qui garde découpe + ombre + coutures et supprime fibres et bouloches.
+
+## 2026-10-29 — Recherche de fond reçue
+
+`docs/recherche-cerveau-sommeil.md` (271 lignes, une URL par affirmation). À retenir :
+- **Source institutionnelle pivot** : synthèse CSEN « Mieux dormir pour mieux apprendre »
+  (2022, dir. Stéphanie Mazza), diffusée par Canopé : hippocampe = « mise en mémoire
+  temporaire », cortex = « stockage définitif », rejeu en sommeil lent profond ; 10-13 h
+  de sommeil entre 3 et 6 ans ; lent profond concentré avant 2-3 h du matin. Corpus et
+  Les Fondamentaux n'ont **pas** de vidéo sommeil identifiable.
+- **Science** : cycles ~80-90 min (ne pas donner de chiffre à l'enfant), 6-7 cycles ;
+  les rêves **mélangent** les éléments du jour, ils ne les rediffusent pas (Wamsley 2010) ;
+  résidu diurne / dream-lag (Nielsen 2004) ; en paradoxal, amygdale + et préfrontal −
+  (Maquet 1996) ⇒ rêves bizarres et non critiqués ; « thérapie de nuit » de Walker
+  **contestée**, à présenter comme hypothèse. Enfants : distinction rêve/réalité acquise
+  entre 3 et 5 ans ; cauchemars fréquents à 3-6 ans mais « souvent » seulement chez 1-4 %.
+- **Cauchemar ≠ terreur nocturne** (REM, fin de nuit, réveil complet, souvenir, consolable
+  vs lent profond, début de nuit, pas vraiment réveillé, aucun souvenir). L'ogre = cauchemar.
+- **Recommandations** : nommer la peur sans se moquer, « c'était un rêve », doudou ; de
+  jour, « changer le film » (Naître et grandir) ; **ne pas** proposer de « chasser le
+  monstre » ; pas d'écran ni d'histoire effrayante le soir ⇒ l'explainer est un outil
+  **de jour**, l'image de l'ogre doit être brève et immédiatement domestiquée, jamais en
+  dernier plan.
+- **Anatomie** : amygdale et hippocampe en temporal médial à hauteur du conduit auditif,
+  amygdale **devant** l'hippocampe ; pinéale sous le splénium ; NSC au-dessus du chiasma.
+- Trous : refrain exact des chiens pirates non vérifié en ligne ; épisode « 1 jour 1
+  question » sur les rêves non confirmé.

@@ -1,0 +1,280 @@
+<h2>Deux thèmes, une seule géométrie : feutrine (par défaut) et risographe</h2>
+<p class="subtitle">Même dessin, même scène. Seul le rendu change : à gauche la feutrine retravaillée (mate, coussinée, bouloches discrètes, fil un peu irrégulier), à droite les trois encres riso. En bas, un zoom sur la matière.</p>
+
+<style>
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  @media (max-width:900px){.duo{grid-template-columns:1fr}}
+  .mockup-body{padding:0}
+  .mockup-body svg{display:block;width:100%;height:auto}
+  .toggle{display:inline-flex;gap:.4rem;margin-left:1rem;vertical-align:middle}
+  .toggle span{font-size:.72rem;padding:.2rem .6rem;border-radius:999px;border:1px solid var(--border);opacity:.6}
+  .toggle span.on{opacity:1;background:var(--accent);color:#fff;border-color:var(--accent)}
+  .zoom{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media (max-width:900px){.zoom{grid-template-columns:1fr}}
+  .why{margin:1.5rem 0 0;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:var(--bg-secondary);border-radius:8px;font-size:.9rem}
+  .why ul{margin:.4rem 0 0 1.2rem}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="g-head" d="M72,200 C74,166 80,150 82,140 C55,128 40,95 52,62 C62,36 95,18 128,22 C160,26 180,52 176,80 C180,86 186,92 190,98 C194,104 190,108 184,109 C185,116 183,120 178,122 C181,128 178,132 172,133 C176,142 166,148 152,146 C148,158 146,170 146,200 Z"/>
+    <path id="g-ear" d="M96,88 C88,84 84,96 92,102 C96,105 100,100 100,94"/>
+    <path id="g-brain" d="M70,70 C66,45 95,30 125,32 C150,34 168,50 166,72 C168,86 150,96 128,94 C110,100 95,98 86,92 C72,90 68,82 70,70 Z"/>
+    <path id="g-gyri" d="M86,58 C96,48 104,60 112,50 M120,42 C128,52 138,44 146,54 M94,80 C104,70 112,84 122,74 M134,66 C142,76 150,68 158,78"/>
+    <ellipse id="g-cereb" cx="92" cy="102" rx="14" ry="9"/>
+    <path id="g-stem" d="M100,108 L104,122 L112,122 L108,106 Z"/>
+    <path id="g-cloud" d="M225,75 C212,75 212,50 230,48 C232,28 262,22 272,38 C292,30 310,50 300,66 C308,80 290,92 272,84 C262,96 240,94 236,82 C230,84 224,82 225,75 Z"/>
+    <path id="g-thumb" d="M250,88 L250,60 C250,46 258,36 266,36 C274,36 282,44 282,58 L282,88 Z"/>
+    <ellipse id="g-nail" cx="266" cy="49" rx="8" ry="10"/>
+    <path id="g-moon" d="M300,10 A14,14 0 1 0 300,38 A11,11 0 1 1 300,10 Z"/>
+    <g id="g-stars"><circle cx="262" cy="16" r="1.4"/><circle cx="286" cy="52" r="1.2"/><circle cx="312" cy="60" r="1"/><circle cx="230" cy="20" r="1"/></g>
+    <!-- trois cartes-souvenirs posées en bas -->
+    <rect id="g-card1" x="150" y="150" width="34" height="40" rx="5"/>
+    <rect id="g-card2" x="192" y="146" width="34" height="40" rx="5" transform="rotate(6 209 166)"/>
+    <rect id="g-card3" x="236" y="150" width="34" height="40" rx="5" transform="rotate(-5 253 170)"/>
+    <path id="g-icecream" d="M160,178 L167,160 L174,178 Z M167,152 m-7,0 a7,7 0 1 0 14,0 a7,7 0 1 0 -14,0"/>
+    <path id="g-dog" d="M200,176 c0,-8 6,-12 12,-10 c5,2 7,8 7,12 l-19,0 z M200,170 l-4,-6 l5,1 z M213,168 l5,-5 l-1,6 z"/>
+    <path id="g-littlethumb" d="M248,180 L248,166 C248,159 252,155 256,155 C260,155 264,159 264,166 L264,180 Z"/>
+
+    <!-- ========== FEUTRINE v2 ========== -->
+    <!-- surface fibreuse : bruit → lumière rasante → multiplié sur la couleur -->
+    <filter id="felt2" x="-14%" y="-14%" width="128%" height="128%" color-interpolation-filters="sRGB">
+      <!-- 1. découpe aux ciseaux un peu tremblée, puis bord pelucheux très fin -->
+      <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="3" seed="7" result="cut"/>
+      <feDisplacementMap in="SourceGraphic" in2="cut" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="shape0"/>
+      <feTurbulence type="turbulence" baseFrequency="1.1" numOctaves="1" seed="4" result="fuzz"/>
+      <feDisplacementMap in="shape0" in2="fuzz" scale="1.1" xChannelSelector="R" yChannelSelector="B" result="shape"/>
+      <!-- 2. fibres mates : bump map très fin, lumière rasante atténuée -->
+      <feTurbulence type="fractalNoise" baseFrequency="1.5 1.1" numOctaves="3" seed="12" result="fiber"/>
+      <feDiffuseLighting in="fiber" surfaceScale="1" diffuseConstant="1" lighting-color="#fff" result="lit0">
+        <feDistantLight azimuth="225" elevation="60"/>
+      </feDiffuseLighting>
+      <feComponentTransfer in="lit0" result="lit">
+        <feFuncR type="linear" slope=".3" intercept=".78"/><feFuncG type="linear" slope=".3" intercept=".78"/><feFuncB type="linear" slope=".3" intercept=".78"/>
+      </feComponentTransfer>
+      <feComposite in="lit" in2="shape" operator="in" result="litIn"/>
+      <feBlend in="shape" in2="litIn" mode="multiply" result="textured"/>
+      <!-- 3. volume : coussin (centre un peu plus clair, bord un peu plus sombre) -->
+      <feMorphology in="shape" operator="erode" radius="3.2" result="core"/>
+      <feGaussianBlur in="core" stdDeviation="2.2" result="coreSoft"/>
+      <feComposite in="shape" in2="coreSoft" operator="out" result="rim"/>
+      <feFlood flood-color="#3a2a1e" flood-opacity=".16" result="rimInk"/>
+      <feComposite in="rimInk" in2="rim" operator="in" result="rimShade"/>
+      <!-- 4. épaisseur de la pièce : liseré clair haut-gauche, sombre bas-droite -->
+      <feMorphology in="shape" operator="erode" radius="1.2" result="inner"/>
+      <feComposite in="shape" in2="inner" operator="out" result="ring"/>
+      <feOffset in="ring" dx="-.8" dy="-.8" result="ringHi0"/>
+      <feComposite in="ringHi0" in2="shape" operator="in" result="ringHi1"/>
+      <feGaussianBlur in="ringHi1" stdDeviation=".45" result="ringHi2"/>
+      <feFlood flood-color="#fff" flood-opacity=".5" result="white"/>
+      <feComposite in="white" in2="ringHi2" operator="in" result="ringHi"/>
+      <feOffset in="ring" dx=".9" dy="1" result="ringLo0"/>
+      <feComposite in="ringLo0" in2="shape" operator="in" result="ringLo1"/>
+      <feGaussianBlur in="ringLo1" stdDeviation=".5" result="ringLo2"/>
+      <feFlood flood-color="#3a2a1e" flood-opacity=".3" result="dark"/>
+      <feComposite in="dark" in2="ringLo2" operator="in" result="ringLo"/>
+      <!-- 5. bouloches : quelques petites boules de fibres, claires avec une ombre minuscule -->
+      <feTurbulence type="fractalNoise" baseFrequency=".16" numOctaves="1" seed="31" result="pn"/>
+      <feColorMatrix in="pn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 40 -27.5" result="pills0"/>
+      <feMorphology in="pills0" operator="dilate" radius=".9" result="pills1"/>
+      <feGaussianBlur in="pills1" stdDeviation=".45" result="pills2"/>
+      <feComposite in="pills2" in2="inner" operator="in" result="pills"/>
+      <feFlood flood-color="#fff" flood-opacity=".42" result="pillWhite"/>
+      <feComposite in="pillWhite" in2="pills" operator="in" result="pillsHi"/>
+      <feOffset in="pills" dx=".5" dy=".7" result="pillsSh0"/>
+      <feFlood flood-color="#3a2a1e" flood-opacity=".22" result="pillDark"/>
+      <feComposite in="pillDark" in2="pillsSh0" operator="in" result="pillsSh"/>
+      <feMerge result="bevelled"><feMergeNode in="textured"/><feMergeNode in="rimShade"/><feMergeNode in="ringLo"/><feMergeNode in="ringHi"/><feMergeNode in="pillsSh"/><feMergeNode in="pillsHi"/></feMerge>
+      <!-- 6. ombre portée douce sur la toile -->
+      <feDropShadow in="bevelled" dx="1.3" dy="2.6" stdDeviation="1.9" flood-color="#4a3728" flood-opacity=".34"/>
+    </filter>
+    <!-- fil : légère ombre pour que la couture ait du relief -->
+    <filter id="thread" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".5" numOctaves="1" seed="19" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale=".9" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feDropShadow in="d" dx=".4" dy=".8" stdDeviation=".5" flood-color="#2b1d12" flood-opacity=".45"/>
+    </filter>
+    <!-- toile de lin : trame + fibres -->
+    <pattern id="linen2" width="7" height="7" patternUnits="userSpaceOnUse">
+      <rect width="7" height="7" fill="#e7dcc6"/>
+      <line x1="0" y1="3.5" x2="7" y2="3.5" stroke="#d9cdb3" stroke-width="1.3"/>
+      <line x1="3.5" y1="0" x2="3.5" y2="7" stroke="#dccfb7" stroke-width="1.3"/>
+    </pattern>
+    <filter id="linenGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="2"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .16 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+
+    <!-- ========== RISO v2 ========== -->
+    <filter id="riso2" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+      <!-- couverture d'encre irrégulière (grain riso) -->
+      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 .05" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in" result="inked"/>
+      <!-- bord légèrement baveux -->
+      <feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="2" seed="8" result="b"/>
+      <feDisplacementMap in="inked" in2="b" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".95" numOctaves="2" seed="3"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .2 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="duo">
+
+  <!-- ===================== FEUTRINE ===================== -->
+  <div class="mockup">
+    <div class="mockup-header">Thème « Feutrine » (par défaut)
+      <span class="toggle"><span class="on">🧶 Feutrine</span><span>🖨️ Riso</span></span>
+    </div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Scène en feutrine">
+        <rect width="320" height="200" fill="url(#linen2)"/>
+        <rect width="320" height="200" fill="#e7dcc6" filter="url(#linenGrain)" opacity=".9"/>
+        <!-- grande pièce de nuit (feutrine bleu nuit) -->
+        <path d="M198,-6 L332,-6 L332,206 L176,206 Z" fill="#3b4078" filter="url(#felt2)"/>
+        <g fill="#fff1c9" filter="url(#felt2)"><use href="#g-moon"/></g>
+        <g fill="#fff1c9"><use href="#g-stars"/></g>
+        <!-- soleil -->
+        <circle cx="28" cy="28" r="14" fill="#f6cf5a" filter="url(#felt2)"/>
+        <!-- tête, cerveau, bulle, pouce : chaque pièce est découpée et posée -->
+        <use href="#g-head" fill="#f4c4a0" filter="url(#felt2)"/>
+        <use href="#g-brain" fill="#ee8aa0" filter="url(#felt2)"/>
+        <use href="#g-cereb" fill="#d8647f" filter="url(#felt2)"/>
+        <use href="#g-stem" fill="#d8647f" filter="url(#felt2)"/>
+        <use href="#g-cloud" fill="#fbf4e2" filter="url(#felt2)"/>
+        <circle cx="202" cy="74" r="4.5" fill="#fbf4e2" filter="url(#felt2)"/>
+        <circle cx="213" cy="60" r="6.5" fill="#fbf4e2" filter="url(#felt2)"/>
+        <use href="#g-thumb" fill="#bdb6a2" filter="url(#felt2)"/>
+        <use href="#g-nail" fill="#e8e2d0" filter="url(#felt2)"/>
+        <!-- cartes-souvenirs posées en bas -->
+        <use href="#g-card1" fill="#fbf4e2" filter="url(#felt2)"/>
+        <use href="#g-card2" fill="#fbf4e2" filter="url(#felt2)"/>
+        <use href="#g-card3" fill="#fbf4e2" filter="url(#felt2)"/>
+        <use href="#g-icecream" fill="#f4a3b8" filter="url(#felt2)"/>
+        <use href="#g-dog" fill="#c89a63" filter="url(#felt2)"/>
+        <use href="#g-littlethumb" fill="#bdb6a2" filter="url(#felt2)"/>
+        <!-- coutures (fil) -->
+        <g fill="none" stroke-linecap="round" stroke-dasharray="2.4 3.2" filter="url(#thread)">
+          <g stroke="#7a4b3a" stroke-width="1.35"><use href="#g-head"/><use href="#g-ear"/></g>
+          <g stroke="#fff3f5" stroke-width="1.35"><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/></g>
+          <g stroke="#9b8d6e" stroke-width="1.25"><use href="#g-cloud"/><use href="#g-thumb"/><use href="#g-nail"/></g>
+          <g stroke="#c9a53a" stroke-width="1.25"><circle cx="28" cy="28" r="14"/></g>
+          <g stroke="#b8a98a" stroke-width="1.1"><use href="#g-card1"/><use href="#g-card2"/><use href="#g-card3"/></g>
+          <g stroke="#fff1c9" stroke-width="1.1"><path d="M198,-6 L176,206"/></g>
+        </g>
+        <!-- brodé : sillons du cerveau en point arrière -->
+        <!-- yeux-boutons et visage -->
+        <circle cx="150" cy="79" r="5.2" fill="#4b3a2e" filter="url(#thread)"/><circle cx="148.4" cy="78" r=".9" fill="#f4c4a0"/><circle cx="151.6" cy="80" r=".9" fill="#f4c4a0"/>
+        <path d="M164,129 Q170,127 173,122" fill="none" stroke="#b86a5a" stroke-width="1.7" stroke-linecap="round"/>
+        <circle cx="166" cy="104" r="4.5" fill="#f5a3a0" opacity=".55" filter="url(#felt2)"/>
+        <!-- ogre : yeux-boutons, sourcils et bouche brodés -->
+        <circle cx="260" cy="64" r="3.3" fill="#2e2a24" filter="url(#thread)"/><circle cx="272" cy="64" r="3.3" fill="#2e2a24" filter="url(#thread)"/>
+        <path d="M256,58 L263,61 M276,58 L269,61" stroke="#2e2a24" stroke-width="1.9" stroke-linecap="round" filter="url(#thread)"/>
+        <path d="M257,77 Q266,71 275,77" fill="none" stroke="#2e2a24" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 2" filter="url(#thread)"/>
+        <!-- une épingle à tête ronde qui tient la carte du pouce -->
+        <line x1="262" y1="146" x2="258" y2="158" stroke="#9a9a9a" stroke-width="1"/><circle cx="262" cy="145" r="2.4" fill="#e0493f" filter="url(#thread)"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ===================== RISO ===================== -->
+  <div class="mockup">
+    <div class="mockup-header">Thème « Riso »
+      <span class="toggle"><span>🧶 Feutrine</span><span class="on">🖨️ Riso</span></span>
+    </div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Scène en risographe">
+        <rect width="320" height="200" fill="#f7f2e8"/>
+        <rect width="320" height="200" fill="#f7f2e8" filter="url(#paperGrain)"/>
+        <g style="mix-blend-mode:multiply">
+          <!-- passe BLEUE : nuit, pouce, contours -->
+          <g fill="#0f6fb8" filter="url(#riso2)" transform="translate(.6,.4)">
+            <path d="M198,-6 L332,-6 L332,206 L176,206 Z" opacity=".55"/>
+            <use href="#g-thumb" opacity=".7"/>
+            <use href="#g-littlethumb" opacity=".7"/>
+            <use href="#g-dog" opacity=".8"/>
+          </g>
+          <!-- passe JAUNE : peau, soleil, lune, cartes -->
+          <g fill="#ffe14a" filter="url(#riso2)" transform="translate(-1.6,1.1)">
+            <use href="#g-head"/><circle cx="28" cy="28" r="14"/><use href="#g-moon"/>
+            <use href="#g-card1"/><use href="#g-card2"/><use href="#g-card3"/>
+            <use href="#g-cloud" opacity=".6"/>
+          </g>
+          <!-- passe ROSE : cerveau, glace, joues -->
+          <g fill="#ff4fa8" filter="url(#riso2)" transform="translate(1.5,-1.3)">
+            <use href="#g-brain"/><use href="#g-cereb"/><use href="#g-stem" opacity=".8"/>
+            <use href="#g-icecream"/><circle cx="166" cy="104" r="5" opacity=".6"/>
+            <use href="#g-nail" opacity=".5"/>
+          </g>
+          <!-- contours à l'encre bleue, légèrement décalés -->
+          <g fill="none" stroke="#0f6fb8" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" filter="url(#riso2)" transform="translate(.3,.2)">
+            <use href="#g-head"/><use href="#g-ear"/><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/><use href="#g-stem"/>
+            <use href="#g-cloud"/><use href="#g-thumb"/><use href="#g-nail"/>
+            <circle cx="28" cy="28" r="14"/><use href="#g-moon"/>
+            <circle cx="202" cy="74" r="4.5"/><circle cx="213" cy="60" r="6.5"/>
+            <use href="#g-card1"/><use href="#g-card2"/><use href="#g-card3"/><use href="#g-icecream"/><use href="#g-dog"/><use href="#g-littlethumb"/>
+            <circle cx="150" cy="78" r="3.4" fill="#0f6fb8"/><path d="M142,70 Q150,66 158,70"/><path d="M164,128 Q170,126 173,122"/>
+            <path d="M256,58 L263,61 M276,58 L269,61"/><circle cx="260" cy="64" r="1.8" fill="#0f6fb8"/><circle cx="272" cy="64" r="1.8" fill="#0f6fb8"/>
+            <path d="M257,77 Q266,71 275,77"/><path d="M261,75 L261,79 M266,73 L266,78 M271,75 L271,79"/>
+          </g>
+          <g fill="#f7f2e8"><use href="#g-stars"/></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<h3>Zoom sur la matière (× 2,6)</h3>
+<div class="zoom">
+  <div class="mockup">
+    <div class="mockup-header">Feutrine : fibres, épaisseur, point de surjet, bouton</div>
+    <div class="mockup-body">
+      <svg viewBox="80 40 120 75" role="img" aria-label="Zoom feutrine">
+        <rect x="80" y="40" width="120" height="75" fill="url(#linen2)"/>
+        <rect x="80" y="40" width="120" height="75" fill="#e7dcc6" filter="url(#linenGrain)" opacity=".9"/>
+        <use href="#g-head" fill="#f4c4a0" filter="url(#felt2)"/>
+        <use href="#g-brain" fill="#ee8aa0" filter="url(#felt2)"/>
+        <use href="#g-cereb" fill="#d8647f" filter="url(#felt2)"/>
+        <g fill="none" stroke-linecap="round" stroke-dasharray="2.4 3.2" filter="url(#thread)">
+          <g stroke="#7a4b3a" stroke-width="1.35"><use href="#g-head"/><use href="#g-ear"/></g>
+          <g stroke="#fff3f5" stroke-width="1.35"><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/></g>
+        </g>
+        <circle cx="150" cy="79" r="5.2" fill="#4b3a2e" filter="url(#thread)"/><circle cx="148.4" cy="78" r=".9" fill="#f4c4a0"/><circle cx="151.6" cy="80" r=".9" fill="#f4c4a0"/>
+        <circle cx="166" cy="104" r="4.5" fill="#f5a3a0" opacity=".55" filter="url(#felt2)"/>
+      </svg>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Riso : grain d'encre, calage décalé, superposition</div>
+    <div class="mockup-body">
+      <svg viewBox="80 40 120 75" role="img" aria-label="Zoom riso">
+        <rect x="80" y="40" width="120" height="75" fill="#f7f2e8"/>
+        <rect x="80" y="40" width="120" height="75" fill="#f7f2e8" filter="url(#paperGrain)"/>
+        <g style="mix-blend-mode:multiply">
+          <g fill="#ffe14a" filter="url(#riso2)" transform="translate(-1.6,1.1)"><use href="#g-head"/></g>
+          <g fill="#ff4fa8" filter="url(#riso2)" transform="translate(1.5,-1.3)"><use href="#g-brain"/><use href="#g-cereb"/><circle cx="166" cy="104" r="5" opacity=".6"/></g>
+          <g fill="none" stroke="#0f6fb8" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" filter="url(#riso2)" transform="translate(.3,.2)">
+            <use href="#g-head"/><use href="#g-ear"/><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/>
+            <circle cx="150" cy="78" r="3.4" fill="#0f6fb8"/><path d="M142,70 Q150,66 158,70"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="why">
+  <b>Comment les deux thèmes cohabitent.</b> Le dessin est écrit une seule fois (les mêmes <code>&lt;path&gt;</code> pour la tête, le cerveau, les cartes). Un thème, c'est un jeu de couleurs, un filtre de matière et une façon de traiter les contours : en feutrine les contours deviennent des coutures, en riso ils deviennent la passe d'encre bleue décalée. L'interrupteur est un bouton 🧶 / 🖨️ en haut de page, mémorisé sur l'appareil.
+  <ul>
+    <li><b>Feutrine, ce que j'ai ajouté (v3) :</b> matière mate et fine au lieu du tissu-éponge, volume « coussin » (centre plus clair, bord plus sombre), bouloches claires avec leur ombre minuscule, fil légèrement irrégulier. Avant : découpe aux ciseaux légèrement tremblée, bord pelucheux, fibres éclairées en lumière rasante, liseré clair en haut-gauche et sombre en bas-droite pour l'épaisseur de la pièce, ombre portée douce sur la toile de lin, fil avec son propre relief, yeux-boutons, épingle à tête rouge.</li>
+    <li><b>Riso, ce que j'ai ajouté :</b> trois passes (jaune, rose, bleu) chacune décalée différemment, couverture d'encre irrégulière, bord qui bave un peu, étoiles en réserve du papier.</li>
+    <li><b>Question pour toi :</b> en feutrine, la nuit est une grande pièce bleu nuit posée sur la toile (comme ici) ou la toile de fond elle-même qui s'assombrit ? Et la glace, le chien et le petit pouce en bas te montrent le format des cartes-souvenirs : ça te va qu'elles soient des pièces épinglées ?</li>
+  </ul>
+</div>
