@@ -73,7 +73,11 @@
      Jetons propres à l'interface, indépendants des thèmes de scène :
      le riso ne change que le SVG. */
   --ui-fond:#fffdf8; --ui-encre:#2b2a33; --ui-gris:#6c6a78; --ui-sable:#efeae0;
-  --ui-indigo:#3b3f8f; --ui-corail:#ff7a59; --ui-vert:#2aa876;
+  --ui-indigo:#3b3f8f; --ui-vert:#2aa876;
+  /* corail : #ff7a59 sur la maquette, assombri à #ff6038 (même teinte) pour que
+     le blanc des gros boutons atteigne 3:1 (texte ≥ 17 px gras) ; le vert est à 3,02:1 */
+  --ui-corail:#ff6038;
+  --ui-gris-fonce:#5a5666;               /* texte des segments non choisis, sur le sable */
   --ui-ciel:#9fc9ff;                     /* fond de l'icône du volet (maquette) */
   /* le rail du temps : soleil → coucher → crépuscule → nuit (valeurs de
      --p-soleil, --nuit-1 et --nuit-2, figées ici pour que le riso n'y touche pas) */
@@ -101,13 +105,16 @@ body{
 }
 /* une colonne : bandeau, scène, dock. Bureau : la scène tient en hauteur dans
    la fenêtre (--hors-scene = bandeau + dock), sa largeur en est déduite au
-   ratio 900:560 (= 45/28) du viewBox ; jamais moins de 480 px de haut. */
+   ratio 900:560 (= 45/28) du viewBox ; jamais moins de 480 px de haut.
+   --marge : 28 px sur bureau, car le bouton du rail (64 px sur un rail de 52 px
+   posé à right:-20px) dépasse de 26 px la scène ; la gouttière sur téléphone. */
 .app{
   --hors-scene:206px;
+  --marge:28px;
   width:100%;
-  max-width:calc(max(480px, 100svh - var(--hors-scene)) * 45 / 28 + 2 * var(--ui-gouttiere));
+  max-width:calc(max(480px, 100svh - var(--hors-scene)) * 45 / 28 + 2 * var(--marge));
   margin:0 auto;
-  padding:0 max(var(--ui-gouttiere), env(safe-area-inset-right, 0px)) 0 max(var(--ui-gouttiere), env(safe-area-inset-left, 0px));
+  padding:0 max(var(--marge), env(safe-area-inset-right, 0px)) 0 max(var(--marge), env(safe-area-inset-left, 0px));
 }
 
 /* ===== 3. Bandeau : titre · vue · réglages ===== */
@@ -139,7 +146,7 @@ body{
 .seg-pouce{
   position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 10px) / 3);
   border-radius:999px;background:var(--ui-indigo);
-  box-shadow:0 4px 12px rgba(59,63,143,.35);
+  box-shadow:0 4px 12px color-mix(in srgb, var(--ui-indigo) 35%, transparent);
   transform:translateX(calc(var(--c) * 100%));
   transition:transform .32s var(--ui-ressort);
 }
@@ -149,7 +156,7 @@ body{
   display:flex;align-items:center;justify-content:center;gap:.4em;
   border:0;border-radius:999px;background:none;cursor:pointer;
   font-family:var(--font-display);font-weight:600;font-size:1.05rem;white-space:nowrap;
-  color:#5a5666;
+  color:var(--ui-gris-fonce);
   transition:color .2s, transform .3s var(--ui-ressort);
 }
 .seg .ic{font-size:1.2em;line-height:1}
@@ -203,14 +210,15 @@ body{
 svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 
 /* Le rail : glissière de 52 px collée au bord droit de la scène (maquette,
-   right:-6px), dégradé soleil → coucher → nuit. Le vrai contrôle est
+   right:-6px, ramené à -20px : le rail ne couvre que 32 px de la scène),
+   dégradé soleil → coucher → nuit. Le vrai contrôle est
    l'<input type=range id=time> posé dessus (piste transparente, pouce
    transparent de 64 px) : clavier et lecteurs d'écran le voient. #railBtn,
    le bouton blanc à icône, n'est qu'un dessin qui suit --k (= t/4, posée par
    uiTime) : sa course est celle du pouce, la longueur du rail moins 64 px. */
 .rail{
   --k:0;--bord:26px;
-  position:absolute;right:-6px;top:10%;bottom:10%;z-index:3;width:52px;
+  position:absolute;right:-20px;top:10%;bottom:10%;z-index:3;width:52px;
   display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   padding:6px 0;border-radius:999px;
   background:linear-gradient(180deg, var(--ui-soleil), var(--ui-coucher) 35%, var(--ui-crepuscule) 70%, var(--ui-nuit));
@@ -220,6 +228,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
   font-family:var(--font-display);font-weight:600;font-size:.75rem;line-height:1;color:#fff;
   text-shadow:0 1px 2px rgba(0,0,0,.4);pointer-events:none;
 }
+.rail .lab.jour{color:var(--ui-encre);text-shadow:none}   /* blanc sur le soleil : 1,6:1 */
 /* cinq crans : un point par moment, aux positions exactes du pouce */
 .crans{
   position:absolute;left:50%;top:calc(var(--bord) + 32px);bottom:calc(var(--bord) + 32px);
@@ -401,8 +410,10 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 /* ===== 7 ter. Avatar : garçon / fille, peau, cheveux (dans la feuille de réglages) =====
    Les pastilles sont des ronds plats de 56 px ; la choisie porte un anneau
    blanc puis indigo. */
-.who{display:flex;flex-direction:column;gap:14px}
-.who .genres{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.who{display:flex;flex-direction:column;gap:8px}
+.who .genres,.deux{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.who .genres{margin-bottom:6px}
+.sous-titre{margin:4px 0 0;font-family:var(--font-display);font-weight:600;font-size:.9rem;color:var(--ui-gris)}
 .dots{display:flex;flex-wrap:wrap;gap:8px}
 .dot{
   --c:#ccc;
@@ -417,9 +428,9 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 /* ===== 8. Volet d'information (#info) =====
    Il monte par-dessus le bas de la scène ; caché tant qu'il n'a pas la classe
    « open ». Entrée à ressort (320 ms), sortie rapide (140 ms). Bureau : il
-   s'arrête avant le rail (52 px − 6 px de débord + marge). */
+   s'arrête avant le rail (32 px sur la scène + 24 px de marge). */
 .volet{
-  position:absolute;left:18px;right:70px;bottom:18px;z-index:2;
+  position:absolute;left:18px;right:56px;bottom:18px;z-index:2;
   max-height:calc(100% - 36px);overflow:auto;
   padding:16px 64px 16px 80px;
   border-radius:20px;
@@ -464,7 +475,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 }
 .feuille[open]{animation:feuille-entre .32s var(--ui-ressort)}
 .feuille.sort{animation:feuille-sort .14s ease-in forwards}
-.feuille::backdrop{background:rgba(43,42,51,.32)}
+.feuille::backdrop{background:color-mix(in srgb, var(--ui-encre) 32%, transparent)}
 @keyframes feuille-entre{from{transform:translateX(48px);opacity:0}}
 @keyframes feuille-sort{to{transform:translateX(48px);opacity:0}}
 .feuille-tete{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 -10px 4px 0}
@@ -503,7 +514,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    bouton), dock sur deux lignes, gouttière de 16 px, jamais de défilement
    horizontal. */
 @media (max-width:899.98px){
-  .app{max-width:none}
+  .app{max-width:none;--marge:var(--ui-gouttiere)}
   .bandeau{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"titre reglages" "vue vue";padding:12px 0 10px}
   .titre{font-size:1.3rem}
   .seg{padding:0 .3em;font-size:.95rem;gap:.3em}
@@ -539,7 +550,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
   .dock{flex-direction:column;align-items:stretch;padding:14px 0 18px}
   .dock-jeux,.dock-outils{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
   .dock .bouton{flex-direction:column;gap:.3em;text-align:center;white-space:normal;padding:.6em .4em}
-  .dock-jeux .bouton{min-height:88px;border-radius:22px;font-size:.95rem}
+  .dock-jeux .bouton{min-height:88px;border-radius:22px;font-size:1.0625rem}   /* ≥ 17 px : seuil « grand texte » du contraste 3:1 */
   .dock-outils .bouton{min-height:var(--ui-cible);border-radius:18px;font-size:.85rem}
 
   .feuille{
@@ -1018,7 +1029,7 @@ html:not([data-pret]) *{transition:none!important}
     <!-- Rail du temps : #time est le vrai curseur (0..400 = moment × 100),
          #railBtn le bouton blanc qui le suit (uiTime). -->
     <div id="rail" class="rail">
-      <span class="lab" aria-hidden="true">jour</span>
+      <span class="lab jour" aria-hidden="true">jour</span>
       <span class="crans" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
       <input type="range" id="time" min="0" max="400" value="0" aria-label="Faire passer la journée et la nuit" aria-valuetext="La journée">
       <span id="railBtn" class="knob" aria-hidden="true">☀️</span>
@@ -1055,13 +1066,18 @@ html:not([data-pret]) *{transition:none!important}
         <button type="button" class="bouton sable" data-genre="garcon" aria-pressed="true"><span class="ic" aria-hidden="true">👦</span>Un garçon</button>
         <button type="button" class="bouton sable" data-genre="fille" aria-pressed="false"><span class="ic" aria-hidden="true">👧</span>Une fille</button>
       </div>
-      <div class="dots" id="skins" role="group" aria-label="Choisir la couleur de la peau"></div>
-      <div class="dots" id="hairs" role="group" aria-label="Choisir la couleur des cheveux"></div>
+      <h4 class="sous-titre" id="skinsTitre">Peau</h4>
+      <div class="dots" id="skins" role="group" aria-labelledby="skinsTitre"></div>
+      <h4 class="sous-titre" id="hairsTitre">Cheveux</h4>
+      <div class="dots" id="hairs" role="group" aria-labelledby="hairsTitre"></div>
     </div>
   </section>
   <section class="reglage">
     <h3>Le dessin</h3>
-    <button type="button" id="theme" class="bouton sable">🧶 Feutrine</button>
+    <div id="theme" class="deux" role="group" aria-label="Le style du dessin">
+      <button type="button" class="bouton sable" data-theme-choix="feutrine" aria-pressed="true"><span class="ic" aria-hidden="true">🧶</span>Feutrine</button>
+      <button type="button" class="bouton sable" data-theme-choix="riso" aria-pressed="false"><span class="ic" aria-hidden="true">🖨️</span>Riso</button>
+    </div>
     <label class="interrupteur"><span>🪶 Version allégée</span><input type="checkbox" id="lite"></label>
     <p class="aide">Moins de laine à dessiner : pour les tablettes et téléphones qui peinent.</p>
   </section>
@@ -1450,17 +1466,17 @@ const URL_ETAT = {
 const root = document.documentElement;
 
 /* ===== 2. Thème (feutrine / riso) ===== */
-const THEMES = { feutrine: '🧶 Feutrine', riso: '🖨️ Riso' };
-const themeBtn = document.getElementById('theme');
+/* #theme est un choix à deux boutons (aria-pressed), dans la feuille de réglages */
+const THEMES = ['feutrine', 'riso'];
+const themeBtns = [...document.querySelectorAll('#theme [data-theme-choix]')];
 
 function setTheme(name){
-  if(!Object.hasOwn(THEMES, name)) name = 'feutrine';
+  if(!THEMES.includes(name)) name = 'feutrine';
   root.dataset.theme = name;
   prefs.set('theme', name);
-  themeBtn.textContent = THEMES[name];
-  themeBtn.setAttribute('aria-label', `Style : ${name}. Appuie pour changer de style.`);
+  themeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeChoix === name)));
 }
-themeBtn.addEventListener('click', () => setTheme(root.dataset.theme === 'riso' ? 'feutrine' : 'riso'));
+themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeChoix)));
 setTheme(Q.get('theme') || prefs.get('theme', 'feutrine'));
 
 /* ===== 3. Version allégée =====
@@ -1682,14 +1698,40 @@ genreBtns.forEach(b => b.addEventListener('click', () => setAvatar({ genre: b.da
 setAvatar(prefs.get('avatar', null));
 
 /* ===== 7. Volet d'information, feuille de réglages, clavier ===== */
-/* Le volet (#info) monte sur la scène avec la classe « open ». Les zones
-   (Task 12), le récit et les jeux appelleront ouvrirInfo() après avoir écrit
-   #infoEmoji / #infoTitle / #infoText. ✕ et Échap le referment. */
+/* Le volet (#info) monte sur la scène avec la classe « open ».
+   openInfo(opener, contenu?) : opener = l'élément qui l'ouvre (zone, bouton) ;
+   le focus lui revient à la fermeture (✕ ou Échap), sinon il resterait sur
+   un bouton caché. contenu = { emoji, titre, texte } (facultatif) : le titre et
+   l'icône sont écrits tout de suite, le texte UNE IMAGE PLUS TARD, quand le
+   volet est visible : une région aria-live cachée (visibility:hidden) n'est
+   pas annoncée, et le texte doit changer APRÈS qu'elle est rendue.
+   closeInfo() referme. Task 12 (zones), le récit et les jeux passent par là. */
 const infoBox = document.getElementById('info');
-function ouvrirInfo(){ infoBox.classList.add('open'); }
-function fermerInfo(){ infoBox.classList.remove('open'); }
-document.getElementById('infoClose').addEventListener('click', fermerInfo);
-if(URL_ETAT.info) ouvrirInfo();
+const infoEmoji = document.getElementById('infoEmoji');
+const infoTitle = document.getElementById('infoTitle');
+const infoText = document.getElementById('infoText');
+let infoOpener = null;
+function openInfo(opener, contenu){
+  infoOpener = opener instanceof HTMLElement || opener instanceof SVGElement ? opener : null;
+  infoBox.classList.add('open');
+  if(contenu){
+    if(contenu.emoji !== undefined) infoEmoji.textContent = contenu.emoji;
+    if(contenu.titre !== undefined) infoTitle.textContent = contenu.titre;
+    if(contenu.texte !== undefined) requestAnimationFrame(() => { infoText.textContent = contenu.texte; });
+  }
+}
+function closeInfo(){
+  if(!infoBox.classList.contains('open')) return;
+  const focusDedans = infoBox.contains(document.activeElement);
+  infoBox.classList.remove('open');
+  if(focusDedans || document.activeElement === document.body){
+    if(infoOpener && infoOpener.isConnected) infoOpener.focus({ preventScroll: true });
+    else if(focusDedans) document.activeElement.blur();
+  }
+  infoOpener = null;
+}
+document.getElementById('infoClose').addEventListener('click', closeInfo);
+if(URL_ETAT.info) openInfo(null);
 
 /* La feuille de réglages : un <dialog> modal (piège du focus, Échap natif).
    Sortie rapide : la classe « sort » joue 140 ms d'animation, puis close(). */
@@ -1731,7 +1773,7 @@ document.addEventListener('keydown', e => {
   if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || feuille.open) return;
   if(e.target.closest && e.target.closest(SAISIE)) return;
   if(e.key === 'Escape'){
-    if(infoBox.classList.contains('open')){ fermerInfo(); e.preventDefault(); }
+    if(infoBox.classList.contains('open')){ closeInfo(); e.preventDefault(); }
     return;
   }
   const PAS = { ArrowLeft: [timeRange, -25, 400], ArrowRight: [timeRange, 25, 400], ArrowUp: [cutRange, -50, 200], ArrowDown: [cutRange, 50, 200] }[e.key];

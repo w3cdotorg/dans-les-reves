@@ -264,4 +264,6 @@ test('aucun son : ni synthèse vocale, ni bouton son, ni préférence son', () =
   for(const interdit of ['speechSynthesis', 'id="sound"', 'id="say"', 'soundOn', 'reves.son']){
     assert.ok(!html.includes(interdit), 'index.html contient encore « ' + interdit + ' »');
   }
+  assert.doesNotMatch(html, /prefs\.(get|set)\(\s*['"]son['"]/, 'préférence « son » lue ou écrite');
+  assert.doesNotMatch(html, /id=['"](sound|say)['"]/, 'bouton son (guillemets simples ou doubles)');
 });
