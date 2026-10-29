@@ -1,0 +1,301 @@
+<h2>Feutrine « à l'aiguille » (v9), toile qui s'assombrit, vraies épingles</h2>
+<p class="subtitle">À gauche la feutrine retravaillée d'après ton renard : pièces bombées en laine feutrée, halo de fibres sur les bords, broderies blanches au point de tige et aux nœuds français, épingles à tête de verre. La toile de lin elle-même s'assombrit vers la nuit. À droite, le riso inchangé.</p>
+
+<style>
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  @media (max-width:900px){.duo{grid-template-columns:1fr}}
+  .mockup-body{padding:0}
+  .mockup-body svg{display:block;width:100%;height:auto}
+  .zoom{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media (max-width:900px){.zoom{grid-template-columns:1fr}}
+  .why{margin:1.5rem 0 0;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:var(--bg-secondary);border-radius:8px;font-size:.9rem}
+  .why ul{margin:.4rem 0 0 1.2rem}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="g-head" d="M72,200 C74,166 80,150 82,140 C55,128 40,95 52,62 C62,36 95,18 128,22 C160,26 180,52 176,80 C180,86 186,92 190,98 C194,104 190,108 184,109 C185,116 183,120 178,122 C181,128 178,132 172,133 C176,142 166,148 152,146 C148,158 146,170 146,200 Z"/>
+    <path id="g-ear" d="M96,88 C88,84 84,96 92,102 C96,105 100,100 100,94"/>
+    <path id="g-brain" d="M70,70 C66,45 95,30 125,32 C150,34 168,50 166,72 C168,86 150,96 128,94 C110,100 95,98 86,92 C72,90 68,82 70,70 Z"/>
+    <!-- sillons brodés : volutes au point de tige -->
+    <path id="g-gyri" d="M84,62 C92,50 104,56 108,48 C112,42 120,46 118,54 M124,40 C132,48 140,40 148,50 C152,56 146,62 140,58 M92,82 C100,72 110,84 120,76 C126,72 132,78 128,84 M136,66 C144,76 152,68 158,78"/>
+    <ellipse id="g-cereb" cx="92" cy="102" rx="14" ry="9"/>
+    <path id="g-stem" d="M100,108 L104,122 L112,122 L108,106 Z"/>
+    <path id="g-cloud" d="M225,75 C212,75 212,50 230,48 C232,28 262,22 272,38 C292,30 310,50 300,66 C308,80 290,92 272,84 C262,96 240,94 236,82 C230,84 224,82 225,75 Z"/>
+    <path id="g-thumb" d="M250,88 L250,60 C250,46 258,36 266,36 C274,36 282,44 282,58 L282,88 Z"/>
+    <ellipse id="g-nail" cx="266" cy="49" rx="8" ry="10"/>
+    <path id="g-moon" d="M300,10 A14,14 0 1 0 300,38 A11,11 0 1 1 300,10 Z"/>
+    <rect id="g-card1" x="150" y="150" width="34" height="40" rx="5"/>
+    <rect id="g-card2" x="192" y="146" width="34" height="40" rx="5" transform="rotate(6 209 166)"/>
+    <rect id="g-card3" x="236" y="150" width="34" height="40" rx="5" transform="rotate(-5 253 170)"/>
+    <path id="g-icecream" d="M160,178 L167,160 L174,178 Z M167,152 m-7,0 a7,7 0 1 0 14,0 a7,7 0 1 0 -14,0"/>
+    <path id="g-dog" d="M200,176 c0,-8 6,-12 12,-10 c5,2 7,8 7,12 l-19,0 z M200,170 l-4,-6 l5,1 z M213,168 l5,-5 l-1,6 z"/>
+    <path id="g-littlethumb" d="M248,180 L248,166 C248,159 252,155 256,155 C260,155 264,159 264,166 L264,180 Z"/>
+
+    <!-- ===== LAINE FEUTRÉE À L'AIGUILLE (v6) ===== -->
+    <filter id="wool" x="-16%" y="-16%" width="132%" height="132%" color-interpolation-filters="sRGB">
+      <!-- A. halo de fibres : la couleur de la pièce, dilatée puis ébouriffée, à demi transparente -->
+      <feMorphology in="SourceGraphic" operator="dilate" radius="1.3" result="dil"/>
+      <feTurbulence type="turbulence" baseFrequency="1.5" numOctaves="2" seed="3" result="hair"/>
+      <feDisplacementMap in="dil" in2="hair" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="halo0"/>
+      <feGaussianBlur in="halo0" stdDeviation=".35" result="halo1"/>
+      <feComponentTransfer in="halo1" result="halo"><feFuncA type="linear" slope=".5"/></feComponentTransfer>
+      <!-- B. corps de la pièce : contour un peu mou (feutré, pas découpé) -->
+      <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="7" result="cut"/>
+      <feDisplacementMap in="SourceGraphic" in2="cut" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="body0"/>
+      <feTurbulence type="turbulence" baseFrequency=".8" numOctaves="1" seed="4" result="fz"/>
+      <feDisplacementMap in="body0" in2="fz" scale="1.4" xChannelSelector="R" yChannelSelector="B" result="body"/>
+      <!-- C. laine : fibres fines + taches de teinture plus larges -->
+      <feTurbulence type="fractalNoise" baseFrequency="2 1.6" numOctaves="2" seed="12" result="fiber"/>
+      <feDiffuseLighting in="fiber" surfaceScale="1.05" diffuseConstant="1" lighting-color="#fff" result="flit0"><feDistantLight azimuth="230" elevation="52"/></feDiffuseLighting>
+      <feComponentTransfer in="flit0" result="flit"><feFuncR type="linear" slope=".27" intercept=".765"/><feFuncG type="linear" slope=".27" intercept=".765"/><feFuncB type="linear" slope=".27" intercept=".765"/></feComponentTransfer>
+      <feTurbulence type="fractalNoise" baseFrequency=".12" numOctaves="2" seed="40" result="dye0"/>
+      <feColorMatrix in="dye0" type="matrix" values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 1" result="dyeGrey"/>
+      <feComponentTransfer in="dye0" result="dye"><feFuncR type="linear" slope=".06" intercept=".95"/><feFuncG type="linear" slope=".06" intercept=".95"/><feFuncB type="linear" slope=".06" intercept=".95"/><feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer>
+      <feComposite in="flit" in2="body" operator="in" result="flitIn"/>
+      <feBlend in="body" in2="flitIn" mode="multiply" result="tex1"/>
+      <feComposite in="dye" in2="body" operator="in" result="dyeIn"/>
+      <feBlend in="tex1" in2="dyeIn" mode="multiply" result="tex"/>
+      <!-- D. volume bombé : relief calculé sur l'alpha flouté, lumière douce du haut-gauche -->
+      <feGaussianBlur in="body" stdDeviation="2.6" result="dome"/>
+      <feDiffuseLighting in="dome" surfaceScale="5" diffuseConstant="1" lighting-color="#fff" result="shade0"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting>
+      <feComponentTransfer in="shade0" result="shade"><feFuncR type="linear" slope=".3" intercept=".7"/><feFuncG type="linear" slope=".3" intercept=".7"/><feFuncB type="linear" slope=".3" intercept=".7"/></feComponentTransfer>
+      <feComposite in="shade" in2="body" operator="in" result="shadeIn"/>
+      <feBlend in="tex" in2="shadeIn" mode="multiply" result="shaded"/>
+      <feSpecularLighting in="dome" surfaceScale="5" specularConstant=".12" specularExponent="6" lighting-color="#fff8ea" result="spec0"><feDistantLight azimuth="225" elevation="55"/></feSpecularLighting>
+      <feComposite in="spec0" in2="body" operator="in" result="spec"/>
+      <feComposite in="spec" in2="shaded" operator="arithmetic" k2="1" k3="1" result="volumed"/>
+      <!-- E. bouloches rares -->
+      <feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="1" seed="31" result="pn"/>
+      <feColorMatrix in="pn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 60 -46.5" result="p0"/>
+      <feMorphology in="p0" operator="dilate" radius=".55" result="p1"/>
+      <feGaussianBlur in="p1" stdDeviation=".45" result="p2"/>
+      <feMorphology in="body" operator="erode" radius="1.5" result="inner"/>
+      <feComposite in="p2" in2="inner" operator="in" result="pills"/>
+      <feFlood flood-color="#fff" flood-opacity=".4" result="pw"/><feComposite in="pw" in2="pills" operator="in" result="pillsHi"/>
+      <feOffset in="pills" dx=".5" dy=".7" result="ps0"/><feFlood flood-color="#3a2a1e" flood-opacity=".22" result="pd"/><feComposite in="pd" in2="ps0" operator="in" result="pillsSh"/>
+      <!-- F. assemblage + ombre portée d'un objet épais -->
+      <feMerge result="piece"><feMergeNode in="halo"/><feMergeNode in="volumed"/><feMergeNode in="pillsSh"/><feMergeNode in="pillsHi"/></feMerge>
+      <feDropShadow in="piece" dx="1.4" dy="3" stdDeviation="2" flood-color="#3b2a1c" flood-opacity=".4"/>
+    </filter>
+    <!-- fil de broderie : un peu irrégulier, avec son relief -->
+    <filter id="thread" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency=".5" numOctaves="1" seed="19" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale=".9" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feDropShadow in="d" dx=".3" dy=".6" stdDeviation=".35" flood-color="#2b1d12" flood-opacity=".4"/>
+    </filter>
+    <!-- nœud français : petite boule de fil -->
+    <radialGradient id="knot" cx="35%" cy="32%" r="65%"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#f3ecdc"/><stop offset="1" stop-color="#cfc4ad"/></radialGradient>
+    <!-- toile de lin et son assombrissement -->
+    <pattern id="linen" width="7" height="7" patternUnits="userSpaceOnUse">
+      <rect width="7" height="7" fill="#e8ddc7"/>
+      <line x1="0" y1="3.5" x2="7" y2="3.5" stroke="#d8cbb0" stroke-width="1.4"/>
+      <line x1="3.5" y1="0" x2="3.5" y2="7" stroke="#dccfb5" stroke-width="1.4"/>
+    </pattern>
+    <filter id="linenGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="2"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .16 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+    <linearGradient id="dusk" x1="0" x2="1" y1="0" y2="0">
+      <stop offset=".42" stop-color="#ffffff"/><stop offset=".58" stop-color="#8d8cae"/><stop offset=".72" stop-color="#3f3f74"/><stop offset="1" stop-color="#262a58"/>
+    </linearGradient>
+    <!-- épingle : tige d'acier + tête de verre -->
+    <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#8e949c"/><stop offset=".45" stop-color="#f4f6f8"/><stop offset="1" stop-color="#7d838b"/></linearGradient>
+    <radialGradient id="glassRed" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#ffd6cf"/><stop offset=".25" stop-color="#f05a4a"/><stop offset=".85" stop-color="#9c1f18"/><stop offset="1" stop-color="#5e0f0b"/></radialGradient>
+    <radialGradient id="glassBlue" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#d9f1ff"/><stop offset=".25" stop-color="#3f9be0"/><stop offset=".85" stop-color="#1a4f8a"/><stop offset="1" stop-color="#0f2f55"/></radialGradient>
+    <radialGradient id="glassYellow" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#fff7d0"/><stop offset=".25" stop-color="#f3c73a"/><stop offset=".85" stop-color="#a77d0c"/><stop offset="1" stop-color="#6a4e05"/></radialGradient>
+    <g id="pin">
+      <!-- dessinée verticale, pointe en bas, tête en (0,0) ; on la tourne à l'usage -->
+      <!-- ombre de la tige sur la toile, puis tige d'acier épaisse à pointe effilée -->
+      <path d="M1.2,3.2 L3.4,24.5 L1.8,25.8 L-1,3.6 Z" fill="#000" opacity=".2"/>
+      <path d="M-1.4,2 L1.4,2 L.55,22.5 L0,25 L-.55,22.5 Z" fill="url(#steel)"/>
+      <path d="M-.55,3 L-.25,21.5" stroke="#fff" stroke-width=".55" opacity=".85" stroke-linecap="round"/>
+      <path d="M.9,3 L.45,20" stroke="#5c6269" stroke-width=".35" opacity=".6" stroke-linecap="round"/>
+      <circle cx="0" cy="0" r="4.6" fill="#000" opacity=".24" transform="translate(1,1.4)"/>
+      <circle cx="0" cy="0" r="4.6" class="pinhead"/>
+      <circle cx="-1.5" cy="-1.7" r="1.25" fill="#fff" opacity=".9"/>
+      <ellipse cx="1.4" cy="2.2" rx="1.6" ry=".8" fill="#fff" opacity=".18"/>
+    </g>
+
+    <!-- ===== RISO (inchangé) ===== -->
+    <filter id="riso2" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 .05" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in" result="inked"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="2" seed="8" result="b"/>
+      <feDisplacementMap in="inked" in2="b" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".95" numOctaves="2" seed="3"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .2 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="duo">
+
+  <!-- ===================== FEUTRINE v6 ===================== -->
+  <div class="mockup">
+    <div class="mockup-header">Thème « Feutrine » v9 — laine feutrée à l'aiguille, grain fin, épingles à grosse tige</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Scène en laine feutrée">
+        <!-- toile de lin, qui s'assombrit vers la droite (la nuit) sans perdre sa trame -->
+        <rect width="320" height="200" fill="url(#linen)"/>
+        <rect width="320" height="200" fill="#e8ddc7" filter="url(#linenGrain)" opacity=".9"/>
+        <rect width="320" height="200" fill="url(#dusk)" style="mix-blend-mode:multiply"/>
+        <!-- étoiles : nœuds français de fil blanc -->
+        <g filter="url(#thread)">
+          <circle cx="262" cy="16" r="1.7" fill="url(#knot)"/><circle cx="286" cy="52" r="1.4" fill="url(#knot)"/><circle cx="312" cy="62" r="1.3" fill="url(#knot)"/><circle cx="236" cy="26" r="1.2" fill="url(#knot)"/><circle cx="300" cy="100" r="1.5" fill="url(#knot)"/><circle cx="250" cy="120" r="1.2" fill="url(#knot)"/>
+        </g>
+        <!-- lune et soleil -->
+        <use href="#g-moon" fill="#fff1c9" filter="url(#wool)"/>
+        <circle cx="28" cy="28" r="14" fill="#f3c74a" filter="url(#wool)"/>
+        <!-- rayons brodés au point de tige, jaune -->
+        <g fill="none" stroke="#e0a92a" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 1.3" filter="url(#thread)">
+          <path d="M28,8 L28,3 M28,48 L28,53 M8,28 L3,28 M48,28 L53,28 M14,14 L10.5,10.5 M42,42 L45.5,45.5 M42,14 L45.5,10.5 M14,42 L10.5,45.5"/>
+        </g>
+        <!-- tête : laine chair, bombée -->
+        <use href="#g-head" fill="#f1c19c" filter="url(#wool)"/>
+        <!-- cerveau : laine rose, bombée ; sillons brodés en blanc -->
+        <use href="#g-brain" fill="#ec8aa2" filter="url(#wool)"/>
+        <use href="#g-cereb" fill="#d4657f" filter="url(#wool)"/>
+        <use href="#g-stem" fill="#d4657f" filter="url(#wool)"/>
+        <g fill="none" stroke="#fff6f1" stroke-width="1.25" stroke-linecap="round" stroke-dasharray="2.6 1" filter="url(#thread)"><use href="#g-gyri"/></g>
+        <!-- nœuds français au bout des volutes -->
+        <g filter="url(#thread)"><circle cx="118" cy="54" r="1.6" fill="url(#knot)"/><circle cx="140" cy="58" r="1.6" fill="url(#knot)"/><circle cx="128" cy="84" r="1.6" fill="url(#knot)"/><circle cx="158" cy="78" r="1.6" fill="url(#knot)"/><circle cx="84" cy="62" r="1.4" fill="url(#knot)"/><circle cx="92" cy="82" r="1.4" fill="url(#knot)"/></g>
+        <!-- oreille brodée, œil fermé brodé (comme le renard), joue, sourire -->
+        <path d="M96,88 C88,84 84,96 92,102 C96,105 100,100 100,94 Z" fill="#e9ad88" filter="url(#wool)"/>
+        <g fill="none" stroke="#b7795a" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2.6 1" filter="url(#thread)"><path d="M164,129 Q170,127 173,122"/></g>
+        <circle cx="166" cy="104" r="5" fill="#f3a39a" opacity=".6" filter="url(#wool)"/>
+        <!-- bulle de rêve : laine crème, bombée, avec ses deux petites boules -->
+        <circle cx="202" cy="74" r="4.6" fill="#fbf3e0" filter="url(#wool)"/>
+        <circle cx="213" cy="60" r="6.6" fill="#fbf3e0" filter="url(#wool)"/>
+        <use href="#g-cloud" fill="#fbf3e0" filter="url(#wool)"/>
+        <!-- pouce-ogre : laine grise, ongle crème, visage brodé -->
+        <use href="#g-thumb" fill="#b9b2a0" filter="url(#wool)"/>
+        <use href="#g-nail" fill="#ebe4d2" filter="url(#wool)"/>
+        <g fill="none" stroke="#2e2a24" stroke-width="1.8" stroke-linecap="round" filter="url(#thread)">
+          <path d="M256,58 L263,61 M276,58 L269,61"/>
+          <path d="M257,77 Q266,71 275,77" stroke-dasharray="2.2 1.6"/>
+        </g>
+        <circle cx="260" cy="64" r="3.3" fill="#2e2a24" filter="url(#thread)"/><circle cx="272" cy="64" r="3.3" fill="#2e2a24" filter="url(#thread)"/>
+        <circle cx="259" cy="63" r=".9" fill="#fff" opacity=".7"/><circle cx="271" cy="63" r=".9" fill="#fff" opacity=".7"/>
+        <!-- cartes-souvenirs : pièces de feutrine crème, bord cousu, épinglées -->
+        <use href="#g-card1" fill="#fbf3e0" filter="url(#wool)"/>
+        <use href="#g-card2" fill="#fbf3e0" filter="url(#wool)"/>
+        <use href="#g-card3" fill="#fbf3e0" filter="url(#wool)"/>
+        <g fill="none" stroke="#c9b58d" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="2.2 2.6" filter="url(#thread)"><use href="#g-card1"/><use href="#g-card2"/><use href="#g-card3"/></g>
+        <use href="#g-icecream" fill="#f2a0b7" filter="url(#wool)"/>
+        <use href="#g-dog" fill="#c7975f" filter="url(#wool)"/>
+        <use href="#g-littlethumb" fill="#b9b2a0" filter="url(#wool)"/>
+        <!-- œil-bouton de l'enfant (ouvert, le jour) -->
+        <circle cx="150" cy="79" r="5.2" fill="#4b3a2e" filter="url(#thread)"/><circle cx="148.4" cy="78" r=".9" fill="#f1c19c"/><circle cx="151.6" cy="80" r=".9" fill="#f1c19c"/>
+        <!-- épingles à tête de verre, plus grandes, une par carte -->
+        <g transform="translate(156,152) rotate(-28)"><use href="#pin" style="--c:1"/></g>
+        <g transform="translate(222,150) rotate(22)"><use href="#pin"/></g>
+        <g transform="translate(240,154) rotate(-12)"><use href="#pin"/></g>
+        <!-- et une épingle qui tient la bulle au coin -->
+        <g transform="translate(292,34) rotate(30)"><use href="#pin"/></g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ===================== RISO (identique à la v5) ===================== -->
+  <div class="mockup">
+    <div class="mockup-header">Thème « Riso » (inchangé)</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Scène en risographe">
+        <rect width="320" height="200" fill="#f7f2e8"/>
+        <rect width="320" height="200" fill="#f7f2e8" filter="url(#paperGrain)"/>
+        <g style="mix-blend-mode:multiply">
+          <g fill="#0f6fb8" filter="url(#riso2)" transform="translate(.6,.4)">
+            <path d="M198,-6 L332,-6 L332,206 L176,206 Z" opacity=".55"/>
+            <use href="#g-thumb" opacity=".7"/><use href="#g-littlethumb" opacity=".7"/><use href="#g-dog" opacity=".8"/>
+          </g>
+          <g fill="#ffe14a" filter="url(#riso2)" transform="translate(-1.6,1.1)">
+            <use href="#g-head"/><circle cx="28" cy="28" r="14"/><use href="#g-moon"/>
+            <use href="#g-card1"/><use href="#g-card2"/><use href="#g-card3"/><use href="#g-cloud" opacity=".6"/>
+          </g>
+          <g fill="#ff4fa8" filter="url(#riso2)" transform="translate(1.5,-1.3)">
+            <use href="#g-brain"/><use href="#g-cereb"/><use href="#g-stem" opacity=".8"/>
+            <use href="#g-icecream"/><circle cx="166" cy="104" r="5" opacity=".6"/><use href="#g-nail" opacity=".5"/>
+          </g>
+          <g fill="none" stroke="#0f6fb8" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" filter="url(#riso2)" transform="translate(.3,.2)">
+            <use href="#g-head"/><use href="#g-ear"/><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/><use href="#g-stem"/>
+            <use href="#g-cloud"/><use href="#g-thumb"/><use href="#g-nail"/>
+            <circle cx="28" cy="28" r="14"/><use href="#g-moon"/>
+            <circle cx="202" cy="74" r="4.5"/><circle cx="213" cy="60" r="6.5"/>
+            <use href="#g-card1"/><use href="#g-card2"/><use href="#g-card3"/><use href="#g-icecream"/><use href="#g-dog"/><use href="#g-littlethumb"/>
+            <circle cx="150" cy="78" r="3.4" fill="#0f6fb8"/><path d="M142,70 Q150,66 158,70"/><path d="M164,128 Q170,126 173,122"/>
+            <path d="M256,58 L263,61 M276,58 L269,61"/><circle cx="260" cy="64" r="1.8" fill="#0f6fb8"/><circle cx="272" cy="64" r="1.8" fill="#0f6fb8"/>
+            <path d="M257,77 Q266,71 275,77"/><path d="M261,75 L261,79 M266,73 L266,78 M271,75 L271,79"/>
+          </g>
+          <g fill="#f7f2e8"><circle cx="262" cy="16" r="1.4"/><circle cx="286" cy="52" r="1.2"/><circle cx="312" cy="60" r="1"/><circle cx="230" cy="20" r="1"/></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<h3>Zoom sur la laine (× 2,6)</h3>
+<div class="zoom">
+  <div class="mockup">
+    <div class="mockup-header">Le cerveau brodé, le halo de fibres, le bombé</div>
+    <div class="mockup-body">
+      <svg viewBox="80 40 120 75" role="img" aria-label="Zoom laine feutrée">
+        <rect x="80" y="40" width="120" height="75" fill="url(#linen)"/>
+        <rect x="80" y="40" width="120" height="75" fill="#e8ddc7" filter="url(#linenGrain)" opacity=".9"/>
+        <use href="#g-head" fill="#f1c19c" filter="url(#wool)"/>
+        <use href="#g-brain" fill="#ec8aa2" filter="url(#wool)"/>
+        <use href="#g-cereb" fill="#d4657f" filter="url(#wool)"/>
+        <g fill="none" stroke="#fff6f1" stroke-width="1.25" stroke-linecap="round" stroke-dasharray="2.6 1" filter="url(#thread)"><use href="#g-gyri"/></g>
+        <g filter="url(#thread)"><circle cx="118" cy="54" r="1.6" fill="url(#knot)"/><circle cx="140" cy="58" r="1.6" fill="url(#knot)"/><circle cx="128" cy="84" r="1.6" fill="url(#knot)"/><circle cx="158" cy="78" r="1.6" fill="url(#knot)"/><circle cx="84" cy="62" r="1.4" fill="url(#knot)"/><circle cx="92" cy="82" r="1.4" fill="url(#knot)"/></g>
+        <path d="M96,88 C88,84 84,96 92,102 C96,105 100,100 100,94 Z" fill="#e9ad88" filter="url(#wool)"/>
+        <circle cx="150" cy="79" r="5.2" fill="#4b3a2e" filter="url(#thread)"/><circle cx="148.4" cy="78" r=".9" fill="#f1c19c"/><circle cx="151.6" cy="80" r=".9" fill="#f1c19c"/>
+        <circle cx="166" cy="104" r="5" fill="#f3a39a" opacity=".6" filter="url(#wool)"/>
+      </svg>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Une carte épinglée, côté nuit : contraste sur la toile sombre</div>
+    <div class="mockup-body">
+      <svg viewBox="180 130 120 75" role="img" aria-label="Zoom carte épinglée">
+        <rect x="180" y="130" width="120" height="75" fill="url(#linen)"/>
+        <rect x="180" y="130" width="120" height="75" fill="#e8ddc7" filter="url(#linenGrain)" opacity=".9"/>
+        <rect x="180" y="130" width="120" height="75" fill="url(#dusk)" style="mix-blend-mode:multiply"/>
+        <circle cx="250" cy="138" r="1.4" fill="url(#knot)" filter="url(#thread)"/><circle cx="290" cy="196" r="1.3" fill="url(#knot)" filter="url(#thread)"/>
+        <use href="#g-card2" fill="#fbf3e0" filter="url(#wool)"/>
+        <use href="#g-card3" fill="#fbf3e0" filter="url(#wool)"/>
+        <g fill="none" stroke="#c9b58d" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="2.2 2.6" filter="url(#thread)"><use href="#g-card2"/><use href="#g-card3"/></g>
+        <use href="#g-dog" fill="#c7975f" filter="url(#wool)"/>
+        <use href="#g-littlethumb" fill="#b9b2a0" filter="url(#wool)"/>
+        <g transform="translate(222,150) rotate(22)"><use href="#pin"/></g>
+        <g transform="translate(240,154) rotate(-12)"><use href="#pin"/></g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* têtes d'épingles : rouge par défaut, variées à l'usage */
+  .pinhead{fill:url(#glassRed)}
+  g[transform*="translate(222"] .pinhead{fill:url(#glassBlue)}
+  g[transform*="translate(292"] .pinhead{fill:url(#glassYellow)}
+</style>
+
+<div class="why">
+  <b>Ce que j'ai pris au renard.</b>
+  <ul>
+    <li><b>Laine feutrée à l'aiguille</b> plutôt que feutrine découpée : chaque pièce est bombée (relief calculé sur la forme), avec une lumière douce venant du haut-gauche et un petit reflet mat sur le sommet.</li>
+    <li><b>Halo de fibres</b> sur tout le contour, de la couleur de la pièce, à demi transparent : c'est lui qui fait « laine » et non « papier ».</li>
+    <li><b>Broderies blanches</b> : les sillons du cerveau sont des volutes au point de tige terminées par des nœuds français, comme les arabesques sur le flanc du renard. L'œil du côté nuit est fermé, brodé d'un trait courbe. Les étoiles sont des nœuds français de fil blanc sur la toile.</li>
+    <li><b>Teinture légèrement irrégulière</b> : taches plus claires et plus foncées dans la laine, en plus des fibres fines et de quelques bouloches rares.</li>
+    <li><b>La toile s'assombrit</b> elle-même vers la nuit : le lin garde sa trame, et les pièces crème, le fil blanc et le halo clair gardent leur contraste sur le bleu nuit.</li>
+    <li><b>Épingles</b> plus grandes et plus vraies : tige d'acier avec reflet, tête de verre rouge, bleue ou jaune avec reflet et ombre portée. Une par carte, et une qui tient la bulle du rêve.</li>
+  </ul>
+  Dis-moi si le bombé est trop fort ou pas assez, si le halo doit être plus ébouriffé, et si l'assombrissement de la toile te paraît lisible.
+</div>

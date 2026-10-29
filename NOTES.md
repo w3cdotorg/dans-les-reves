@@ -181,3 +181,15 @@ en dégradé radial rouge/bleu/jaune avec reflet, ombre de la tête et de la tig
 Point de vigilance de dessin repéré sur la maquette : l'oreille et le cervelet se
 chevauchent dans la géométrie de test ; dans le vrai dessin, le cervelet est derrière et
 au-dessus du conduit auditif, l'oreille devant.
+
+## 2026-10-29 — Grain de la laine affiné (v8)
+
+Retour du propriétaire sur la v7 : « un tout petit peu grossier, pour l'intérieur des
+formes notamment ». Banc d'essai de 4 finesses de fibres (scène + zoom, capture) :
+la v7 (`fractalNoise .75×.6`, 4 octaves, slope .4) lisait comme du papier froissé. Retenu :
+**fibres `fractalNoise 2×1.6`, 2 octaves, surfaceScale 1.05, slope .27 / intercept .765**,
+teinture presque imperceptible (slope .06 / intercept .95). Règle : la laine feutrée à
+l'aiguille est **fine et régulière** ; la matière se lit au bord (halo, bombé) plus que
+dans la surface, qui doit rester calme.
+
+Épingles (v9, demande du propriétaire) : **tige plus grosse** — un trapèze d'acier de 2,8 px à la tête qui s'effile en pointe sur 25 px, fil de lumière blanc + fil d'ombre gris, ombre de la tige portée sur la toile ; tête de verre r 4,6 avec reflet principal et petit reflet secondaire.
