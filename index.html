@@ -3059,9 +3059,11 @@ const PLURIEL = {
 const pluriel = g => g === 'mp' || g === 'fp';
 const VOYELLE = /^[aeiouyéèêàâîôœ]/i;
 /* « un chien » → « le chien », « une glace » → « la glace », « un orage » → « l'orage »,
-   « des pirates » / « de grands yeux » → « les … » ; « le pouce géant », « mamie »,
+   « des pirates » / « de grands yeux » → « les … », « deux grands bras » → « les deux
+   grands bras » ; « le pouce géant », « mamie »,
    « papa et maman » restent tels quels */
 function defini(nom){
+  if(/^deux /.test(nom)) return 'les ' + nom;
   const m = /^(un|une|des|de) (.*)$/.exec(nom);
   if(!m) return nom;
   if(m[1] === 'des' || m[1] === 'de') return 'les ' + m[2];
@@ -3135,6 +3137,8 @@ function composeDream(slugs, opts = {}){
    - base au pluriel : la greffe passe au pluriel (PLURIEL), « des pirates » ;
    - {MODIF} s'accorde avec la greffe (MODIFS.f / mp / fp), ou avec la base en mode
      « seul » ; « qui n'obéit pas » passe à l'imparfait du récit (n'obéissait pas) ;
+     en mode « seul », « était qui n'obéissait pas » devient « ne voulait pas obéir »
+     (« ne voulaient pas obéir » au pluriel) ;
    - « était … l'a rejoué » du gabarit « seul » s'accorde (était / étaient, l'a
      rejouée, les a rejoués, les a rejouées) ;
    - « c'est {VRAI} » : « c'est une statue » si la base est le pouce de César, sinon
@@ -3149,7 +3153,10 @@ function phraseDuReve({ mode, base, greffe, reconfort, modif }, genre){
     const parGreffe = !base.base;
     const g = parGreffe ? base.greffe.g : base.g;
     const sujet = parGreffe ? defini(base.greffe.nom) : (base.ton || defini(base.nom));
-    p = PHRASES.seul.replace('{BASE}', sujet).replace('{MODIF}', formeModif(g));
+    p = PHRASES.seul.replace('{BASE}', sujet);
+    /* « était qui n'obéissait pas » ne se dit pas : le verbe remplace « était » */
+    if(modif === 'desobeit') p = p.replace('était {MODIF}', pluriel(g) ? 'ne voulaient pas obéir' : 'ne voulait pas obéir');
+    else p = p.replace('{MODIF}', formeModif(g));
     if(pluriel(g)) p = p.replace(' était ', ' étaient ').replace("l'a rejoué", g === 'fp' ? 'les a rejouées' : 'les a rejoués');
     else if(g === 'f') p = p.replace("l'a rejoué", "l'a rejouée");
   }else{

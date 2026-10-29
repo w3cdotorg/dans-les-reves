@@ -25,6 +25,8 @@ function propre(p, ctx){
   assert.ok(!/\b(le|la|Le|La) [aeiouyéèêàâîôœ]/.test(p), ctx + ' : élision manquante → ' + p);
   assert.ok(!/\bmon doudou\b/.test(p), ctx + ' : « mon doudou » dans la bouche du narrateur → ' + p);
   assert.ok(!/undefined|null|NaN/.test(p), ctx + ' → ' + p);
+  assert.ok(!/\bétai(en)?t qui\b/.test(p), ctx + ' : « était qui » → ' + p);
+  assert.ok(!/^Dans le rêve, deux /.test(p), ctx + ' : sujet « deux … » sans article → ' + p);
   for(const mot of INTERDITS) assert.ok(!p.toLowerCase().includes(mot), ctx + ' : « ' + mot + ' » → ' + p);
 }
 
@@ -167,7 +169,8 @@ test('toutes les paires de cartes font un rêve lisible et une phrase correcte',
       assert.ok(r.phrase.includes(MODIFS[r.modif].nom) || r.phrase.includes(MODIFS[r.modif].f)
         || r.phrase.includes(MODIFS[r.modif].mp) || r.phrase.includes(MODIFS[r.modif].fp)
         || r.phrase.includes(MODIFS[r.modif].nom.replace("n'obéit", "n'obéissait"))
-        || r.phrase.includes(MODIFS[r.modif].mp.replace("n'obéissent", "n'obéissaient")), ctx + ' : le modificateur est nommé → ' + r.phrase);
+        || r.phrase.includes(MODIFS[r.modif].mp.replace("n'obéissent", "n'obéissaient"))
+        || (r.modif === 'desobeit' && /ne voulai(en)?t pas obéir/.test(r.phrase)), ctx + ' : le modificateur est nommé → ' + r.phrase);
       if(r.greffe){
         assert.notEqual(r.greffe.slug, r.base.slug, ctx);
         assert.ok(r.greffe.charge >= 0, ctx + ' : une carte apaisante n\'est jamais greffe');
@@ -220,4 +223,30 @@ test('aucune pièce .w ne porte d\'attribut transform dans les dessins du rêve'
   const ecran = html.match(/<g id="g-ecran"[\s\S]*?<!-- ECRAN-END -->/);
   assert.ok(ecran, 'écran');
   for(const el of ecran[0].match(/<[^>]*class="w[ "][^>]*>/g) || []) assert.ok(!/\stransform=/.test(el), el.slice(0, 80));
+});
+
+test('mode « seul » : chaque carte seule, toutes graines et genres, une phrase correcte', () => {
+  for(const c of CARTES) for(const genre of [undefined, 'garcon', 'fille']) for(const seed of [0, 1, 2]){
+    const r = composeDream([c.slug], { seed, genre });
+    const ctx = `${c.slug} seul (${genre}, ${seed})`;
+    assert.equal(r.mode, 'seul', ctx);
+    assert.ok(!/étai(en)?t qui/.test(r.phrase), ctx + ' → ' + r.phrase);
+    propre(r.phrase, ctx);
+  }
+});
+
+test("« je me suis fâché » seul : ne voulaient pas obéir, accordé au pluriel", () => {
+  const r = composeDream(['fache'], { seed: 0 });
+  assert.equal(r.modif, 'desobeit');
+  assert.equal(r.phrase, "Dans le rêve, les sourcils fâchés ne voulaient pas obéir, parce que ton cerveau les a rejoués.");
+  const p = composeDream(['fache', 'pirate'], { seed: 0 });
+  assert.ok(p.phrase.includes('ne voulaient pas obéir'), p.phrase);
+  assert.ok(!/étai(en)?t qui/.test(p.phrase), p.phrase);
+});
+
+test('« deux grands bras » prend son article en mode « seul »', () => {
+  for(const seed of [0, 1, 2]){
+    const r = composeDream(['calin'], { seed });
+    assert.ok(r.phrase.startsWith('Dans le rêve, les deux grands bras étaient '), r.phrase);
+  }
 });
