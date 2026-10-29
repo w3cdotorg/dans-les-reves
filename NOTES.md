@@ -195,3 +195,16 @@ dans la surface, qui doit rester calme.
 Épingles (v9, demande du propriétaire) : **tige plus grosse** — un trapèze d'acier de 2,8 px à la tête qui s'effile en pointe sur 25 px, fil de lumière blanc + fil d'ombre gris, ombre de la tige portée sur la toile ; tête de verre r 4,6 avec reflet principal et petit reflet secondaire.
 
 Épingles **plantées** (v10, retour du propriétaire : « on ne dirait pas qu'elle est plantée ») : on ne voit que ~10 px de tige, qui entre dans la laine par un petit creux sombre entouré de fibres repoussées en clair ; l'ombre de la tige ne court que sur la partie visible. Validé en capture. Épingle déclarée « parfaite » par le propriétaire → **référence figée** pour le dessin final.
+
+## 2026-10-29 — Spec de design écrite, en relecture
+
+`docs/superpowers/specs/2026-10-29-dans-les-reves-design.md`. Choix structurants pris
+dans la spec (à valider par le propriétaire) : deux curseurs croisés comme le volcan
+(TEMPS : journée / soir / nuit profonde / nuit des rêves / matin ; VUE : dehors / dedans /
+tout près) ; cartes-souvenirs avec **catégorie + charge**, 4 max par journée ; rêve
+fabriqué par **base + greffe + modificateur** à partir des 2 cartes les plus chargées,
+phrase à gabarit fixe ; **télécommande** = carte réconfort + transformation ridicule/gentille
++ chanson (embed) + phrase-clé ; mode guidé « L'histoire du pouce » ; second mini-jeu
+« Rêve ou pour de vrai ? » ; carte « Pour les parents » ; budget de filtres + version
+allégée automatique. Relecture par un constructeur neutre lancée (brainstorming skill,
+builder check) avant remise au propriétaire.
