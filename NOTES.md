@@ -344,3 +344,71 @@ décide (« c'est une statue » pour le pouce). Mais « c'est {VRAI} » rempli a
 pas pour de vrai » donnerait « c'est ce n'est pas pour de vrai » : à régler là-bas. De
 même, les ressentis en `{C1}`/`{C2}` (« mélangé un vélo avec j'ai ri ») sonnent mal ;
 `greffe.nom` est probablement le meilleur choix pour eux.
+
+## 2026-10-29 — Task 3 : la tête et le cerveau
+
+**Coordonnées retenues** (scène 900 × 560, centres des boîtes englobantes, plan ±10 px) :
+tête x 159–507 / y 51–562, bout du nez (507,250), bouche (468–488, 294–309), œil-bouton
+(456,194) r 10, conduit auditif (299,251), cou x 304–414 ; cerveau x 198–467 / y 84–300 ;
+sillon central (330,88) → (380,226) ; sillon latéral (421,231) → (262,211) ; pôle temporal
+(434,252) ; amygdale (356,248) ; hippocampe de (351,243) à (300,210) (queue enroulée vers le
+haut) ; thalamus (335,200) ; hypothalamus (347,222) ; chiasma (375,232) ; hypophyse (371,253)
+sur sa tige ; pinéale (300,196) ; corps calleux de (254,190) à (421,190), sommet y 154 ;
+cervelet x 196–316 / y 258–327, corps centré ≈ (240,292), séparé du cerveau par ~10 px de
+« coussin d'eau » ; tronc (320,243) → (330,334), pont bombé jusqu'à x 349 ; moelle x 323–338
+jusqu'en bas du cou ; nerf optique de (449,197) à (375,232).
+
+**Petites libertés anatomiques assumées.** Le chiasma est 4 px DEVANT l'hypophyse (recherche
+§2.8 : « en avant de l'hypophyse ») alors que le plan les donnait dans l'autre ordre (365 vs
+368). L'hypophyse est descendue de 7 px pour ne pas toucher l'amygdale : en projection
+latérale elles se superposent vraiment (l'amygdale est 2 cm plus en dehors). Le tronc commence
+à y 234 (et non 250) pour rejoindre le thalamus ; son sommet passe sous l'hippocampe. Le
+cervelet a un petit « bras » (pédoncule) qui le rattache au tronc : séparé du cerveau, pas du
+tronc.
+
+**Astuces de dessin.**
+- Tracés générés UNE fois par un petit script Python + shapely (hors dépôt) à partir de points
+  d'ancrage écrits à la main, puis figés dans le HTML : courbes de Catmull-Rom à tangentes
+  bornées par la corde (pas de boucles). shapely a servi à trois choses impossibles à la main :
+  (1) découper le cerveau en 4 lobes par les deux sillons et la ligne pariéto-occipitale,
+  chaque lobe rentré de 2,4 px → le cortex (plus sombre, 2,6 px plus large que le cerveau)
+  apparaît en creux entre les lobes : les sillons sont de vrais sillons ; (2) les bandes
+  crâne / coussin d'eau / calotte de cheveux par différences d'offsets ; (3) les tubes
+  effilés (hippocampe, nerf, corps calleux, tronc, moelle) = enveloppes convexes de cercles
+  successifs.
+- Le coussin d'eau est UNE pièce pleine sous le cerveau et le cervelet (union, +14 −5 px :
+  fermeture qui comble l'espace entre lobe occipital et cervelet) : il ne se voit qu'en liseré.
+- Cheveux : cercles posés sur le contour de la tête, rayon qui ondule (sinus, période 31 px)
+  et s'amincit vers la nuque, + trois mèches de frange en tubes ; fils plus clairs brodés
+  dessus (`.meches`, `color-mix` de `--hair`). Un épi en fil épais sur le dessus.
+- Régions profondes (`.profond`) : opacité .85 + duplicata du tracé en `.fil.couture`
+  (1,7 px, point plus long) ; l'hippocampe a un œil (nœud brun), l'hypothalamus deux aiguilles
+  d'horloge brodées, le chiasma une croix brodée, l'oreille un petit escargot en spirale.
+- Oreille à opacité .72 par-dessus le cortex (elle est à la surface, le cerveau est dessous).
+- Visage prêt pour la nuit : `#p-paupiere` (laine peau) et `#fil-oeil-ferme` (courbe + 3 cils)
+  à opacité 0 ; `#p-sourcil` est un `<g>` (la pièce .w dedans) pour que `.fronce` (transform
+  CSS) ne remplace pas le décalage d'encre riso de la pièce ; pivot au bout arrière
+  (442,183), `transform-box:view-box`. `#p-pineale.allume` : trois drop-shadow violets.
+
+**Ce qui a raté.**
+- Calotte de cheveux v1 (bande de 17 px + boucles r 8,5 tous les 17 px) : un cadre perlé
+  brun, pas des cheveux. v2 (bande fine + petites boucles) : une chenille. v3 retenue : épaisse
+  sur le dessus, ondulée large, effilée à la nuque, frange en mèches.
+- Les mèches de frange disparaissaient : elles étaient soustraites avec l'intérieur de la tête
+  (`difference(H.buffer(-6))`) ; il faut les unir APRÈS la soustraction.
+- Riso v1 : cortex rose + lobes roses + tête jaune en multiply = rouge sang, thalamus noir,
+  hippocampe invisible. Corrigé : cortex en voile (.4), régions profondes et oreille sans
+  multiply (« imprimées en réserve »).
+- Playwright MCP refuse `file:` : servir le dossier (`python3 -m http.server`, port libre ;
+  8765 est déjà pris par autre chose) ; son `browser_resize` ne répond pas (fenêtre 420 px).
+  Dans cette session Playwright les rAF sont ralentis (5,7 s pour deux images) et la page
+  s'allège toute seule : ne pas en conclure que le rendu est lent. En Chrome headless 1400 ×
+  1000 : premier rendu 5–22 ms (Task 1 seule : 14 ms), pas d'allègement.
+
+**Budget mesuré** : `#g-dedans .w:not(.lite)` = **18** (dont `#p-cheveux-long`, caché chez
+le garçon) ; 8 pièces `.w.lite` (pinéale, hypothalamus, amygdale, hypophyse, joue, œil,
+paupière, sourcil).
+
+**Avatar** : la 2e carnation (par défaut) prend la laine chair de la palette (#f1c19c /
+#c98e66) au lieu de #f7c79c / #d9976a du corps, pour que la tête par défaut soit exactement la
+palette du plan. Pastilles de 44 px (cible au pouce), pompons de laine.
