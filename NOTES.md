@@ -44,3 +44,30 @@ chez les 4-5 ans) lancée en arrière-plan ; résultat attendu dans
 `docs/recherche-cerveau-sommeil.md`.
 
 **Nom.** Le propriétaire a tranché : `dans-les-reves` (et non « dans ma tête »). Le titre affiché sera « Dans les rêves ».
+
+## 2026-10-29 — Planche contact des styles
+
+Huit styles proposés sur **la même géométrie** (tête de profil, cerveau, pouce-ogre rêvé,
+jour à gauche / nuit à droite), pour que seule la manière compte :
+`docs/brainstorm/2026-10-29-planche-styles.html` (fragment HTML servi par le compagnon
+visuel de brainstorming ; les `<symbol>`/filtres partagés sont en tête du fichier).
+
+| | Style | Références | Pourquoi ici |
+|---|---|---|---|
+| A | Risographe 3 encres | Blexbolex, Hélium, éd. 2024, Tom Gauld | le mélange des encres = le mélange des souvenirs |
+| B | Théâtre d'ombres | Lotte Reiniger, Michel Ocelot | le cerveau-lanterne, le rêve en ombre chinoise projetée |
+| C | Papier découpé | Eric Carle, Leo Lionni, Lotta Nieminen | les souvenirs = bouts de papier recollés autrement |
+| D | Planche anatomique 1900 | Larousse, Bourgery, Brödel, Corpus | le sérieux savant, et l'ogre légendé comme le cervelet |
+| E | Sérigraphie années 60 | Alain Grée, Dick Bruna, Paul Rand | aplats chaleureux, très lisibles, pas mièvres |
+| F | Géométrique minimal | Charley Harper, Jean Jullien, Munari | le moins de traits possible, chacun juste |
+| G | Craie sur ardoise | tableau d'école, Kentridge (doux) | tout a l'air dessiné à l'instant, on efface et on redessine |
+| H | Feutrine et fil | livres en tissu, stop-motion feutre | le monde du doudou, rassurant |
+
+Techniques SVG vérifiées en rendu (capture Chrome headless) : grain papier et bords
+déchirés par `feTurbulence` + `feDisplacementMap`, craie par turbulence + masque,
+feutrine par turbulence + ombre portée, trames de points et hachures par `<pattern>`,
+encres riso par `mix-blend-mode:multiply` avec décalage de calage. Tout tient dans une
+page sans dépendance.
+
+Explicitement écarté : le planétarium néon / verre dépoli du corps et du volcan
+(« le style habituel » de la famille, anti-objectif du propriétaire).

@@ -1,0 +1,392 @@
+<h2>Planche contact : huit styles pour « Dans les rêves »</h2>
+<p class="subtitle">Même scène partout (une tête d'enfant de profil, son cerveau, le pouce-ogre qu'il rêve, le jour à gauche, la nuit à droite) pour comparer les styles et non les sujets. Tu peux en cocher deux : un pour le jour, un pour la nuit.</p>
+
+<style>
+  .cards{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
+  .card-image svg{width:100%;height:100%;display:block}
+  .card-body p{margin:.25rem 0}
+  .card-body .refs{font-size:.78rem;opacity:.85}
+  .card-body .fit{font-size:.82rem}
+  .why{margin:2rem 0 0;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:var(--bg-secondary);border-radius:8px;font-size:.9rem}
+</style>
+
+<!-- géométrie et filtres partagés -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- tête de profil, regard vers la droite -->
+    <path id="g-head" d="M72,200 C74,166 80,150 82,140 C55,128 40,95 52,62 C62,36 95,18 128,22 C160,26 180,52 176,80 C180,86 186,92 190,98 C194,104 190,108 184,109 C185,116 183,120 178,122 C181,128 178,132 172,133 C176,142 166,148 152,146 C148,158 146,170 146,200 Z"/>
+    <path id="g-ear" d="M96,88 C88,84 84,96 92,102 C96,105 100,100 100,94"/>
+    <path id="g-brain" d="M70,70 C66,45 95,30 125,32 C150,34 168,50 166,72 C168,86 150,96 128,94 C110,100 95,98 86,92 C72,90 68,82 70,70 Z"/>
+    <path id="g-gyri" d="M86,58 C96,48 104,60 112,50 M120,42 C128,52 138,44 146,54 M94,80 C104,70 112,84 122,74 M134,66 C142,76 150,68 158,78"/>
+    <ellipse id="g-cereb" cx="92" cy="102" rx="14" ry="9"/>
+    <path id="g-stem" d="M100,108 L104,122 L112,122 L108,106 Z"/>
+    <path id="g-cloud" d="M225,75 C212,75 212,50 230,48 C232,28 262,22 272,38 C292,30 310,50 300,66 C308,80 290,92 272,84 C262,96 240,94 236,82 C230,84 224,82 225,75 Z"/>
+    <path id="g-thumb" d="M250,88 L250,60 C250,46 258,36 266,36 C274,36 282,44 282,58 L282,88 Z"/>
+    <ellipse id="g-nail" cx="266" cy="49" rx="8" ry="10"/>
+    <path id="g-ogre" d="M258,62 L264,66 M274,62 L268,66 M256,78 Q266,72 276,78 M260,76 L260,80 M266,74 L266,79 M272,76 L272,80"/>
+    <path id="g-rays" d="M28,8 L28,2 M28,48 L28,54 M8,28 L2,28 M48,28 L54,28 M14,14 L10,10 M42,42 L46,46 M42,14 L46,10 M14,42 L10,46"/>
+    <path id="g-moon" d="M300,10 A14,14 0 1 0 300,38 A11,11 0 1 1 300,10 Z"/>
+    <g id="g-stars"><circle cx="262" cy="16" r="1.4"/><circle cx="286" cy="52" r="1.2"/><circle cx="312" cy="60" r="1"/><circle cx="230" cy="20" r="1"/></g>
+
+    <!-- grain papier -->
+    <filter id="f-grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .18 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+    <!-- bord déchiré / découpé -->
+    <filter id="f-paper" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="2" result="fib"/>
+      <feColorMatrix in="fib" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .14 0" result="fib2"/>
+      <feComposite in="fib2" in2="d" operator="in" result="fib3"/>
+      <feBlend in="d" in2="fib3" mode="multiply" result="t"/>
+      <feDropShadow in="t" dx="1.2" dy="2.2" stdDeviation="1.4" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+    <!-- craie -->
+    <filter id="f-chalk" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="5" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".6" numOctaves="2" seed="9" result="m"/>
+      <feColorMatrix in="m" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.6 -.3" result="mask"/>
+      <feComposite in="d" in2="mask" operator="in"/>
+    </filter>
+    <!-- feutrine : bord pelucheux + petite ombre -->
+    <filter id="f-felt" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency=".35" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="11" result="fz"/>
+      <feColorMatrix in="fz" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .22 0" result="fz2"/>
+      <feComposite in="fz2" in2="d" operator="in" result="fz3"/>
+      <feBlend in="d" in2="fz3" mode="multiply" result="t"/>
+      <feDropShadow in="t" dx=".8" dy="1.6" stdDeviation="1" flood-color="#5a4630" flood-opacity=".35"/>
+    </filter>
+    <!-- riso : léger grain d'encre -->
+    <filter id="f-ink" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="21" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.2 .15" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in"/>
+    </filter>
+    <!-- halftone sérigraphie -->
+    <pattern id="p-dots" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.2" fill="#1f3b5c"/></pattern>
+    <pattern id="p-dots-light" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#e8622b"/></pattern>
+    <!-- hachures gravure -->
+    <pattern id="p-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="0" y1="0" x2="0" y2="4" stroke="#3b2a1a" stroke-width=".7"/></pattern>
+    <pattern id="p-hatch2" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-50)"><line x1="0" y1="0" x2="0" y2="3" stroke="#3b2a1a" stroke-width=".6"/></pattern>
+    <!-- dentelle du théâtre d'ombres -->
+    <pattern id="p-lace" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="2.2" fill="#ffd27a"/><circle cx="0" cy="0" r="1" fill="#ffd27a"/><circle cx="9" cy="9" r="1" fill="#ffd27a"/></pattern>
+    <!-- toile de lin (feutrine) -->
+    <pattern id="p-linen" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#e6dcc8"/><line x1="0" y1="3" x2="6" y2="3" stroke="#d8cdb6" stroke-width="1"/><line x1="3" y1="0" x2="3" y2="6" stroke="#d8cdb6" stroke-width="1"/></pattern>
+    <!-- fond ombres -->
+    <radialGradient id="rg-dusk" cx="30%" cy="110%" r="110%"><stop offset="0" stop-color="#ffb347"/><stop offset=".35" stop-color="#e8605a"/><stop offset=".7" stop-color="#5a2d6e"/><stop offset="1" stop-color="#140f33"/></radialGradient>
+    <radialGradient id="rg-lantern" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#fff2c2"/><stop offset="1" stop-color="#ff9f3f"/></radialGradient>
+    <radialGradient id="rg-smudge" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
+
+<div class="cards" data-multiselect>
+
+  <!-- A — Risographe -->
+  <div class="card" data-choice="A-riso" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style risographe">
+        <rect width="320" height="200" fill="#f6f1e7"/>
+        <rect width="320" height="200" fill="#f6f1e7" filter="url(#f-grain)"/>
+        <!-- ciel : bleu la nuit à droite, en bande -->
+        <rect x="200" y="0" width="120" height="200" fill="#0078bf" opacity=".22" transform="skewX(-8)"/>
+        <g style="mix-blend-mode:multiply" filter="url(#f-ink)">
+          <!-- encre jaune -->
+          <g fill="#ffe800" transform="translate(-1.5,1)">
+            <use href="#g-head"/><circle cx="28" cy="28" r="13"/><use href="#g-cloud" opacity=".55"/>
+          </g>
+          <!-- encre rose -->
+          <g fill="#ff48b0" transform="translate(1.6,-1.2)">
+            <use href="#g-brain"/><use href="#g-cereb"/><use href="#g-thumb" opacity=".75"/><use href="#g-moon"/>
+          </g>
+          <!-- encre bleue : contours -->
+          <g fill="none" stroke="#0078bf" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(.4,.3)">
+            <use href="#g-head"/><use href="#g-ear"/><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/><use href="#g-stem"/>
+            <use href="#g-cloud"/><use href="#g-thumb"/><use href="#g-nail"/><use href="#g-ogre"/>
+            <use href="#g-rays"/><circle cx="28" cy="28" r="13"/>
+            <circle cx="150" cy="78" r="3.5" fill="#0078bf"/><path d="M142,70 Q150,66 158,70"/><path d="M164,128 Q170,126 173,122"/>
+            <circle cx="202" cy="74" r="4"/><circle cx="213" cy="60" r="6"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A · Risographe trois encres</h3>
+      <p class="fit">Jaune, rose fluo, bleu : trois encres qui se superposent en multiply et se décalent un peu. Le jour est jaune, la nuit est bleue, le rêve naît là où les encres se mélangent : <b>le mélange des couleurs raconte le mélange des souvenirs</b>.</p>
+      <p class="refs">Références : Blexbolex (<i>L'Imagier des gens</i>), les éditions 2024 et Hélium, Tom Gauld, les affiches riso des ateliers Papier Machine.</p>
+      <p class="refs">SVG : facile (mix-blend-mode, filtres de grain), animations propres par couche.</p>
+    </div>
+  </div>
+
+  <!-- B — Théâtre d'ombres -->
+  <div class="card" data-choice="B-ombres" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style théâtre d'ombres">
+        <rect width="320" height="200" fill="url(#rg-dusk)"/>
+        <g fill="#fff3c4"><use href="#g-stars"/><use href="#g-moon" opacity=".9"/></g>
+        <circle cx="28" cy="28" r="13" fill="#fff0b8" opacity=".95"/>
+        <!-- silhouette -->
+        <use href="#g-head" fill="#120b1e"/>
+        <!-- le cerveau est une lanterne découpée -->
+        <use href="#g-brain" fill="url(#rg-lantern)"/>
+        <use href="#g-brain" fill="url(#p-lace)" opacity=".9"/>
+        <g fill="none" stroke="#120b1e" stroke-width="2.4" stroke-linecap="round"><use href="#g-gyri"/></g>
+        <use href="#g-cereb" fill="#ff9f3f"/>
+        <use href="#g-stem" fill="#ff9f3f"/>
+        <!-- bulle : ombre chinoise du pouce-ogre sur un écran lumineux -->
+        <use href="#g-cloud" fill="#ffe6a8" opacity=".92"/>
+        <use href="#g-thumb" fill="#120b1e"/>
+        <use href="#g-nail" fill="#2a1d3a"/>
+        <g fill="none" stroke="#ffe6a8" stroke-width="1.6" stroke-linecap="round"><use href="#g-ogre"/></g>
+        <circle cx="202" cy="74" r="4" fill="#ffe6a8"/><circle cx="213" cy="60" r="6" fill="#ffe6a8"/>
+        <!-- œil fermé -->
+        <path d="M143,78 Q150,83 157,78" fill="none" stroke="#ffd27a" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B · Théâtre d'ombres</h3>
+      <p class="fit">Silhouettes noires sur un ciel qui passe du crépuscule à la nuit, et le cerveau est une <b>lanterne découpée comme une dentelle</b> qui s'allume quand on dort. Le rêve est une ombre chinoise projetée sur un écran : la métaphore du projecteur devient littérale.</p>
+      <p class="refs">Références : Lotte Reiniger (<i>Les Aventures du prince Ahmed</i>), Michel Ocelot (<i>Princes et Princesses</i>, <i>Les Contes de la nuit</i>), les lanternes magiques, le papier découpé d'Antoine Guilloppé.</p>
+      <p class="refs">SVG : très facile (aplats noirs, dégradés, motifs), et le jour → nuit n'est qu'un dégradé qui glisse.</p>
+    </div>
+  </div>
+
+  <!-- C — Papier découpé -->
+  <div class="card" data-choice="C-papier" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style papier découpé">
+        <rect width="320" height="200" fill="#e9dfcf"/>
+        <rect width="320" height="200" fill="#e9dfcf" filter="url(#f-grain)"/>
+        <path d="M190,-5 L330,-5 L330,205 L170,205 Z" fill="#2f3f7a" filter="url(#f-paper)"/>
+        <path d="M0,-5 L200,-5 L180,205 L0,205 Z" fill="#8fc3e6" filter="url(#f-paper)"/>
+        <g filter="url(#f-paper)">
+          <circle cx="28" cy="28" r="14" fill="#f5c84b"/>
+          <use href="#g-moon" fill="#fff6d6"/>
+          <use href="#g-head" fill="#f3b58e"/>
+          <use href="#g-brain" fill="#e4707a"/>
+          <use href="#g-cereb" fill="#c9566a"/>
+          <use href="#g-stem" fill="#c9566a"/>
+          <use href="#g-cloud" fill="#fff8ee"/>
+          <use href="#g-thumb" fill="#a6a28f"/>
+          <use href="#g-nail" fill="#cfc9b4"/>
+        </g>
+        <g fill="none" stroke="#b64a5a" stroke-width="2.4" stroke-linecap="round"><use href="#g-gyri"/></g>
+        <g fill="none" stroke="#3a2a22" stroke-width="2" stroke-linecap="round"><use href="#g-ogre"/><use href="#g-ear"/></g>
+        <circle cx="150" cy="78" r="3.6" fill="#3a2a22"/>
+        <circle cx="202" cy="74" r="4" fill="#fff8ee" filter="url(#f-paper)"/><circle cx="213" cy="60" r="6" fill="#fff8ee" filter="url(#f-paper)"/>
+        <g fill="#fff6d6"><use href="#g-stars"/></g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C · Papier découpé et collage</h3>
+      <p class="fit">Des morceaux de papier de couleur, à bords irréguliers, posés les uns sur les autres avec une petite ombre. Les <b>cartes-souvenirs sont des bouts de papier</b> que le cerveau découpe et recolle autrement la nuit : la mécanique du rêve est celle du collage.</p>
+      <p class="refs">Références : Eric Carle, Leo Lionni (<i>Petit-Bleu et Petit-Jaune</i>), Lotta Nieminen, Hervé Tullet, les collages de Matisse pour la salle de classe.</p>
+      <p class="refs">SVG : facile (filtres de déplacement et d'ombre), un peu lourd si des centaines de pièces sont filtrées à la fois.</p>
+    </div>
+  </div>
+
+  <!-- D — Planche anatomique 1900 -->
+  <div class="card" data-choice="D-planche" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style planche anatomique ancienne">
+        <rect width="320" height="200" fill="#efe6cf"/>
+        <rect width="320" height="200" fill="#efe6cf" filter="url(#f-grain)"/>
+        <ellipse cx="260" cy="150" rx="60" ry="30" fill="#c9b58a" opacity=".25"/>
+        <ellipse cx="40" cy="170" rx="30" ry="18" fill="#c9b58a" opacity=".2"/>
+        <g fill="none" stroke="#3b2a1a" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <use href="#g-head"/><use href="#g-ear"/><use href="#g-brain"/><use href="#g-gyri"/><use href="#g-cereb"/><use href="#g-stem"/>
+          <use href="#g-cloud" stroke-dasharray="3 2"/><use href="#g-thumb"/><use href="#g-nail"/><use href="#g-ogre"/>
+          <use href="#g-rays"/><circle cx="28" cy="28" r="13"/><use href="#g-moon"/>
+          <circle cx="150" cy="78" r="3.5"/><path d="M142,70 Q150,66 158,70"/>
+          <circle cx="202" cy="74" r="4"/><circle cx="213" cy="60" r="6"/>
+        </g>
+        <!-- hachures d'ombre -->
+        <use href="#g-head" fill="url(#p-hatch)" opacity=".45"/>
+        <use href="#g-brain" fill="url(#p-hatch2)" opacity=".5"/>
+        <use href="#g-cereb" fill="url(#p-hatch)" opacity=".6"/>
+        <use href="#g-thumb" fill="url(#p-hatch)" opacity=".45"/>
+        <!-- légendes numérotées -->
+        <g font-family="Georgia, 'Times New Roman', serif" font-size="8" fill="#3b2a1a">
+          <line x1="120" y1="40" x2="40" y2="30" stroke="#3b2a1a" stroke-width=".6"/><text x="33" y="28" font-style="italic">1</text>
+          <line x1="92" y1="104" x2="30" y2="120" stroke="#3b2a1a" stroke-width=".6"/><text x="22" y="123" font-style="italic">2</text>
+          <line x1="268" y1="88" x2="268" y2="110" stroke="#3b2a1a" stroke-width=".6"/><text x="265" y="120" font-style="italic">3</text>
+          <text x="10" y="190" font-style="italic" font-size="7.5">Fig. 12. — 1. Cerveau. 2. Cervelet. 3. Le pouce, rêvé.</text>
+          <text x="262" y="190" font-size="7" letter-spacing=".5">PL. IV</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D · Planche anatomique 1900</h3>
+      <p class="fit">Gravure fine sur papier jauni, hachures, chiffres et légende en italique : le dessin « savant » des vieux Larousse, <b>pris au sérieux pour un enfant</b>, comme on l'a fait pour les os et les muscles du corps. L'humour vient du contraste : le pouce-ogre est légendé avec le même sérieux que le cervelet.</p>
+      <p class="refs">Références : les planches du <i>Larousse médical</i> et de Bourgery, Max Brödel, les carnets de naturalistes, <i>Corpus</i> de Canopé pour la rigueur.</p>
+      <p class="refs">SVG : facile (traits et motifs de hachures), très léger ; demande un vrai soin anatomique du dessin.</p>
+    </div>
+  </div>
+
+  <!-- E — Sérigraphie années 60 -->
+  <div class="card" data-choice="E-serigraphie" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style sérigraphie années 60">
+        <rect width="320" height="200" fill="#f2e8d5"/>
+        <rect x="196" y="0" width="124" height="200" fill="#1f3b5c"/>
+        <rect x="196" y="0" width="124" height="200" fill="url(#p-dots)" opacity=".35" transform="translate(2,0)"/>
+        <circle cx="28" cy="28" r="15" fill="#e6b53a"/><circle cx="28" cy="28" r="15" fill="url(#p-dots-light)" opacity=".5"/>
+        <g fill="#f2e8d5"><use href="#g-moon"/><use href="#g-stars"/></g>
+        <use href="#g-head" fill="#e8a97c"/>
+        <use href="#g-head" fill="url(#p-dots-light)" opacity=".25"/>
+        <use href="#g-brain" fill="#e8622b"/>
+        <use href="#g-brain" fill="url(#p-dots)" opacity=".28" transform="translate(1.5,1)"/>
+        <use href="#g-cereb" fill="#5ba39d"/><use href="#g-stem" fill="#5ba39d"/>
+        <g fill="none" stroke="#f2e8d5" stroke-width="2.6" stroke-linecap="round"><use href="#g-gyri"/></g>
+        <use href="#g-cloud" fill="#5ba39d"/>
+        <use href="#g-thumb" fill="#e6b53a"/><use href="#g-nail" fill="#f2e8d5"/>
+        <g fill="none" stroke="#1f3b5c" stroke-width="2.2" stroke-linecap="round"><use href="#g-ogre"/></g>
+        <circle cx="152" cy="78" r="4.2" fill="#1f3b5c"/><circle cx="153.5" cy="76.5" r="1.3" fill="#f2e8d5"/>
+        <path d="M164,128 Q171,127 174,122" fill="none" stroke="#1f3b5c" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="160" cy="100" r="5" fill="#e8622b" opacity=".55"/>
+        <circle cx="202" cy="74" r="4" fill="#5ba39d"/><circle cx="213" cy="60" r="6" fill="#5ba39d"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>E · Sérigraphie années 60</h3>
+      <p class="fit">Aplats francs, palette moutarde / brique / vert d'eau / bleu nuit, trames de points et petits décalages d'impression, visages naïfs à joues rondes. Le style des albums documentaires français d'avant, <b>chaleureux et très lisible pour un petit</b>, sans être mièvre.</p>
+      <p class="refs">Références : Alain Grée (<i>Achille et Bergamote</i>, les docus Casterman), Dick Bruna, Paul Rand (<i>Sparkle and Spin</i>), les albums du Père Castor des années 50-60.</p>
+      <p class="refs">SVG : le plus simple de tous (aplats + motifs), ultra-léger, s'anime très bien.</p>
+    </div>
+  </div>
+
+  <!-- F — Géométrique Charley Harper -->
+  <div class="card" data-choice="F-geometrique" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style géométrique minimal">
+        <rect width="320" height="200" fill="#f4efe6"/>
+        <path d="M210,0 L320,0 L320,200 L170,200 Z" fill="#264653"/>
+        <!-- soleil : disque et rayons en points -->
+        <circle cx="30" cy="30" r="12" fill="#e9c46a"/>
+        <g fill="#e9c46a"><circle cx="30" cy="8" r="1.8"/><circle cx="30" cy="52" r="1.8"/><circle cx="8" cy="30" r="1.8"/><circle cx="52" cy="30" r="1.8"/><circle cx="14" cy="14" r="1.8"/><circle cx="46" cy="46" r="1.8"/><circle cx="46" cy="14" r="1.8"/><circle cx="14" cy="46" r="1.8"/></g>
+        <circle cx="296" cy="26" r="11" fill="#f4efe6"/><circle cx="302" cy="22" r="10" fill="#264653"/>
+        <g fill="#f4efe6"><use href="#g-stars"/></g>
+        <!-- tête : un disque + un triangle de nez + un rectangle de cou -->
+        <circle cx="112" cy="88" r="62" fill="#2b2b2b"/>
+        <rect x="88" y="140" width="40" height="60" fill="#2b2b2b"/>
+        <path d="M168,78 L192,100 L168,112 Z" fill="#2b2b2b"/>
+        <!-- cerveau : arcs concentriques -->
+        <g fill="none" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round">
+          <path d="M72,70 A40,40 0 0 1 152,70"/>
+          <path d="M84,74 A28,28 0 0 1 140,74"/>
+          <path d="M96,78 A16,16 0 0 1 128,78"/>
+        </g>
+        <circle cx="112" cy="80" r="4" fill="#2a9d8f"/>
+        <!-- cervelet : petit éventail -->
+        <path d="M70,104 A18,18 0 0 1 106,104 Z" fill="#e76f51"/>
+        <g stroke="#f4efe6" stroke-width="1.6"><line x1="88" y1="104" x2="88" y2="88"/><line x1="88" y1="104" x2="76" y2="92"/><line x1="88" y1="104" x2="100" y2="92"/></g>
+        <!-- œil -->
+        <circle cx="150" cy="80" r="7" fill="#f4efe6"/><circle cx="152" cy="80" r="3.2" fill="#2b2b2b"/>
+        <!-- bulle géométrique -->
+        <circle cx="202" cy="74" r="4" fill="#f4efe6"/><circle cx="214" cy="60" r="6" fill="#f4efe6"/>
+        <circle cx="264" cy="58" r="36" fill="#f4efe6"/>
+        <!-- pouce-ogre : capsule -->
+        <rect x="250" y="34" width="28" height="52" rx="14" fill="#e9c46a"/>
+        <rect x="256" y="38" width="16" height="14" rx="7" fill="#f4efe6" opacity=".8"/>
+        <circle cx="259" cy="64" r="2.4" fill="#2b2b2b"/><circle cx="269" cy="64" r="2.4" fill="#2b2b2b"/>
+        <path d="M256,58 L262,61 M272,58 L266,61" stroke="#2b2b2b" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M257,76 L271,76" stroke="#2b2b2b" stroke-width="1.8" stroke-linecap="round"/>
+        <g fill="#2b2b2b"><rect x="259" y="73" width="2.4" height="3"/><rect x="263.5" y="73" width="2.4" height="3"/><rect x="268" y="73" width="2.4" height="3"/></g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>F · Géométrique « réalisme minimal »</h3>
+      <p class="fit">Tout est cercle, arc, triangle : la tête est un disque, le cerveau trois arcs, le cervelet un éventail. <b>Le moins de traits possible, mais chaque trait est juste</b>. Très graphique, très moderne, très loin du « dessin mignon » habituel ; demande de l'inventivité pour rester anatomiquement honnête.</p>
+      <p class="refs">Références : Charley Harper, Jean Jullien, Ingela P. Arrhenius, Bruno Munari (<i>Dans le brouillard de Milan</i>), les pictos d'Otl Aicher.</p>
+      <p class="refs">SVG : trivial à dessiner, le plus léger ; l'animation (arcs qui tournent, pièces qui glissent) est son terrain naturel.</p>
+    </div>
+  </div>
+
+  <!-- G — Craie sur ardoise -->
+  <div class="card" data-choice="G-craie" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style craie sur ardoise">
+        <rect width="320" height="200" fill="#213b31"/>
+        <rect width="320" height="200" fill="#213b31" filter="url(#f-grain)"/>
+        <ellipse cx="90" cy="150" rx="120" ry="40" fill="url(#rg-smudge)"/>
+        <ellipse cx="250" cy="60" rx="90" ry="50" fill="url(#rg-smudge)"/>
+        <!-- nuit : hachures de craie bleue -->
+        <g filter="url(#f-chalk)" fill="none" stroke="#9ad3f2" stroke-width="1.4" stroke-linecap="round" opacity=".55">
+          <path d="M205,5 L300,5 M212,15 L312,15 M208,25 L306,25 M214,35 L318,35 M206,45 L310,45 M212,55 L316,55 M209,65 L306,65 M215,75 L314,75 M207,85 L312,85 M213,95 L318,95 M208,105 L310,105 M214,115 L314,115 M206,125 L306,125 M212,135 L318,135 M209,145 L312,145 M215,155 L310,155 M207,165 L316,165 M213,175 L306,175 M208,185 L314,185 M214,195 L318,195"/>
+        </g>
+        <g filter="url(#f-chalk)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <g stroke="#f4f1e8" stroke-width="2.4"><use href="#g-head"/><use href="#g-ear"/><circle cx="150" cy="78" r="3"/><path d="M142,70 Q150,66 158,70"/><path d="M164,128 Q170,126 173,122"/></g>
+          <g stroke="#f7a1b5" stroke-width="2.6"><use href="#g-brain"/><use href="#g-gyri"/></g>
+          <g stroke="#c8a2e0" stroke-width="2.4"><use href="#g-cereb"/><use href="#g-stem"/></g>
+          <g stroke="#f5e27a" stroke-width="2.4"><use href="#g-rays"/><circle cx="28" cy="28" r="13"/></g>
+          <g stroke="#9ad3f2" stroke-width="2.2" stroke-dasharray="6 4"><use href="#g-cloud"/><circle cx="202" cy="74" r="4"/><circle cx="213" cy="60" r="6"/></g>
+          <g stroke="#f4f1e8" stroke-width="2.2"><use href="#g-thumb"/><use href="#g-nail"/><use href="#g-ogre"/><use href="#g-moon"/></g>
+        </g>
+        <!-- remplissages de craie couchée -->
+        <use href="#g-brain" fill="#f7a1b5" opacity=".18" filter="url(#f-chalk)"/>
+        <use href="#g-thumb" fill="#f4f1e8" opacity=".14" filter="url(#f-chalk)"/>
+        <g fill="#f4f1e8" filter="url(#f-chalk)"><use href="#g-stars"/></g>
+        <text x="12" y="190" font-family="'Chalkboard SE','Comic Sans MS',cursive" font-size="9" fill="#f4f1e8" opacity=".85" filter="url(#f-chalk)">le cerveau · la nuit · le rêve</text>
+      </svg>
+    </div>
+    <div class="card-image" style="display:none"></div>
+    <div class="card-body">
+      <h3>G · Craie sur ardoise</h3>
+      <p class="fit">Le tableau noir de l'école : traits de craie blanche et craies de couleur, remplissages frottés, estompes, et la nuit hachurée en bleu. <b>Tout a l'air dessiné devant l'enfant, à l'instant</b>, et la maîtresse peut effacer et recommencer : on efface la journée, on redessine le rêve.</p>
+      <p class="refs">Références : les tableaux de Canopé en classe, les films d'animation à la craie de William Kentridge (en version douce), <i>Le Petit Nicolas</i> de Sempé pour l'esprit « école », les tableaux noirs de cafés.</p>
+      <p class="refs">SVG : facile (filtres de turbulence sur les traits), rendu un peu coûteux sur vieille tablette si tout est filtré ; magnifique en animation « le trait se trace ».</p>
+    </div>
+  </div>
+
+  <!-- H — Feutrine et fil -->
+  <div class="card" data-choice="H-feutrine" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 200" role="img" aria-label="Style feutrine cousue">
+        <rect width="320" height="200" fill="url(#p-linen)"/>
+        <path d="M196,-5 L330,-5 L330,205 L176,205 Z" fill="#3a3f72" filter="url(#f-felt)"/>
+        <g filter="url(#f-felt)">
+          <circle cx="28" cy="28" r="14" fill="#f8d35c"/>
+          <use href="#g-moon" fill="#fff1c9"/>
+          <use href="#g-head" fill="#f7c6a3"/>
+          <use href="#g-brain" fill="#ef8ca0"/>
+          <use href="#g-cereb" fill="#d96a84"/><use href="#g-stem" fill="#d96a84"/>
+          <use href="#g-cloud" fill="#fff6de"/>
+          <use href="#g-thumb" fill="#c8c2b0"/><use href="#g-nail" fill="#ebe6d6"/>
+          <circle cx="202" cy="74" r="4" fill="#fff6de"/><circle cx="213" cy="60" r="6" fill="#fff6de"/>
+        </g>
+        <!-- points de couture -->
+        <g fill="none" stroke-linecap="round" stroke-dasharray="2.2 3.4">
+          <g stroke="#7a4b3a" stroke-width="1.3"><use href="#g-head"/><use href="#g-ear"/></g>
+          <g stroke="#fff1f3" stroke-width="1.3"><use href="#g-brain"/><use href="#g-gyri"/></g>
+          <g stroke="#fff1f3" stroke-width="1.2"><use href="#g-cereb"/></g>
+          <g stroke="#9b8d6e" stroke-width="1.2"><use href="#g-cloud"/><use href="#g-thumb"/><use href="#g-nail"/></g>
+          <g stroke="#c9a53a" stroke-width="1.2"><circle cx="28" cy="28" r="14"/></g>
+        </g>
+        <!-- yeux-boutons -->
+        <circle cx="150" cy="79" r="5" fill="#4b3a2e"/><circle cx="148.5" cy="78" r=".9" fill="#f7c6a3"/><circle cx="151.5" cy="80" r=".9" fill="#f7c6a3"/>
+        <circle cx="260" cy="64" r="3.2" fill="#2e2a24"/><circle cx="272" cy="64" r="3.2" fill="#2e2a24"/>
+        <path d="M256,58 L263,61 M276,58 L269,61" stroke="#2e2a24" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M257,77 Q266,71 275,77" fill="none" stroke="#2e2a24" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 2"/>
+        <path d="M164,129 Q170,127 173,122" fill="none" stroke="#b86a5a" stroke-width="1.6" stroke-linecap="round"/>
+        <g fill="#fff1c9"><use href="#g-stars"/></g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>H · Feutrine et fil</h3>
+      <p class="fit">Des pièces de feutrine aux bords pelucheux cousues au point de surjet sur une toile de lin, des yeux-boutons, la nuit en feutrine bleu nuit. <b>Doux, tactile, rassurant</b> : le monde du doudou, ce qui n'est pas rien quand on parle de cauchemars. Les cartes-souvenirs deviennent des pièces qu'on épingle sur le cerveau.</p>
+      <p class="refs">Références : les livres en tissu, les films en stop-motion de laine et feutre (<i>Pat et Mat</i>, les courts de la Chouette du cinéma), Beatrice Alemagna pour les textures, les « quiet books ».</p>
+      <p class="refs">SVG : moyen (filtres de déplacement + pointillés), un peu plus coûteux ; très beau à l'arrêt, plus délicat à animer finement.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="why">
+  <b>Ce qu'on ne refait pas :</b> le planétarium néon aux cartes de verre dépoli du corps et du volcan. C'est « le style habituel » de la famille ; ici on change de famille. Les huit vignettes partagent exactement la même géométrie, pour que seule la manière compte. Mariages possibles : B pour la nuit avec C ou E pour le jour (le papier découpé qui devient ombre chinoise quand la lumière s'éteint), ou D pour les zones « savantes » du cerveau avec A pour le rêve. Dis-moi ce qui te parle, ce qui te fait grimacer, et si tu veux un deuxième tour avec d'autres pistes (gravure sur bois, broderie, pixel Game Boy, aquarelle lavis).
+</div>
