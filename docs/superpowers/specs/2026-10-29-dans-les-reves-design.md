@@ -53,7 +53,8 @@ peut vivre tout le cycle jour → nuit → matin.
 
 **Non-objectifs (YAGNI)**
 - Pas de backend, pas de compte, pas de sauvegarde autre que les préférences locales
-  (thème, prénom, chanson, son).
+  (thème, version allégée, son, prénom, chanson, carte réconfort, avatar : garçon/fille,
+  carnation, cheveux).
 - Pas d'autre langue que le français.
 - Pas de son autre que la synthèse vocale et la vidéo YouTube sur demande (pas de
   bruitages, pas de musique d'ambiance).
@@ -143,8 +144,20 @@ celui de la nuit et porte **l'écran du rêve** (une grande pièce de laine crè
 nuage-écran, épinglée). En bas, la **boîte à souvenirs** : la rangée de cartes.
 
 Garçon ou fille, carnation et cheveux : repris de *Dans mon corps* (mêmes variables
-CSS), parce que l'enfant doit se reconnaître. En feutrine, les cheveux sont une pièce de
-laine, les yeux des boutons.
+CSS, même commande visible en haut de la scène), parce que l'enfant doit se reconnaître ;
+le choix est mémorisé. En feutrine, les cheveux sont une pièce de laine, les yeux des
+boutons. **La narration s'accorde avec l'avatar** (choix du rédacteur après relecture) :
+toutes les phrases de narration et de zones qui parlent de l'enfant existent en forme
+masculine et féminine dès l'écriture, via une petite fonction d'accord dans les données
+(`{il|elle}`, `{terrorisé|terrorisée}`) ; l'histoire du pouce suit donc l'avatar et le
+prénom saisi, même si l'anecdote d'origine concerne un garçon.
+
+**Le décor Dehors est piloté par les cartes** (choix du rédacteur après relecture) : la
+scène de jour a un fond fixe (ciel, sol, le bâtiment de l'expo, l'enfant) et tout le
+reste — le pouce de César, les copains, la glace, le chien… — n'apparaît que si sa carte a
+été choisie (ou pré-remplie par le mode guidé). On ne voit donc jamais dehors une chose
+qui n'entre pas dans la tête : le décor **est** la journée. Les zones Dehors « le pouce de
+César » et « les copains » ne sont cliquables que lorsqu'elles sont présentes.
 
 ### 4.3 Les cartes-souvenirs
 
@@ -165,7 +178,14 @@ voix haute, une **catégorie** et une **charge** :
   (choses vues) ou par l'oreille (mots entendus, gens, ressentis) puis aller dans
   l'hippocampe. **Au plus 4 cartes** dans une journée (au-delà, la plus ancienne revient
   dans la boîte avec un petit « oups, trop de choses ! » qui est aussi une vraie leçon :
-  le cerveau ne garde pas tout).
+  le cerveau ne garde pas tout). La carte réconfort ajoutée par la télécommande (§4.6)
+  occupe un **emplacement à part** et ne compte pas dans les 4.
+- **Échelle des charges** (choix du rédacteur après relecture), une valeur par carte dans
+  les données : **peur = 3** (ogre, dragon, orage, j'ai eu peur), **colère = 2** (je me suis
+  fâché), **joie = 1** (copains, pirate, anniversaire, câlin, j'ai ri, gens), **neutre = 0**
+  (choses vues ordinaires, le pouce géant compris), **apaisante = −2** (ma chanson, mon
+  doudou, un câlin quand il est choisi comme carte réconfort). La « charge la plus forte »
+  est la plus grande valeur absolue, peur avant colère avant joie.
 - Le bouton **« Nouvelle journée »** renvoie toutes les cartes dans la boîte et remet le
   temps au matin.
 - Les cartes sont la **seule** source du rêve : pas de carte, pas de rêve (« Tu n'as rien
@@ -176,9 +196,9 @@ voix haute, une **catégorie** et une **charge** :
 
 Quand le curseur traverse la nuit profonde : chaque carte quitte l'hippocampe sur une
 vague lente, va se coudre dans le cortex (petite animation de point de couture), et
-**rétrécit** : les cartes de charge neutre deviennent petites (« rangé »), les cartes
-chargées (peur ou grande joie) restent grandes et **restent accrochées à l'amygdale** par un
-fil rouge. C'est ce qui prépare le rêve : le cerveau garde en avant ce qui l'a remué.
+**rétrécit** : les cartes de charge 0 deviennent petites (« rangé »), les cartes de charge
+non nulle restent grandes et **restent accrochées à l'amygdale** par un fil : rouge pour la
+peur, orange pour la colère, rose pour la joie, bleu doux pour une carte apaisante. C'est ce qui prépare le rêve : le cerveau garde en avant ce qui l'a remué.
 Pendant ce temps, le rinçage (vagues bleu pâle qui passent dans les plis), les « zzz » du
 lobe frontal, la petite étiquette « je grandis » sur l'os du crâne.
 
@@ -187,22 +207,40 @@ lobe frontal, la petite étiquette « je grandis » sur l'os du crâne.
 Règles simples, lisibles, déterministes pour une même journée (pour que l'enfant puisse
 refaire « sa » nuit), avec une part de variation visuelle sur « Encore un rêve » :
 
-1. **Choisir les ingrédients** : les 2 cartes de charge la plus forte (ex æquo : la plus
-   récemment choisie), plus **une** carte neutre si elle existe. Les autres cartes sont
-   « oubliées » pour ce rêve (elles pâlissent).
-2. **Une base et une greffe** : la carte n° 1 devient la **base** (sa grande forme de rêve),
-   la carte n° 2 sa **greffe** (son attribut de rêve : des yeux et des dents pour « ogre »,
-   un chapeau et un sabre pour « pirate », des ailes et du feu pour « dragon », un cornet et
-   des gouttes pour « glace », une queue qui remue pour « chien »…). Chaque carte possède
-   donc trois dessins : sa vignette, sa forme de base, sa greffe.
-3. **Un modificateur**, tiré de la charge : peur → **gigantesque** (la base grandit jusqu'à
-   déborder l'écran, le contexte disparaît : les copains et le soleil s'effacent) ; joie →
-   **multiplié** ou **à l'envers** ; neutre → **tout petit** ou **d'une autre couleur**. Le
-   modificateur est toujours **nommé** dans la phrase.
-4. **Verdict** : si la charge la plus forte est « peur », c'est un **cauchemar** : la toile
-   vire au bleu profond, l'amygdale pulse en rouge, l'enfant endormi fronce les sourcils,
-   l'écran tremble légèrement. Sinon c'est un **beau rêve** ou un **rêve rigolo** : l'écran
-   se colore, l'enfant sourit.
+1. **Choisir les ingrédients** (règle corrigée après relecture) : la **greffe** est la
+   carte de charge la plus forte (ex æquo : la plus récemment choisie). La **base** est la
+   carte la plus *concrète* parmi les autres, dans l'ordre chose vue > gens > mot entendu >
+   ressenti (ex æquo : la plus récente). Une troisième carte, la plus concrète des
+   restantes, devient le **contexte** : elle apparaît en petit dans le fond de l'écran, et
+   c'est elle qui s'efface quand le modificateur est « gigantesque ». Les autres cartes sont
+   « oubliées » pour ce rêve (elles pâlissent). Vérification sur l'histoire du pouce (pouce
+   géant, mot « ogre », copains, j'ai ri) : greffe = ogre, base = pouce géant, contexte =
+   copains → « le pouce est devenu un ogre gigantesque, les copains ont disparu ». Avec une
+   **seule carte**, elle est sa propre base, sans greffe : rêve de la carte seule avec un
+   modificateur (« tout petit », « multiplié » ou « d'une autre couleur ») et la phrase
+   « parce que ton cerveau l'a rejouée ». Si la carte la plus forte est une carte
+   **apaisante**, elle n'est pas greffe mais **fin du rêve** (voir le verdict).
+2. **Une base et une greffe** : la base donne sa grande forme de rêve, la greffe son
+   attribut de rêve (des yeux et des dents pour « ogre », un chapeau et un sabre pour
+   « pirate », des ailes et du feu pour « dragon », un cornet et des gouttes pour « glace »,
+   une queue qui remue pour « chien », des guirlandes pour « anniversaire »…). Chaque carte
+   possède donc trois dessins : sa vignette, sa forme de base, sa greffe ; les ressentis
+   n'ont pas de forme de base (ils ne peuvent être que greffe ou contexte : « j'ai ri »
+   greffe un grand sourire, « j'ai eu peur » de grands yeux).
+3. **Un modificateur**, tiré de la charge de la greffe : peur → **gigantesque** (la base
+   grandit jusqu'à déborder l'écran, le contexte s'efface) ; colère → **à l'envers** ou
+   **qui n'obéit pas** (la base se tourne, se secoue) ; joie → **multiplié** ; neutre → **tout
+   petit** ou **d'une autre couleur**. Le modificateur est toujours **nommé** dans la phrase.
+4. **Verdict** : charge de la greffe = peur → **cauchemar** : la toile vire au bleu profond,
+   l'amygdale pulse en rouge, l'enfant endormi fronce les sourcils, l'écran tremble
+   légèrement. Colère → **rêve bizarre** (amygdale orange, sourcils froncés, pas de
+   tremblement). Joie ou neutre → **beau rêve** ou **rêve rigolo** : l'écran se colore,
+   l'enfant sourit. Si la journée contient **aussi** une carte apaisante (chanson, doudou,
+   câlin choisi comme réconfort), un cauchemar devient un **mauvais rêve qui finit bien** :
+   l'ogre apparaît, puis la carte apaisante entre dans l'écran et applique d'elle-même une
+   transformation de la télécommande, avec la phrase « … mais ta chanson était dans ta
+   tête, alors le film a changé tout seul ». C'est le message de la page, et c'est honnête :
+   une routine apaisante réduit les cauchemars.
 5. **La phrase** (affichée et lue) suit toujours le même gabarit :
    « Dans le rêve, *[base]* est devenu *[greffe + modificateur]*, parce que ton cerveau a
    mélangé *[carte 1]* avec *[carte 2]*. Le chef qui vérifie dormait, alors personne n'a
@@ -280,8 +318,9 @@ l'oreille et le petit escargot (cochlée) · le casque d'os (crâne) et le couss
 (liquide, qui rince).
 
 **Dehors (≈ 9)** : le soleil / la lune · la lampe (lumière = « jour » pour l'horloge) · le
-lit · le doudou · la fenêtre · le pouce de César · les copains · la boîte à souvenirs ·
-l'écran du rêve.
+lit · le doudou · la fenêtre · le bâtiment de l'expo · la boîte à souvenirs · l'écran du
+rêve · et, **quand leur carte est choisie**, chaque chose du décor (le pouce de César, les
+copains, la glace…) avec son propre texte.
 
 **Tout près (≈ 5)** : un neurone · une étincelle (synapse, « ils se parlent ») · une
 grande vague lente · une petite rafale qui colle (fuseau) · une cellule qui grandit.
@@ -333,7 +372,12 @@ bombées, bords cousus), **pas** en verre dépoli.
   défaut**, bouton 🔇 / 🎧 gros et visible ; tant qu'elle est coupée, les textes s'affichent
   sans être lus.
 - **Loupe** au doigt ou à la souris (suivi cadencé sur `requestAnimationFrame`, comme dans
-  le volcan après correction).
+  le volcan après correction). La lentille clone la scène (`<use>`), donc elle **double
+  temporairement** le nombre de pièces filtrées ; décision (après relecture) : en thème
+  complet, la lentille montre la **laine complète** (c'est là qu'on la voit de près) et,
+  tant que la loupe est active, les animations d'ambiance sont mises en pause pour
+  compenser ; en version allégée, la lentille est allégée aussi. Le budget « ≤ 40 pièces
+  filtrées par vue » s'entend **hors lentille**.
 - **Montrer les zones** : fait pulser toutes les zones de la vue active.
 - **Mini-jeu 1 « Trouve la bonne partie ! »** : 3 questions tirées d'une banque de 8,
   étoiles et confettis (en feutrine : des confettis de laine).
@@ -389,7 +433,16 @@ bombées, bords cousus), **pas** en verre dépoli.
   légères), et le seuil de bascule en version allégée.
 - La structure du code et le découpage du travail.
 
-## 11. Critères de réussite
+## 11. Décisions prises après la relecture du constructeur
+
+Les cinq questions du relecteur ont toutes été tranchées par le rédacteur (aucune ne
+changeait l'intention) et intégrées ci-dessus : rôles base / greffe / contexte et cas d'une
+seule carte (§4.5-1), échelle numérique des charges, colère et cartes apaisantes, emplacement
+à part de la carte réconfort (§4.3, §4.5-4), narration accordée à l'avatar (§4.2), décor
+Dehors piloté par les cartes (§4.2, §5), loupe en laine complète avec pause des animations
+(§7).
+
+## 12. Critères de réussite
 
 - La page s'ouvre en local et hors ligne ; thème feutrine par défaut, riso d'un appui.
 - Un enfant de 5 ans compose une journée de 1 à 4 cartes, fait avancer la nuit et obtient

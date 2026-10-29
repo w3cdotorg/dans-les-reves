@@ -208,3 +208,24 @@ phrase à gabarit fixe ; **télécommande** = carte réconfort + transformation 
 « Rêve ou pour de vrai ? » ; carte « Pour les parents » ; budget de filtres + version
 allégée automatique. Relecture par un constructeur neutre lancée (brainstorming skill,
 builder check) avant remise au propriétaire.
+
+## 2026-10-29 — Relecture constructeur : cinq questions, cinq décisions
+
+Le relecteur (agent neutre, sans accès à la conversation) a trouvé cinq endroits où il
+aurait dû deviner. Toutes tranchées par le rédacteur et intégrées à la spec (§11) :
+1. **Rôles du rêve** : la recette initiale (« la carte n° 1 devient la base ») ne
+   reproduisait pas l'histoire du pouce (l'ogre serait devenu un pouce, et en mode guidé le
+   pouce n'était même pas ingrédient). Nouvelle règle : greffe = carte la plus chargée ;
+   base = la plus concrète des autres (chose vue > gens > mot > ressenti) ; contexte = la
+   suivante, effacée par « gigantesque ». Une seule carte → rêve seul, modificateur, « ton
+   cerveau l'a rejouée ».
+2. **Charges numériques** : peur 3, colère 2, joie 1, neutre 0, apaisante −2. Colère →
+   « rêve bizarre » (à l'envers / n'obéit pas). Carte apaisante dans la journée → le
+   cauchemar « finit bien » tout seul (la carte entre dans l'écran et change le film). La
+   carte réconfort de la télécommande a son emplacement à part, hors plafond de 4.
+3. **Avatar et narration** : commande garçon/fille/carnation/cheveux visible comme dans le
+   corps, mémorisée ; toutes les phrases existent au masculin et au féminin via une
+   fonction d'accord dans les données.
+4. **Décor Dehors piloté par les cartes** : on ne voit dehors que ce qui entre dans la tête.
+5. **Loupe en laine complète**, animations d'ambiance en pause pendant la loupe ; budget de
+   40 pièces filtrées hors lentille.
