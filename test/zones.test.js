@@ -47,3 +47,11 @@ test('le code crée des .hs accessibles (role, tabindex, aria-label, data-id)', 
   assert.match(html, /__zonesManquantes/);
   for(const g of ['hs-0', 'hs-1', 'hs-2']) assert.ok(html.includes(g), g);
 });
+
+test('pastilles d\'aide et zones invisibles : #g-hint, évaluation de visibilité, sel sur la pièce', () => {
+  assert.ok(html.includes('id="g-hint"'));
+  assert.match(html, /function evaluerZones\(/);
+  assert.match(html, /function dessinerPastilles\(/);
+  assert.match(html, /document\.addEventListener\('temps', \(\) => \{ planifierZones/);
+  assert.doesNotMatch(html, /#scene\.hint \.hs\{/);
+});
