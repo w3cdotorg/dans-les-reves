@@ -77,6 +77,7 @@
 
   /* fils de broderie */
   --fil-blanc:#fff6f1; --fil-brun:#7a4b3a; --fil-sable:#c9b58d; --fil-rouge:#e0493f;
+  --fil-orange:#f28c28; --fil-rose-doux:#f4a3b8; --fil-bleu-doux:#9ad3f2;
   --fil-neurone:#b5527a; --fil-neurone-2:#8a5fae; --fil-etincelle:#fff1b0;   /* Tout près (Task 5) */
   --fil-vague:#5f8fd0; --fil-cellule:#f2fbe8;
   --fil-bouche:#93392f;            /* le sourire : setAvatar le change avec la peau (3e valeur de SKINS) */
@@ -724,6 +725,19 @@ symbol{overflow:visible}
 .decor{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
 [data-theme=riso]{--decor-iso:isolate}   /* riso : un décor ne se multiplie pas avec l'expo derrière lui */
 .decor-pop{transform-box:fill-box;transform-origin:50% 100%}
+.grandis{opacity:var(--grandis, 0);font-family:var(--font-display);font-weight:600;font-size:8.5px;text-anchor:middle;
+  fill:var(--fil-encre, var(--fil-brun));filter:var(--fil-filter);pointer-events:none}
+.hippo-carte .points{opacity:0;filter:var(--fil-filter)}
+.points .fil{filter:none;stroke-width:.9}   /* le filtre sur le groupe : un trait droit n'a pas de boîte pour le sien */
+.hippo-carte.range .points{opacity:1}
+.hippo-carte.range .pin-mini{opacity:0}
+#g-cortex-cartes{pointer-events:none}
+.fil-amygdale{stroke-width:2.4;--fil-encre:var(--ink, var(--c))}
+.fil-amygdale.c3{--c:var(--fil-rouge)} .fil-amygdale.c2{--c:var(--fil-orange)}
+.fil-amygdale.c1{--c:var(--fil-rose-doux)} .fil-amygdale.cm2{--c:var(--fil-bleu-doux)}
+/* riso : le cortex est imprimé en rose, un fil rose y disparaîtrait : peur = bleu, colère = jaune, joie = papier (réserve), apaisant = bleu léger */
+[data-theme=riso] .fil-amygdale.c3{--ink:var(--ink-bleu)} [data-theme=riso] .fil-amygdale.c2{--ink:var(--ink-jaune)}
+[data-theme=riso] .fil-amygdale.c1{--ink:var(--papier)} [data-theme=riso] .fil-amygdale.cm2{--ink:var(--ink-bleu);opacity:.5}
 .hippo-carte{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
 /* la bulle de la boîte : cachée tant qu'elle ne parle pas */
 #bulle-boite{opacity:0;visibility:hidden;pointer-events:none;transform-box:fill-box;transform-origin:50% 100%;
@@ -1702,6 +1716,18 @@ html:not([data-pret]) *{transition:none!important}
               </g>
             </g>
 
+            <!-- les cartes rangées dans le cortex la nuit profonde (Task 9) : les fils vers
+                 l'amygdale dessous, les cartes cousues dessus ; elles restent la nuit des rêves et le matin -->
+            <g id="g-cortex-cartes">
+              <g id="g-fils-amygdale"></g>
+              <g id="g-cartes-rangees"></g>
+            </g>
+
+            <!-- l'étiquette brodée « je grandis », sur la bande d'os de l'arrière du crâne
+                 (opacité : --grandis, posée par setTime ; nuit profonde seulement) -->
+            <path id="chemin-grandis" d="M479 138Q477 178 470 216" fill="none"/>
+            <text id="t-grandis" class="grandis"><textPath href="#chemin-grandis" startOffset="50%">je grandis</textPath></text>
+
             <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui se repose la nuit
                  (Task 7 : opacité par le temps, ils montent doucement) -->
             <g id="g-zzz" style="--f:var(--nuit-2)">
@@ -2662,6 +2688,7 @@ const TEMPS = {
   paupiere:   [0, 1, 1, 1, 0],      /* yeux fermés */
   pineale:    [0, 1, .6, .4, 0],    /* la glande de la nuit */
   rem:        [0, 0, 0, 1, 0],      /* les yeux bougent sous les paupières */
+  grandis:    [0, 0, 1, .3, 0],     /* l'étiquette « je grandis » sur le crâne : la nuit profonde seulement */
   zzz:        [0, 0, 1, 1, 0],      /* le lobe frontal se repose */
   amygdale:   [0, 0, .3, 1, 0],     /* l'amygdale s'allume en rêve */
   phaseNuit:  [0, 0, 1, .2, 0],     /* Tout près : vagues, fuseaux, rinçage, cellule */
@@ -2698,6 +2725,7 @@ function setTime(t){
   root.style.setProperty('--paupiere-op', v.paupiere);
   root.style.setProperty('--pineale-lueur', v.pineale);
   root.style.setProperty('--amygdale-lueur', v.amygdale);
+  root.style.setProperty('--grandis', v.grandis);
   tete['p-pineale'].classList.toggle('allume', v.pineale > .02);
   tete['p-amygdale'].classList.toggle('lueur', v.amygdale > .02);
   tete['p-amygdale'].classList.toggle('pulse', v.amygdale > .5);
@@ -3029,6 +3057,17 @@ const SLOT_PREFERE = { pouce: 1, orage: 2 };
    x, y et inclinaison */
 const HIPPO = [[288, 219, -14], [307, 235, -5], [327, 247, 4], [348, 256, 13]];
 const HIPPO_ECHELLE = .5;
+/* Task 9 : 4 places sur le cortex (frontal, pariétal, occipital, temporal) ; une carte
+   « grande » (charge ≠ 0) y vaut CORTEX_ECHELLE fois la vignette de l'hippocampe, une
+   carte rangée (charge 0) .55 de cela ; l'amygdale est le point où les fils se branchent */
+const CORTEX = [[440, 152], [300, 116], [224, 150], [405, 262]];
+const CORTEX_ECHELLE = 1.9;
+const AMYGDALE = [361, 246];
+const POINTS = ['M-8 -14.5H-3', 'M3 -14.5H8', 'M13.5 -7V-2', 'M13.5 5V10', 'M8 15.5H3', 'M-3 15.5H-8', 'M-13.5 10V5', 'M-13.5 -2V-7'];
+const FIL_CHARGE = { 3: 'c3', 2: 'c2', 1: 'c1', '-2': 'cm2' };
+const rangees = {};        /* slug → { el, ligne } : les cartes qui sont dans le cortex */
+const cortexCartes = document.getElementById('g-cartes-rangees');
+const cortexFils = document.getElementById('g-fils-amygdale');
 
 const PAR_SLUG = Object.fromEntries(CARTES.map((c, i) => [c.slug, { ...c, i }]));
 let journee = [];
@@ -3287,13 +3326,99 @@ function poserHippo(slug){
   const el = svgEl('g', { class: 'hippo-carte', 'data-slug': slug }, hippoCartes);
   svgEl('path', { class: 'w lite reserve carte-fond', style: '--p:var(--riso-papier, var(--p-carte))', d: rrD(-12, -12, 24, 26, 4) }, el);
   svgEl('use', { href: '#v-' + slug, transform: `translate(0 1) scale(${HIPPO_ECHELLE})` }, el);
-  svgEl('use', { href: '#pin', style: `color:var(${EPINGLES[PAR_SLUG[slug].i % 3]})`, transform: 'translate(0 -10) scale(.6)' }, el);
+  svgEl('use', { class: 'pin-mini', href: '#pin', style: `color:var(${EPINGLES[PAR_SLUG[slug].i % 3]})`, transform: 'translate(0 -10) scale(.6)' }, el);
+  /* les points de couture de la nuit profonde : six traits courts autour de la carte */
+  const points = svgEl('g', { class: 'points' }, el);
+  POINTS.forEach(d => svgEl('path', { class: 'fil', style: '--f:var(--fil-brun)', d }, points));
   placerHippo(el, journee.indexOf(slug));
   return el;
 }
 function rangerHippo(){
   [...hippoCartes.children].forEach(el => placerHippo(el, journee.indexOf(el.dataset.slug)));
 }
+
+/* --- la nuit profonde : le rangement (Task 9) --- */
+const echelleCarte = slug => PAR_SLUG[slug].charge === 0 ? .55 : 1;
+const tfHippo = k => `translate(${HIPPO[k][0]}px,${HIPPO[k][1]}px) rotate(${HIPPO[k][2]}deg)`;
+const tfCortex = (k, slug) => `translate(${CORTEX[k][0]}px,${CORTEX[k][1]}px) rotate(0deg) scale(${CORTEX_ECHELLE * echelleCarte(slug)})`;
+/* pose une transform sans la transition de .hippo-carte (l'animation, elle, voyage) */
+function poserTf(el, tf){
+  el.style.transition = 'none';
+  el.style.transform = tf;
+  void el.getBoundingClientRect();
+  el.style.transition = '';
+}
+/* la vague lente : un trajet en S, avec un ease-in-out dans les images clés elles-mêmes
+   (les transform, qui se mélangent mal entre translate+rotate+scale, sont interpolées à la main) */
+function vague(el, [x0, y0, r0, s0], [x1, y1, r1, s1], ms, delay){
+  const N = 10, images = [];
+  for(let i = 0; i <= N; i++){
+    const f = i / N, e = f * f * (3 - 2 * f);
+    const dy = -16 * Math.sin(Math.PI * e) + 7 * Math.sin(2 * Math.PI * e);
+    images.push({ transform: `translate(${x0 + (x1 - x0) * e}px,${y0 + (y1 - y0) * e + dy}px) rotate(${r0 + (r1 - r0) * e}deg) scale(${s0 + (s1 - s0) * e})`, offset: f });
+  }
+  return animer(el, images, { duration: ms, delay, easing: 'linear', fill: 'backwards' });
+}
+function ligneAmygdale(slug, k){
+  const charge = PAR_SLUG[slug].charge;
+  if(charge === 0) return null;
+  return svgEl('line', { class: 'fil fil-amygdale ' + FIL_CHARGE[charge], 'data-slug': slug,
+    x1: CORTEX[k][0], y1: CORTEX[k][1], x2: AMYGDALE[0], y2: AMYGDALE[1] }, cortexFils);
+}
+/* une carte quitte l'hippocampe pour sa place k du cortex ; anim : la vague, les points, le fil */
+function ranger(slug, k, anim){
+  const el = hippoCartes.querySelector(`.hippo-carte[data-slug="${slug}"]`);
+  if(!el || rangees[slug]) return;
+  const delay = 250 * k, ms = 1000;
+  cortexCartes.appendChild(el);
+  poserTf(el, tfCortex(k, slug));
+  el.classList.add('range');
+  const ligne = ligneAmygdale(slug, k);
+  rangees[slug] = { el, ligne };
+  if(!anim) return;
+  vague(el, [HIPPO[k][0], HIPPO[k][1], HIPPO[k][2], 1], [CORTEX[k][0], CORTEX[k][1], 0, CORTEX_ECHELLE * echelleCarte(slug)], ms, delay);
+  /* le point de couture à l'arrivée : les traits apparaissent l'un après l'autre en 400 ms */
+  [...el.querySelector('.points').children].forEach((p, i, tous) =>
+    animer(p, [{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: delay + ms + i * (400 / tous.length), fill: 'backwards' }));
+  if(ligne){
+    animer(ligne, [{ opacity: 0, strokeDashoffset: 14.4 }, { opacity: 1, strokeDashoffset: 0 }],
+      { duration: 700, delay: delay + ms + 150, easing: 'linear', fill: 'backwards' });
+  }
+}
+function rangerTout(anim){
+  const aRanger = journee.filter(s => !rangees[s]);
+  if(!aRanger.length) return;
+  if(anim) animer(hippocampe, [{ transform: 'scale(1)' }, { transform: 'scale(.96)' }, { transform: 'scale(1)' }], { duration: 420, easing: 'ease-in-out' });   /* il expire */
+  journee.forEach((s, k) => { if(!rangees[s]) ranger(s, k, anim); });
+}
+/* retour à l'hippocampe (phase 0 ou nouvelle journée), avec les épingles */
+function sortirTout(anim){
+  Object.keys(rangees).forEach(slug => {
+    const { el, ligne } = rangees[slug];
+    const k = journee.indexOf(slug);
+    delete rangees[slug];
+    ligne?.remove();
+    if(k < 0){ el.remove(); return; }
+    el.classList.remove('range');
+    hippoCartes.appendChild(el);
+    poserTf(el, tfHippo(k));
+    if(anim) vague(el, [CORTEX[k][0], CORTEX[k][1], 0, CORTEX_ECHELLE * echelleCarte(slug)], [HIPPO[k][0], HIPPO[k][1], HIPPO[k][2], 1], 700, 80 * k);
+  });
+}
+/* une carte évincée libère une place : les autres se recalent (transition CSS), les fils suivent */
+function rangerCortex(){
+  Object.keys(rangees).forEach(slug => {
+    const k = journee.indexOf(slug), r = rangees[slug];
+    if(k < 0) return;
+    r.el.style.transform = tfCortex(k, slug);
+    if(r.ligne){ r.ligne.setAttribute('x1', CORTEX[k][0]); r.ligne.setAttribute('y1', CORTEX[k][1]); }
+  });
+}
+document.addEventListener('temps', e => {
+  const { phase } = e.detail;
+  if(phase === 2) rangerTout(!REDUIT.matches);
+  else if(phase === 0) sortirTout(!REDUIT.matches);
+});
 
 /* --- les voyages (décoratifs : l'état est déjà posé) --- */
 function vignetteVolante(slug){
@@ -3352,7 +3477,9 @@ function retirerCarte(slug, anim){
   deplanter(slug, anim);
   retirerDecor(slug, anim);
   hippoCartes.querySelectorAll(`.hippo-carte[data-slug="${slug}"]`).forEach(el => el.remove());
+  if(rangees[slug]){ rangees[slug].el.remove(); rangees[slug].ligne?.remove(); delete rangees[slug]; }   /* évincée dans le cortex */
   rangerHippo();
+  rangerCortex();
 }
 function pickCard(slug, opts = {}){
   const c = PAR_SLUG[slug];
@@ -3381,12 +3508,14 @@ function pickCard(slug, opts = {}){
     if(vue === 0) volDehors(c, x0, y0, decor);
     else if(vue === 1) volDedans(c, x0, y0, mini);
   }
+  if(phaseCourante >= 2 && phaseCourante <= 4) ranger(slug, journee.indexOf(slug), false);   /* la nuit : rangée tout de suite */
   emettreJournee();
   return true;
 }
 function resetDay(){
   for(const slug of [...journee]) retirerCarte(slug, false);
   journee = [];
+  sortirTout(false);
   vols.replaceChildren();
   cacherBulle();
   emettreJournee();
