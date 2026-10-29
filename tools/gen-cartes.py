@@ -104,7 +104,7 @@ def rendu(el, s=1.0, dx=0, dy=0, fil_s=1.0, filtre='vig'):
     if kind == 'F':
         _, d, fil, cls = el
         st = f' style="--f:var({fil})"' if fil else ''
-        c = ('fil ' + cls + (' gros' if fil_s != 1 else '')).strip()
+        c = ' '.join(x for x in ('fil', cls, 'gros' if fil_s != 1 else '') if x)
         return f'<path class="{c}"{st} d="{echelle_d(d, s, dx, dy)}"/>'
     if kind == 'P':   # sous-couche de papier (riso) : rien en feutrine
         return f'<path class="papier-pres" d="{echelle_d(el[1], s, dx, dy)}"/>'
@@ -139,9 +139,11 @@ V['pouce'] = [
     W(rr(-13, 14, 26, 6, 2), 'socle', 'bleu', 'pastel'),
     W("M-9 15C-9.5 8 -10 2 -9.5 -5C-9 -13 -6 -19 0 -19C6 -19 9 -13 9.5 -5C10 2 9.5 8 9 15Z", 'bronze', 'jaune', 'brun'),
     W("M4.5 -17.5C8 -14.5 9.5 -9.5 9.5 -5C10 2 9.5 8 9 15H5.5C6.5 8 7 2 6.8 -5C6.6 -10 6 -14 4.5 -17.5Z", 'bronze-ombre', 'rose', 'pastel'),
-    W("M-5.6-13.5C-5.6-18.4 5.6-18.4 5.6-13.5L5.2-8.5C5-6 3.5-5 0-5C-3.5-5-5-6-5.2-8.5Z", 'bronze-clair', 'jaune'),
-    W("M-5.2-14.6C-4.6-18 4.6-18 5.2-14.6C2.6-15.8-2.6-15.8-5.2-14.6Z", 'ongle', 'jaune', 'pastel'),
-    F("M-7.5 2Q0 4.5 7.5 2M-7 5.6Q0 7.6 7 5.6", BRUN),
+    ('F', "M-9 15C-9.5 8-10 2-9.5-5C-9-13-6-19 0-19C6-19 9-13 9.5-5C10 2 9.5 8 9 15", BRUN, 'epais'),
+    W("M-6.2-13.2C-6.2-18.6 6.2-18.6 6.2-13.2L5.8-7.5C5.6-5 4-3.8 0-3.8C-4-3.8-5.6-5-5.8-7.5Z", 'ongle', 'jaune', 'pastel'),
+    ('F', "M-6.2-13.2C-6.2-18.6 6.2-18.6 6.2-13.2L5.8-7.5C5.6-5 4-3.8 0-3.8C-4-3.8-5.6-5-5.8-7.5Z", BRUN, ''),
+    F("M-3.4-15.5Q-3.6-12-3-8.5", BLANC),
+    ('F', "M-7.5 2Q0 4.5 7.5 2M-7 6.4Q0 8.4 7 6.4", BRUN, 'epais'),
 ]
 
 V['glace'] = [
@@ -428,8 +430,9 @@ D = {}
 for slug, s, dy in [('glace', 2.2, 0), ('chien', 2.1, 3), ('velo', 2.2, 0), ('piscine', 2.4, 0), ('gateau', 2.1, 0),
                     ('tracteur', 2.3, 0), ('manege', 2.3, 0), ('doudou', 1.9, 6)]:
     D[slug] = agrandi(slug, s, 0, dy)
-# l'orage : le nuage est haut dans le ciel, la pluie et l'éclair descendent
-D['orage'] = agrandi('orage', 2.3, 0, -95)
+# l'orage : à #slot-2 (780,350), le nuage est dans le ciel à droite du pouce
+# géant (centre ≈ (814,160)), l'éclair s'arrête sur le toit de l'expo
+D['orage'] = agrandi('orage', 1.8, 34, -176)
 
 kid1, _, _ = personne(-15, 70, 'peau-a', 'cheveux-a', 'copain-1', 'jaune', 'jean', 'court', haut_cls='orange', enfant=True)
 kid2, _, _ = personne(14, 74, 'peau-b', 'cheveux-b', 'copain-2', 'bleu', 'jean', 'nattes', robe=True, haut_cls='vert',
@@ -452,10 +455,14 @@ D['maitresse'] = d_gens(maitresse) + [
     rendu(F("M-23.5-4V9", BLANC)),
 ]
 
-# Le pouce de César : bronze, ongle, plis. Posé à #slot-1 (700,300) : du socle
-# (y local 152 = 452 dans la scène, au-dessus de la boîte qui commence à 470)
-# jusqu'à y local −104 (196 dans la scène), devant le bâtiment de l'expo.
-D['pouce'] = [rendu(e, filtre='mini') for e in [
+# Le pouce de César : bronze, ongle, plis. Posé à #slot-1 (700,300), dessiné
+# ci-dessous à l'échelle 1 (socle à y local 152, ongle à −104) puis agrandi ×1,65
+# autour du bas du socle : le socle reste à y 452 de la scène (au-dessus de la
+# boîte, qui commence à 470), l'ongle monte à y ≈ 30, plus haut que la tête de
+# l'enfant (≈ 12–330 de sommet à menton : il la dépasse de toute sa hauteur
+# au-dessus du sol, y ≈ 404). Il couvre l'expo et son drapeau : c'est voulu.
+POUCE_S = 1.65   # le pouce dépasse la tête de l'enfant : ongle à y ≈ 30 de la scène
+D['pouce'] = [rendu(e, POUCE_S, 0, 152 * (1 - POUCE_S), fil_s=1.6, filtre='mini') for e in [
     W(rr(-66, 136, 132, 16, 4), 'socle', 'bleu', 'pastel'),
     F("M-60 144H60", SABLE),
     # riso : une sous-couche de papier, sinon l'expo se voit au travers du grain d'encre
@@ -476,7 +483,6 @@ D['pouce'] = [rendu(e, filtre='mini') for e in [
     # les plis de la phalange et la base du pouce
     F("M-42-6Q-12 4 38-6M-38 6Q-6 16 40 4M-36 18Q-4 26 34 16", BRUN),
     F("M-44 92Q0 104 46 92M-40 104Q-4 112 40 104", BRUN),
-    F("M-30 34Q-26 38-20 36M18 50Q24 54 30 52", BRUN),
 ]]
 
 # Petites portes d'entrée au bas des cartes : un œil, une oreille (brodés)
