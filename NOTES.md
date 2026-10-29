@@ -684,3 +684,64 @@ Retour du propriétaire sur la passe 2 : « Ce n'est pas mieux ». Il a fourni d
 - Générateurs reproductibles (md5 identique).
 - Pose couchée à −80° et −90° : correcte.
 - Données `d` de `#g-dedans` : 27 140 octets.
+
+## 2026-10-29 — Task 3b, passe 4 : la tête redessinée d'après les photos
+
+Retour du propriétaire après la passe 2 (« Ce n'est pas mieux ») et constat du contrôleur après la passe 3 : la tête restait une **boîte** (arrière vertical, sommet plat, front droit, cheveux en casque, cou long et large, oreille trop haute), parce que le crâne épousait un cerveau en pain plat et que chaque passe ne bougeait qu'une ancre. Cette passe repart de la **silhouette entière**, tracée comme un illustrateur (dôme, occiput, nuque, visage, cou, col), puis le cerveau est posé dedans, puis le visage et les cheveux. Les photos (`refs/photos/`, git-ignorées) n'ont servi qu'à mesurer ; rien n'en est copié ni décalqué.
+
+**Rapports mesurés sur les photos** (verticalement : sommet des cheveux = 0 %, bas du menton = 100 % ; la photo 1 est renversée vers le haut d'environ 15–20°, ce qui descend l'oreille et remonte le front) :
+
+| repère | photo 1 | photo 2 | dessin (passe 4) |
+|---|---|---|---|
+| lisière du front | 38 % | 32 % | 34 % |
+| sourcil | 57 % | 55 % | 56 % |
+| œil (centre) | 62 % | 60 % | 60 % |
+| bout du nez | 73 % | 73 % | 73 % |
+| base du nez | 77 % | 77 % | 78 % |
+| bouche | 85 % | 87 % | 86 % |
+| haut de l'oreille | 72 % | 65 % | 61 % |
+| conduit de l'oreille | 82 % | 76 % | 75 % |
+| bas de l'oreille | 92 % | 86 % | 83 % |
+| hauteur de l'oreille / hauteur de tête | 20 % | 21 % | 22 % |
+| occiput le plus en arrière | 46 % | 44 % | 50 % |
+| menton → haut du col | 14 % | 14 % | 20 % |
+| longueur (arrière → nez) / hauteur | 1,22 (renversée) | 1,10 | 0,99 (peau 1,01) |
+| conduit, en % de la longueur depuis l'arrière | 49 % | 31 % | 37 % |
+| sommet, en % de la longueur depuis l'arrière | 56 % | 51 % | 49 % |
+| front le plus en avant, en retrait du bout du nez | 17 % | 18 % | 3 % |
+| épaisseur visible du cou / hauteur | ≈ 35 % | ≈ 34 % | 31 % |
+
+Ce que montrent les photos et que le dessin reprend : un front qui bombe au-dessus des yeux et file sans cassure jusqu'au sommet ; le sommet au-dessus de l'oreille ; un occiput rond et plein ; un visage petit et bas (la face fait 45 % de la hauteur, sourcil → menton) ; une oreille petite (un cinquième de la tête) et basse, dégagée ; un cou court et fin, attaché loin en arrière, qui disparaît presque aussitôt dans le col ; des cheveux courts et ébouriffés, qui couvrent la nuque jusqu'au col.
+
+**Nouveaux repères** (scène 900 × 560) :
+- **Dôme** : sommet de la peau (340,44), cheveux jusqu'à y 31 ; front le plus en avant (497,182) ; lisière des cheveux sur le front vers (488,143).
+- **Occiput** : le plus en arrière (186,198), cheveux à x 180 ; bas de l'occiput (199,300) → (210,326) → (232,340) ; nuque courte (256,348) → (280,356) → (300,366) → (311,378), qui rejoint le bord arrière du cou à x 316.
+- **Cou** : x 316–418 (102 px, 31 % de la hauteur) ; gorge sous le menton (456,369) → (438,376) → (426,388) → (420,404) → x 418. Pivot `#g-enfant-dehors` **inchangé (359,440)**, au milieu du cou.
+- **Col du pyjama** `#g-col` : `#p-col` (laine `--p-pyjama`, en réserve) de (296,432)/(324,429) à (438,452)/(450,464), puis le haut du pyjama x 272–456 jusqu'au bas de la scène ; `#p-col-bord` (lite, 20 px plus clair) est le bourrelet côtelé, cousu d'un fil blanc à son bord bas. Menton → col : 67 px (20 %).
+- **Visage** (inchangé à 2 px près) : sourcil y 206–219, œil (458,228), racine du nez (487,222), bout du nez (507,272), base (489,290), bouche (481,316), menton (482,349)/(472,362), joue (449,288) ; angle de la mâchoire (322,340), ombre `#p-ombre-cou` du dessous du menton (456,370) à la branche montante (317,302).
+- **Oreille** : le gabarit de la passe 3 réduit à 0,7 autour du conduit, puis descendu : pavillon x 272–309 / y 234–307, **conduit (300,280)** (le plus bas que le brief permette). Les fils de l'oreille (hélix, anthélix, lobe) subissent la même transformation (`ear_path`) ; l'escargot et le trou sont seulement descendus de 30 px.
+- **Cerveau** : cortex plus rond et bombé, x 199–472 / y 62–300 (boîte permise x 195–475 / y 55–340) ; pôle frontal (472,150) derrière le front, dôme pariétal (322,62), pôle occipital (199,205). Sillons inchangés. Entre la peau et le cerveau au sommet : 2 de peau, 7 d'os, 9 d'eau.
+- **Bloc profond** (corps calleux, thalamus, hypothalamus, pinéale, hippocampe, amygdale, hypophyse, chiasma, tronc, cervelet) translaté ensemble de **(4,−4)** (5,7 px) : thalamus (339,196), amygdale (360,244), hippocampe x 302–357, tronc (324,239) → (326,330), cervelet x 209–329 / y 256–325. Le nerf optique part toujours de l'œil (446,229) et rejoint le chiasma décalé (379,228). Les petits fils écrits à la main (stries du cervelet, aiguilles de l'horloge, croix du chiasma, œil de l'hippocampe) suivent le bloc par `shift()`.
+- **Trou occipital** x 318–346 sous y 322 ; **moelle** (326,324) → (336,440), x 329–343, dans le tiers arrière du cou, puis sous le col.
+- **Cheveux** (Dedans) : bande de boucles rayon 3 + jusqu'à 10,4 px, jamais rase à l'arrière (facteur ,3 + ,7·avant), effilée vers la nuque jusqu'à y 352 ; deux mèches de frange qui tombent sur le front (vers (498,150) et (486,134)) ; épi à (350,36). Dehors (`gen-dehors.py`, `HAIRLINE`) : lisière du front y 134, tempe, patte devant l'oreille, par-dessus le pavillon (y ≈ 226), derrière l'oreille, nuque couverte jusqu'à (306,358).
+
+**Choix et écarts.**
+- **Amygdale et hippocampe à 36 px au-dessus du conduit** (le brief disait ± 30 px « suffisant ») : le bloc profond ne peut pas descendre, car le cervelet, qui en fait partie, a besoin de ≥ 9 px d'os et de peau sous l'occiput arrondi (sondé avec shapely : à (0,0) il n'en restait que 4 ; à (4,−4), 10,0). Les deux restent dans la hauteur du pavillon (y 234–307), c'est ce que disent les textes.
+- **Menton → col à 20 %** et non aux « 45–50 % » du brief : sur les deux photos, le col est à 14 % sous le menton ; 45 % mettrait le col à y 510, hors de la fenêtre y 430–475 demandée par le même brief. J'ai lu 45–50 % comme l'épaisseur du cou (cible des passes précédentes) et gardé un cou court.
+- **Front en retrait du nez de 3 % seulement** (photos : 17–18 %) : le pôle frontal du cerveau (boîte jusqu'à x 475) impose un front ≥ 485 et le nez est plafonné à 510. C'est l'écart principal qui reste ; la tête est un peu plus haute que longue (0,99 contre 1,10).
+- Le pédoncule du cervelet chevauche de 15 px² le bas du lobe temporal : il est caché sous le cortex (dessiné après). Le corps du cervelet garde 6,6 à 31 px d'eau sous le lobe occipital.
+- Cheveux longs (fille) : le rideau passe DERRIÈRE le col, comme des cheveux rentrés dans le pyjama ; l'inverse (hair sur le col) demanderait le col sous la tête, donc sous la peau du cou.
+
+**Ce qui a raté.**
+1. Première version du col : un bloc uni avec un simple fil, qui se lisait comme un **bavoir**. Ajout du bourrelet clair `#p-col-bord` (lite).
+2. Bloc profond à (0,0) : le cervelet à 4 px de la peau derrière l'occiput arrondi.
+3. Riso : le pyjama à 40 % d'encre laissait voir le sol et le matelas au travers du grain ; passé à 55 %.
+4. Patte de cheveux devant l'oreille (Dehors) en pointe de crochet : arrondie.
+
+**Contrôles.**
+- `node --test test/` : 15/15 ; console propre (Playwright, http://localhost:8793, `lite=0`).
+- `.w:not(.lite)` : **19** Dedans (18 + `#p-col`), **14** Dehors (+ 6 `<use>`) ; 0 `.w[transform]` ; tous les ids présents ; `#p-tete` reste `class="w peau"` ; pivot calculé 359px 440px.
+- Générateurs reproductibles à l'octet (même md5 après deux passes de `gen-tete.py` puis `gen-dehors.py`).
+- Pose couchée à −90° : la tête repose sur l'oreiller, le col dépasse de la couverture, le pyjama passe dessous.
+- Fille, peau 5, riso (Dedans et Dehors), allégé : captures `shots/t3b-apres-*`.
+- Données `d` de `#g-dedans` : 29 169 octets (27 140 à la passe 3 : col et bourrelet en plus).

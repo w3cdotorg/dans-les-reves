@@ -126,36 +126,61 @@ def rounded(g, r):
 
 # ---------------------------------------------------------------- formes de base
 # Tête (peau), de profil, regard vers la droite — profil d'enfant de 5 ans.
-# Passe 3 : proportions mesurées sur la photo de référence du propriétaire
-# (NOTES.md) : œil à ~59 % de la hauteur (sommet des cheveux → menton), base du
-# nez ~78 %, bouche ~85 %. Œil (458,228), bout du nez (507,272), base du nez
-# (489,290), philtre court, jonction des lèvres (488,314), menton petit et rond,
-# un peu en retrait (482,349)/(472,362). Front en dôme continu (le plus en avant (499,162)),
-# sommet au-dessus de l'oreille (310,52), occiput rond (le plus en arrière
-# (186,228), à hauteur des yeux), bas de l'occiput (204,323)–(244,342), nuque
-# courte qui rejoint le cou en (290,360) ; cou x 292–428 (≈ 43 % de la hauteur).
-H_PTS = [(292,575),(292,500),(292,420),(293,374),(286,356),(268,348),(244,342),(221,337),(204,323),
-         (194,294),(188,262),(186,228),(188,194),(196,158),(212,122),(236,92),(270,66),(310,52),
-         (356,52),(404,60),(444,76),(474,100),(492,130),(499,162),(497,192),(492,210),(487,222),
-         (490,234),(496,248),(503,262),(507,272),(503,282),(495,287),(489,290),(488,297),(493,305),
-         (493,310),(488,314),(491,321),(488,330),(479,338),(482,349),(472,362),(454,370),
-         (436,376),(428,392),(428,440),(428,500),(428,575)]
-# Cerveau (hémisphère vu de côté, avant à droite).
-S_PTS = [(466,142),(462,164),(442,180),(428,200),(421,228),(431,240),(434,256),(424,278),
-         (398,294),(360,300),(328,296),(306,284),(290,266),(266,252),(240,247),(216,242),
-         (202,228),(199,192),(210,156),(238,120),(280,95),(330,86),(380,85),(424,96),(452,115)]
+# Passe 4 : silhouette redessinée d'après les photos de référence (rapports
+# mesurés dans NOTES.md, « Task 3b, passe 4 »). Un DÔME continu du sourcil au
+# sommet (apex (340,44), au-dessus et un peu devant l'oreille), un occiput rond
+# et plein (le plus en arrière (186,198), à 50 % de la hauteur), une nuque courte,
+# un cou court et fin (x 316–418, 31 % de la hauteur) attaché loin en arrière,
+# couvert par le col du pyjama dès y ≈ 430. Le visage reste petit et bas :
+# œil (458,228), bout du nez (507,272), base du nez (489,290), bouche (481,316),
+# menton petit et fuyant (482,349)/(472,362).
+H_PTS = [(316,575),(316,500),(316,440),(315,400),(311,378),(300,366),(280,356),(256,348),(232,340),
+         (210,326),(199,300),(193,278),(191,254),(187,224),(186,198),(189,170),(196,144),(208,118),
+         (226,94),(248,74),(276,58),(306,47),(340,44),(372,48),(404,58),(432,74),(456,94),(474,116),
+         (486,138),(494,160),(497,182),(494,202),(489,216),(487,222),(490,234),(496,248),(503,262),
+         (507,272),(503,282),(495,287),(489,290),(488,297),(493,305),(493,310),(488,314),(491,321),
+         (488,330),(479,338),(482,349),(472,362),(456,369),(438,376),(426,388),(420,404),(418,440),
+         (418,500),(418,575)]
+# Cerveau (hémisphère vu de côté, avant à droite) : passe 4, plus rond et bombé
+# (dôme pariétal à y 62, pôle frontal arrondi derrière le front, pôle occipital
+# rond), dans la boîte x 199–472 / y 62–300.
+S_PTS = [(472,150),(462,170),(444,186),(428,204),(421,226),(431,240),(434,256),(424,278),
+         (398,294),(360,300),(328,296),(306,282),(290,262),(266,249),(240,244),(216,240),
+         (201,228),(199,205),(200,170),(209,138),(226,110),(252,86),(286,68),(322,62),
+         (360,64),(396,74),(428,90),(452,108),(466,128)]
+# Passe 4 : les régions profondes, le corps calleux, le thalamus, le tronc, le
+# cervelet et le nerf optique sont translatés ENSEMBLE de (B_DX, B_DY) (5,7 px),
+# pour que le cervelet garde ≥ 9 px d'os et de peau sous l'occiput arrondi.
+B_DX, B_DY = 4, -4
+def B(pts): return [(x + B_DX, y + B_DY) for x, y in pts]
+def Bt(cs): return [(x + B_DX, y + B_DY, r) for x, y, r in cs]
 # Cervelet : corps ovale + bras (pédoncule) qui rejoint le tronc.
-# Passe 2 : avancé de (9,2) (9,2 px) pour garder de l'os derrière et dessous
-# quand l'arrière du crâne a reculé.
-C_DX, C_DY = 9, 2
+# Passe 2 : avancé de (9,2) ; passe 4 : + le décalage commun du bloc.
+C_DX, C_DY = 9 + B_DX, 2 + B_DY
 C_PTS = [(x + C_DX, y + C_DY) for x, y in
          [(196,290),(206,268),(236,258),(266,263),(285,281),(300,292),(314,296),(315,306),
           (299,311),(282,316),(262,325),(236,327),(210,321),(198,306)]]
-# Oreille : un pavillon (hélix qui s'enroule, lobe, tragus devant le conduit),
-# de la ligne des sourcils (y 184) à la base du nez (y 286), conduit (300,250).
-E_PTS = [(x, y + 12) for x, y in      # passe 3 : pavillon descendu de 12 px (sourcil → base du nez)
+# Oreille : un pavillon (hélix qui s'enroule, lobe, tragus devant le conduit).
+# Passe 4 : plus petite (×0,7 : 72 px, 22 % de la hauteur de tête, comme sur les
+# photos) et plus basse : haut à y 235 (sourcil → œil), conduit (300,280), lobe à
+# y 307. Le gabarit est dessiné autour du conduit d'origine (300,250).
+E_K, E_DY = 0.7, 30
+def ear_pt(x, y): return (300 + (x - 300) * E_K, 250 + (y - 250) * E_K + E_DY)
+E_PTS = [ear_pt(x, y) for x, y in
          [(306,196),(294,186),(278,186),(266,198),(261,218),(262,242),(267,264),(276,280),
           (288,288),(297,284),(300,274),(306,266),(309,256),(306,244),(311,232),(313,214)]]
+def ear_path(d):
+    """Tracé relatif « M x,y c … » du pavillon d'origine : M transformé, c mis à l'échelle."""
+    def one(seg):
+        m = re.match(r'M(-?[\d.]+),(-?[\d.]+)(.*)', seg)
+        x, y = ear_pt(float(m.group(1)), float(m.group(2)))
+        rest = re.sub(r'-?\d+(?:\.\d+)?', lambda n: f(float(n.group(0)) * E_K), m.group(3))
+        return f"M{f(x)},{f(y)}" + rest
+    return ''.join(one(s) for s in re.findall(r'M[^M]+', d))
+def shift(d, dx, dy):
+    """Tracé absolu « x,y » : translation de toutes les paires."""
+    return re.sub(r'(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)',
+                  lambda m: f"{f(float(m.group(1)) + dx)},{f(float(m.group(2)) + dy)}", d)
 H = poly(H_PTS); S = poly(S_PTS); C = poly(C_PTS)
 
 # lobes : on découpe le cerveau par trois lignes (prolongées hors du cerveau)
@@ -183,27 +208,29 @@ def lobe(g): return rounded(g.buffer(-GAP), 3)
 
 cortex = S.buffer(2.6)
 # le tronc descend en arrière vers le trou occipital (bas recalé de 8 px vers l'arrière)
-tronc = tube([(320,243,9.5),(323,258,10),(330,276,12.5),(334,293,14),(329,309,11.5),(324,322,8.6),(322,334,7.8)])
+tronc = tube(Bt([(320,243,9.5),(323,258,10),(330,276,12.5),(334,293,14),(329,309,11.5),(324,322,8.6),(322,334,7.8)]))
 # le coussin d'eau : 9 px autour du cerveau, mais jamais à moins de 7 px de la peau
 # (2 de peau + 5 d'os) : à l'arrière, devenu moins profond, il s'amincit.
-liq = unary_union([S, C, tronc.intersection(box(0,0,900,330))]).buffer(14).buffer(-5).intersection(H.buffer(-7))
+liq = unary_union([S, C, tronc.intersection(box(0,0,900,330 + B_DY))]).buffer(14).buffer(-5).intersection(H.buffer(-7))
 # crâne : la voûte (entre la peau et le coussin d'eau, de l'arcade sourcilière à
 # l'occiput) + le plancher (un anneau de 9 px sous le coussin d'eau : toit de
 # l'orbite, fosse sous le lobe temporal, sous le cervelet), percé du TROU
 # OCCIPITAL sous l'oreille, par où le tronc sort vers la moelle.
 # Sous les cheveux, l'os monte jusqu'à 2 px de la peau (l'arrière du crâne est
 # mince) ; au front, sous la lisière, il laisse 7 px de peau.
-vault_keep = Polygon([(540,-20),(540,188),(486,188),(452,194),(418,238),(330,300),(300,362),
-                      (110,362),(110,-20)])
-foramen = box(309, 326, 337, 380)
-cap_keep = Polygon([(620,-60),(620,30),(486,100),(330,300),(210,390),(80,470),(-60,470),(-60,-60)])
+vault_keep = Polygon([(540,-20),(540,200),(488,200),(452,206),(418,244),(330,310),(300,372),
+                      (110,372),(110,-20)])
+foramen = box(314 + B_DX, 326 + B_DY, 342 + B_DX, 380)
+# lisière des cheveux : front dégagé jusqu'à (488,143) (34 % de la hauteur), puis
+# cap_keep sert aussi à l'os (2 px sous la peau là où il y a des cheveux)
+cap_keep = Polygon([(620,-60),(620,20),(498,134),(330,300),(210,400),(80,470),(-60,470),(-60,-60)])
 voute = unary_union([H.buffer(-2).intersection(cap_keep), H.buffer(-7)]).intersection(vault_keep)
 crane = rounded(unary_union([voute, liq.buffer(7)])
                 .difference(liq).difference(foramen).intersection(H.buffer(-2)), 2)
 # cheveux courts : une calotte de laine sur le haut et l'arrière, bord ondulé,
-# qui s'amincit vers la nuque ; trois mèches de frange sur le front.
-# implantation : front dégagé (lisière vers (486,100)), courte lisière de nuque
-# (les cheveux s'arrêtent vers y 326) ; cap_keep est défini avec le crâne.
+# qui s'amincit vers la nuque ; deux mèches de frange sur le front.
+# Passe 4 : courts et ébouriffés, épais aussi à l'arrière (bord x ≈ 180), ils
+# s'arrêtent à la nuque vers y 352 ; l'oreille reste dégagée.
 ring = H.exterior
 blobs = []; strands = []
 L = ring.length
@@ -213,41 +240,52 @@ for i in range(int(L//5)):
     p = ring.interpolate(sd)
     if not cap_keep.contains(p) or p.y > 392: continue
     if s0 is None: s0 = sd
-    taper = max(0.0, min(1.0, (330 - p.y)/110))          # 1 en haut, 0 à la nuque
-    arriere = max(0.0, min(1.0, (p.x - 187)/70))         # 0 tout à l'arrière : cheveux ras (bord x ≈ 183)
-    r = 3.6 + taper*arriere*(7.5 + 2.4*math.sin((sd-s0)/31*2*math.pi) + 1.6*math.sin((sd-s0)/13*2*math.pi + 1))   # ébouriffés
+    taper = max(0.0, min(1.0, (352 - p.y)/120))         # 1 en haut, 0 à la nuque
+    arriere = .3 + .7*max(0.0, min(1.0, (p.x - 186)/70))   # .3 tout à l'arrière : plus courts, jamais ras
+    r = 3 + taper*arriere*(6.8 + 2.2*math.sin((sd-s0)/31*2*math.pi) + 1.4*math.sin((sd-s0)/13*2*math.pi + 1))   # ébouriffés
     blobs.append(p.buffer(r, 20))
-locks = [tube([(470,80,7),(482,96,4.6),(486,110,1.6)]), tube([(456,70,7),(468,88,4),(472,100,1.4)])]
+locks = [tube([(480,120,7),(492,136,4.6),(498,150,1.6)]), tube([(466,106,7),(480,122,4),(486,134,1.4)])]
 hair = unary_union([unary_union(blobs).difference(H.buffer(-2.5)).intersection(cap_keep)] + locks)
-hair = rounded(biggest(hair.buffer(0).difference(box(0,326,330,600))), 1)   # courte lisière de nuque
+hair = rounded(biggest(hair.buffer(0).difference(box(0,352,330,600))), 1)   # courte lisière de nuque
 # fils de laine plus clairs qui suivent la calotte
 inner = H.buffer(1.5).exterior
 for k in range(40):
     sd = k*46
     seg = [inner.interpolate(sd + t) for t in (0, 15, 30)]
-    if all(cap_keep.buffer(-12).contains(q) and q.y < 330 for q in seg):
+    if all(cap_keep.buffer(-12).contains(q) and q.y < 345 for q in seg):
         strands.append([(q.x, q.y) for q in seg])
 # cheveux longs (fille) : rideau derrière la tête et le cou
 HL_PTS = [(262,84),(214,104),(190,150),(178,220),(176,300),(180,380),(186,450),(192,490),
           (204,512),(222,520),(242,512),(262,524),(284,516),(304,524),(318,512),(322,470),
           (316,410),(290,370),(240,330),(220,200)]
 hairlong = poly(HL_PTS)
+# le col rond du pyjama (passe 4) : bourrelet de laine posé sur le bas du cou
+# (y 429 à la nuque, 452 à la gorge), puis le haut du pyjama jusqu'au bas de la
+# scène ; il raccourcit le cou (menton → col ≈ 21 % de la hauteur de tête).
+COL_PTS = [(280,440),(296,432),(324,429),(356,431),(388,436),(416,443),(438,452),(450,464),
+           (454,480),(456,575),(272,575),(272,470),(274,452)]
+col = poly(COL_PTS)
+# le bourrelet côtelé du col : une bande de 20 px le long du bord haut, en laine
+# plus claire (pièce lite), cousue d'un fil blanc à son bord bas
+col_band = rounded(col.difference(affinity.translate(col, 0, 20)).intersection(box(260,420,470,478)), 1.5)
+COL_FIL = [(276,462),(300,454),(330,450),(362,452),(394,458),(422,466),(444,476)]
 
-# régions profondes
-calleux = tube([(254,190,7.5),(262,178,6),(282,168,5),(310,162,4.6),(345,159,4.6),(380,161,4.8),
-                (406,166,5.5),(421,177,6.4),(422,190,4.6),(414,197,2.6)])
-thalamus = ellipse(335,200,23,14,-6)
-hypoth = ellipse(347,222,11,7,8)
-pineale = ellipse(300,196,7,5.6,-20)
-hippo = unary_union([tube([(345,243,6.4),(336,238,5.6),(325,232,4.6),(314,226,3.8),(305,219,3.1),
-                           (301,212,2.7),(303,206,2.5),(308,206,2.3),(309,211,2)]),
-                     Point(347,239).buffer(6,24)])
-amygdale = ellipse(356,248,6.6,4.8,-22)
-hypophyse = unary_union([tube([(354,228,1.6),(362,238,1.5),(369,248,1.7)]), Point(371,253).buffer(4.4,24)])
-# passe 3 : l'œil est à hauteur du pôle temporal, le nerf file presque à l'horizontale
-nerf = unary_union([tube([(446,229,3.4),(424,231,3.1),(400,232,2.9),(381,232,2.7)]), ellipse(375,232,6.2,4.2,-10)])
-# la moelle sort par le trou occipital et descend dans la moitié ARRIÈRE du cou
-moelle = tube([(322,328,7.6),(320,380,7.2),(318,440,7),(318,500,7),(318,580,7)])   # passe 3 : cou x 292–428, moelle dans le tiers arrière
+# régions profondes (bloc translaté de (B_DX, B_DY))
+calleux = tube(Bt([(254,190,7.5),(262,178,6),(282,168,5),(310,162,4.6),(345,159,4.6),(380,161,4.8),
+                   (406,166,5.5),(421,177,6.4),(422,190,4.6),(414,197,2.6)]))
+thalamus = ellipse(335 + B_DX,200 + B_DY,23,14,-6)
+hypoth = ellipse(347 + B_DX,222 + B_DY,11,7,8)
+pineale = ellipse(300 + B_DX,196 + B_DY,7,5.6,-20)
+hippo = unary_union([tube(Bt([(345,243,6.4),(336,238,5.6),(325,232,4.6),(314,226,3.8),(305,219,3.1),
+                              (301,212,2.7),(303,206,2.5),(308,206,2.3),(309,211,2)])),
+                     Point(347 + B_DX,239 + B_DY).buffer(6,24)])
+amygdale = ellipse(356 + B_DX,248 + B_DY,6.6,4.8,-22)
+hypophyse = unary_union([tube(Bt([(354,228,1.6),(362,238,1.5),(369,248,1.7)])), Point(371 + B_DX,253 + B_DY).buffer(4.4,24)])
+# l'œil ne bouge pas : le nerf part de l'arrière de l'œil (446,229) et file
+# presque à l'horizontale jusqu'au chiasma, qui suit le bloc
+nerf = unary_union([tube([(446,229,3.4),(426,229.5,3.1),(402,229.5,2.9),(381 + B_DX,232 + B_DY,2.7)]), ellipse(375 + B_DX,232 + B_DY,6.2,4.2,-10)])
+# la moelle sort par le trou occipital et descend dans le tiers ARRIÈRE du cou (x 316–418)
+moelle = tube([(322 + B_DX,328 + B_DY,7.6),(331,380,7.2),(336,440,7),(336,500,7),(336,580,7)])
 
 out = {}
 out['H'] = smooth_path(H_PTS)
@@ -255,6 +293,9 @@ out['S'] = smooth_path(S_PTS)
 out['C'] = smooth_path(C_PTS)
 out['E'] = smooth_path(E_PTS)
 out['HL'] = smooth_path(HL_PTS)
+out['col'] = smooth_path(COL_PTS)
+out['col_fil'] = smooth_path(COL_FIL, closed=False)
+out['col_band'] = shape_path(col_band, .4)
 out['cortex'] = shape_path(cortex)
 out['frontal'] = shape_path(lobe(front))
 out['parietal'] = shape_path(lobe(par))
@@ -274,6 +315,16 @@ out['hippocampe'] = shape_path(hippo, .25)
 out['amygdale'] = shape_path(amygdale, .15)
 out['hypophyse'] = shape_path(hypophyse, .2)
 out['nerf'] = shape_path(nerf, .25)
+# petits fils et nœuds écrits à la main, qui suivent le bloc ou l'oreille
+out['fil_cervelet'] = shift("M222,272 Q249,266 276,272 M214,283 Q249,276 284,283 M211,294 Q249,288 290,294 M214,305 Q249,300 285,305 M222,316 Q249,312 276,316", B_DX, B_DY)
+out['fil_horloge'] = shift("M347,222 L347,217.6 M347,222 L350.6,223.6", B_DX, B_DY)
+out['fil_chiasma'] = shift("M372,229.6 L378,234.4 M378,229.6 L372,234.4", B_DX, B_DY)
+out['oeil_hippo'] = f'cx="{f(347.6 + B_DX)}" cy="{f(238.4 + B_DY)}"'
+out['fil_helix'] = ear_path("M303,211c-8-8-22-8-31 2-7 9-8 26-5 42 2 12 8 24 16 31")
+out['fil_anthelix'] = ear_path("M296,218c-10-3-19 5-20 17-1 10 4 18 6 24M287,244c5-2 10 0 12 4")
+out['fil_lobe'] = ear_path("M292,274c-4 4-4 12 2 17")
+out['fil_cochlee'] = shift("M303,251", 0, E_DY) + " c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"
+out['trou_oreille'] = f'cx="299" cy="{f(251 + E_DY)}"'
 
 # rapport des positions réelles (centres des boîtes)
 def c(g):
@@ -282,17 +333,19 @@ def c(g):
 for k, g in [('cerveau', S), ('cervelet', C), ('tronc', tronc), ('thalamus', thalamus), ('hypothalamus', hypoth),
              ('pineale', pineale), ('hippocampe', hippo), ('amygdale', amygdale), ('hypophyse', hypophyse),
              ('nerf', nerf), ('calleux', calleux), ('frontal', front), ('parietal', par), ('temporal', temp),
-             ('occipital', occ), ('tete', H), ('crane', crane), ('liquide', liq), ('oreille', poly(E_PTS))]:
+             ('occipital', occ), ('tete', H), ('crane', crane), ('liquide', liq), ('oreille', poly(E_PTS)),
+             ('cheveux', hair), ('col', col), ('col-bord', col_band)]:
     print(f"{k:13s} {c(g)}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------- gabarit SVG
 GABARIT = r"""
             <!-- La tête de profil (regard vers la droite) et le cerveau à sa vraie
-                 place (recherche §2.8). Repères (Task 3b, profil d'enfant de 5 ans) :
-                 œil (458,228), conduit auditif (300,250), bout du nez (507,272),
-                 bouche (481,316), menton (472,362), angle de la mâchoire (322,338),
-                 trou occipital (323,340), occiput x 186, nuque → cou à (290,360), cou x 292–428.
+                 place (recherche §2.8). Repères (Task 3b passe 4, profil d'enfant de 5 ans
+                 d'après photo) : sommet (340,44), œil (458,228), conduit auditif (300,280),
+                 bout du nez (507,272), bouche (481,316), menton (472,362), angle de la
+                 mâchoire (322,340), trou occipital (326,336), occiput x 186 (à y 198),
+                 nuque → cou à (311,378), cou x 316–418, col du pyjama dès y 429.
                  Ordre d'empilement = du plus profond au plus proche de l'œil, sauf
                  les régions profondes, posées PAR-DESSUS le cortex en transparence
                  (.profond : opacité .85 + bord cousu .couture) pour qu'on les lise
@@ -314,7 +367,7 @@ GABARIT = r"""
 
             <!-- le cervelet, SÉPARÉ du cerveau, strié de 5 traits brodés -->
             <path id="p-cervelet" class="w" style="--p:var(--p-cervelet)" data-ink="rose" d="{{C}}"/>
-            <path id="fil-cervelet" class="fil" d="M222,272 Q249,266 276,272 M214,283 Q249,276 284,283 M211,294 Q249,288 290,294 M214,305 Q249,300 285,305 M222,316 Q249,312 276,316"/>
+            <path id="fil-cervelet" class="fil" d="{{fil_cervelet}}"/>
 
             <!-- le cerveau : le cortex (couverture plissée, plus sombre) et ses quatre lobes
                  posés dessus ; les sillons entre les lobes laissent voir le cortex -->
@@ -339,19 +392,28 @@ GABARIT = r"""
               <path id="p-oreille" class="w peau" style="--p:var(--skin)" data-ink="jaune" d="{{E}}"/>
               <g id="fil-oreille" style="--f:var(--skin-shade)">
                 <!-- le rebord de l'hélix qui s'enroule, l'anthélix, et la conque autour du conduit -->
-                <path class="fil" d="M303,211c-8-8-22-8-31 2-7 9-8 26-5 42 2 12 8 24 16 31"/>
-                <path class="fil" d="M296,218c-10-3-19 5-20 17-1 10 4 18 6 24M287,244c5-2 10 0 12 4"/>
-                <path class="fil" d="M292,274c-4 4-4 12 2 17"/>
+                <path class="fil" d="{{fil_helix}}"/>
+                <path class="fil" d="{{fil_anthelix}}"/>
+                <path class="fil" d="{{fil_lobe}}"/>
                 <!-- le petit escargot (cochlée), juste au fond du conduit -->
-                <path class="fil" d="M303,251 c2.6,-1 4.4,1.2 3.6,3.4 c-1,2.6 -5,2.8 -6.4,0.4 c-1.6,-3 0.6,-6.6 4,-7 c3.8,-0.4 6.8,2.8 6.2,6.6"/>
+                <path class="fil" d="{{fil_cochlee}}"/>
               </g>
-              <ellipse class="trou" cx="299" cy="251" rx="2.4" ry="3.2"/>
+              <ellipse class="trou" {{trou_oreille}} rx="2.4" ry="3.2"/>
             </g>
 
             <!-- le tronc cérébral (pont bombé vers l'avant) et la moelle dans le cou -->
             <path id="p-moelle" class="w profond" style="--p:var(--p-tronc)" data-ink="rose" d="{{moelle}}"/>
             <path id="p-tronc" class="w profond" style="--p:var(--p-tronc)" data-ink="rose" d="{{tronc}}"/>
             <path class="fil couture" d="{{tronc}}"/>
+
+            <!-- le col rond du pyjama (passe 4), par-dessus le bas du cou et de la moelle ;
+                 repris tel quel dans Dehors (<use href="#g-col">). En riso : encre bleue
+                 pâle (variable --encre-bleu-pale, lue par une règle sur la pièce), en réserve. -->
+            <g id="g-col">
+              <path id="p-col" class="w reserve" style="--p:var(--p-pyjama)" data-ink="bleu" d="{{col}}"/>
+              <path id="p-col-bord" class="w lite reserve" style="--p:color-mix(in srgb, var(--p-pyjama) 70%, #fff)" data-ink="bleu" d="{{col_band}}"/>
+              <path class="fil couture" d="{{col_fil}}"/>
+            </g>
 
             <!-- les régions profondes, en transparence -->
             <path id="p-calleux" class="w profond" style="--p:var(--p-calleux)" data-ink="jaune" d="{{calleux}}"/>
@@ -363,14 +425,14 @@ GABARIT = r"""
             <path id="p-hypothalamus" class="w lite profond" style="--p:var(--p-hypothalamus)" data-ink="jaune" d="{{hypothalamus}}"/>
             <path class="fil couture" d="{{hypothalamus}}"/>
             <!-- l'horloge : deux aiguilles brodées -->
-            <path class="fil" style="--f:var(--fil-brun)" d="M347,222 L347,217.6 M347,222 L350.6,223.6"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="{{fil_horloge}}"/>
             <!-- l'hippocampe dans son groupe : c'est #g-hippocampe qu'on fera gonfler
                  (une transform CSS sur la pièce .w écraserait le décalage d'encre riso) -->
             <g id="g-hippocampe">
               <path id="p-hippocampe" class="w profond" style="--p:var(--p-hippocampe)" data-ink="jaune" d="{{hippocampe}}"/>
               <path class="fil couture" d="{{hippocampe}}"/>
               <!-- l'œil du petit cheval de mer (nœud français brun) -->
-              <circle class="oeil-hippo" cx="347.6" cy="238.4" r="1.25"/>
+              <circle class="oeil-hippo" {{oeil_hippo}} r="1.25"/>
             </g>
             <path id="p-amygdale" class="w lite profond" style="--p:var(--p-amygdale)" data-ink="rose" d="{{amygdale}}"/>
             <path class="fil couture" d="{{amygdale}}"/>
@@ -378,22 +440,22 @@ GABARIT = r"""
             <path class="fil couture" d="{{hypophyse}}"/>
             <!-- le nerf de l'œil, de l'arrière de l'œil vers l'arrière et le milieu, jusqu'au croisement (chiasma) -->
             <path id="p-nerf-optique" class="w profond" style="--p:var(--p-nerf)" data-ink="jaune" d="{{nerf}}"/>
-            <path class="fil" style="--f:var(--fil-brun)" d="M372,229.6 L378,234.4 M378,229.6 L372,234.4"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="{{fil_chiasma}}"/>
 
             <!-- les cheveux courts : une calotte bouclée, et un épi sur le dessus -->
             <!-- les cheveux courts et leurs fils -->
             <g id="g-cheveux">
               <path id="p-cheveux" class="w cheveux" style="--p:var(--hair)" data-ink="bleu" d="{{cheveux}}"/>
               <path class="fil meches" d="{{meches}}"/>
-              <path class="fil epi" d="M352,44 C350,32 356,24 364,26 C371,28 370,37 363,37 C358,37 358,31 362,31"/>
+              <path class="fil epi" d="M350,36 C348,24 354,16 362,18 C369,20 368,29 361,29 C356,29 356,23 360,23"/>
             </g>
 
             <!-- le visage : joue, œil-bouton, paupière (fermée la nuit), sourcil, sourire -->
             <!-- le visage entier -->
             <g id="g-visage">
               <!-- la mâchoire : une fine ombre de laine sous son bord, du dessous du menton
-                   à l'angle sous l'oreille (322,338), puis le long de la branche qui remonte -->
-              <path id="p-ombre-cou" class="w lite" style="--p:var(--skin-shade)" data-ink="jaune" d="M452,370C420,362 372,348 330,338 322,326 318,312 315,300 312,314 314,330 322,342 364,354 410,366 442,377Z"/>
+                   à l'angle sous l'oreille (322,340), puis le long de la branche qui remonte -->
+              <path id="p-ombre-cou" class="w lite" style="--p:var(--skin-shade)" data-ink="jaune" d="M456,370C424,362 376,349 332,340 324,328 320,314 317,302 314,316 316,332 324,344 366,355 412,367 444,378Z"/>
               <path id="p-joue" class="w lite" style="--p:var(--p-joue)" data-ink="rose" d="M434,288c0-7 7-11 15-11s15 4 15 11-7 11-15 11-15-4-15-11Z"/>
               <!-- l'œil de profil (458,228), à hauteur du pôle temporal : une amande (blanc
                    de laine), le bouton cousu devant, le bord de la paupière et trois cils ;

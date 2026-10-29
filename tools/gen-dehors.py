@@ -97,11 +97,13 @@ out = {}
 # (la tête H au-dessus et derrière une ligne de cheveux qui passe au-dessus de
 # l'oreille), posée SOUS la bande reprise par <use> (qui garde ses boucles).
 # Task 3b : lisière réaliste — front dégagé, tempe, petite patte devant l'oreille,
-# par-dessus le haut du pavillon (y ≈ 176), derrière l'oreille, puis une courte
-# lisière de nuque (passe 2 : les cheveux s'arrêtent vers y 326).
-HAIRLINE = [(490, 112), (462, 112), (430, 118), (398, 130), (372, 150), (354, 176), (344, 204),
-            (338, 232), (326, 222), (314, 202), (296, 192), (274, 194), (258, 210), (250, 238),
-            (246, 270), (238, 298), (224, 318), (206, 332)]
+# par-dessus le haut du pavillon, derrière l'oreille, puis la nuque.
+# Passe 4 : la lisière du front descend à y ≈ 134 (34 % de la hauteur), l'oreille
+# (pavillon x 272–309, y 234–307) reste dégagée, les cheveux couvrent la nuque
+# jusqu'au col (y ≈ 358 en (306,358)).
+HAIRLINE = [(498, 134), (470, 134), (440, 140), (410, 150), (382, 166), (360, 188), (346, 212),
+            (338, 236), (336, 254), (324, 252), (312, 236), (296, 226), (278, 228), (264, 240),
+            (258, 264), (258, 292), (262, 318), (272, 338), (290, 350), (306, 358)]
 line = LineString(T.sample(HAIRLINE, closed=False, n=8))
 wavy = []                                    # bord ondulé (±2,6 px), comme une découpe à la main
 for i in range(int(line.length // 5) + 1):
@@ -109,7 +111,7 @@ for i in range(int(line.length // 5) + 1):
     nx, ny = -(b.y - a.y), b.x - a.x; l = math.hypot(nx, ny) or 1
     w = 3.2 * math.sin(i * .95)
     wavy.append((a.x + nx/l*w, a.y + ny/l*w))
-zone = Polygon(wavy + [(120, 430), (-40, 430), (-40, -40), (560, -40), (560, 80)])
+zone = Polygon(wavy + [(120, 440), (-40, 440), (-40, -40), (560, -40), (560, 80)])
 calotte = T.rounded(T.unary_union([T.H.buffer(-1).intersection(zone), T.hair]).buffer(0), 2)
 out['calotte'] = T.shape_path(calotte, .6)
 
@@ -297,11 +299,12 @@ GABARIT = r"""
             </g>
 
             <!-- l'enfant : la MÊME tête que Dedans, reprise par <use> (avatar, genre,
-                 paupière, sourcil suivent tout seuls). Pivot au cou (359,440) :
+                 paupière, sourcil, col du pyjama suivent tout seuls). Pivot au cou (359,440) :
                  Task 7 le couche par une transform CSS sur ce groupe. -->
             <g id="g-enfant-dehors">
               <use href="#p-cheveux-long"/>
               <use href="#p-tete"/>
+              <use href="#g-col"/>
               <path id="p-calotte" class="w cheveux reserve" style="--p:var(--hair)" data-ink="bleu" d="{{calotte}}"/>
               <use href="#g-cheveux"/>
               <use href="#g-oreille" style="--oreille-opacite:1"/>
