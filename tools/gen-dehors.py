@@ -95,8 +95,11 @@ out = {}
 # le reste). Dehors, sans cerveau, la tête paraissait chauve : une calotte pleine
 # (la tête H au-dessus et derrière une ligne de cheveux qui passe au-dessus de
 # l'oreille), posée SOUS la bande reprise par <use> (qui garde ses boucles).
-HAIRLINE = [(480, 92), (452, 112), (414, 126), (378, 142), (350, 166), (332, 194), (318, 214),
-            (298, 206), (276, 208), (260, 224), (254, 256), (248, 292), (236, 328), (214, 368)]
+# Task 3b : lisière réaliste — front dégagé, tempe, petite patte devant l'oreille,
+# par-dessus le haut du pavillon (y ≈ 176), derrière l'oreille, puis la nuque.
+HAIRLINE = [(486, 100), (462, 108), (430, 116), (398, 128), (372, 146), (352, 170), (340, 196),
+            (335, 222), (324, 210), (314, 186), (296, 176), (274, 178), (258, 194), (250, 222),
+            (246, 260), (240, 300), (226, 340), (206, 380)]
 line = LineString(T.sample(HAIRLINE, closed=False, n=8))
 wavy = []                                    # bord ondulé (±2,6 px), comme une découpe à la main
 for i in range(int(line.length // 5) + 1):
@@ -296,7 +299,7 @@ GABARIT = r"""
               <use href="#p-tete"/>
               <path id="p-calotte" class="w cheveux reserve" style="--p:var(--hair)" data-ink="bleu" d="{{calotte}}"/>
               <use href="#g-cheveux"/>
-              <use href="#g-oreille"/>
+              <use href="#g-oreille" style="--oreille-opacite:1"/>
               <use href="#g-visage"/>
             </g>
 

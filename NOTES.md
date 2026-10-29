@@ -500,3 +500,59 @@ règle sur l'élément.
 - **Couché (pour Task 7)** : pivot au cou (359,440) ; essai validé en capture :
   `#g-enfant-dehors{transform:translate(61px,-90px) rotate(-80deg) scale(.6)}`. La couverture
   `#p-couverture` est dessinée PAR-DESSUS l'enfant (elle le borde), le lit `#p-lit` dessous.
+
+## 2026-10-29 — Task 3b : une tête « anatomiquement correcte »
+
+Demande du propriétaire : « Pourras-tu faire une tête plus anatomiquement correcte ? ». Avant, la tête était un gros œuf avec une bosse pour le nez : pas de menton, pas de mâchoire, la bouche à la place du menton, le profil qui glissait tout droit dans un cou large, et une oreille en forme de « 6 ».
+
+**Proportions retenues (enfant de 5 ans).** Référence : les proportions classiques de la tête d'enfant en dessin (A. Loomis, *Drawing the Head and Hands*, chapitre sur l'enfant), donc de mémoire, sans recherche en ligne, et recoupées avec les repères du brief :
+- les yeux à mi-hauteur entre le sommet et le menton (sommet y 48, œil y 190, menton y 348) ;
+- la base du nez vers les ¾ (y 266) ;
+- la bouche dans le tiers inférieur du visage (jonction des lèvres y 297) ;
+- l'oreille entre la ligne des sourcils et la base du nez ;
+- un crâne très grand devant une face petite ;
+- un nez court et retroussé, un menton peu avancé.
+
+**Nouveaux repères** (scène 900 × 560) :
+
+| repère | coordonnées |
+|---|---|
+| racine du nez (creux) | (486,194) |
+| bout du nez | (507,249) |
+| base du nez | (489,266) |
+| lèvre supérieure | (492,284–292) |
+| jonction des lèvres | (488,297) |
+| **bouche brodée** | de (472,298) à (490,298), centre **(481,299)** |
+| sillon sous la lèvre | (480,320) |
+| menton | (484,333) en avant, (472,348) en bas |
+| gorge | (424,376) |
+| angle de la mâchoire | **(330,328)** |
+| trou occipital | x 309–337 sous y 326, centre ≈ (323,340) |
+| cou | x 301–419 sous y 440 |
+| nuque | creusée de (301,452) à (184,340) |
+| pivot du cou (inchangé) | (359,440) |
+
+**Choix et écarts.**
+- **Angle de la mâchoire en (330,328), pas en (330,365) comme le suggérait le brief.** Avec le menton à y 348, un angle à y 365 ferait DESCENDRE le bord de la mâchoire vers l'arrière. Or chez l'enfant, il monte vers l'oreille d'environ 10°. La première version (bord quasi horizontal à y 365) se lisait comme une sangle en travers du cou.
+- **Trou occipital sous l'oreille, à x ≈ 323, pas derrière elle.** Le conduit auditif (300,250) et le tronc (plan : x 320–330) sont figés. Le bas du tronc recule de 8 px (dans la tolérance), et la moelle passe dans le tiers arrière du cou (x 322–338 sur 301–419).
+- **Cerveau recalé** : seule la face orbitaire du lobe frontal remonte de 7 à 9 px, pour laisser la place au toit de l'orbite au-dessus de l'œil. Le reste du cerveau ne bouge pas.
+- **Œil** : vu de profil, c'est une amande de laine blanche (`#p-oeil-blanc`, nouvel id), avec le bouton cousu à l'avant (`#p-oeil`, r 6,3), le bord de paupière et 3 cils brodés (`.cils`), le pli de la paupière et le creux vers le nez (`.pli`). `#p-paupiere` et `#fil-oeil-ferme` suivent l'amande. Le pivot de `#p-sourcil` passe à (444,181).
+- **Mâchoire** : une fine ombre de laine `#p-ombre-cou` (lite, `--skin-shade` à opacité .3) court du dessous du menton à l'angle, puis le long de la branche montante.
+- **Crâne** : la voûte va du sourcil à l'occiput. Le plancher est un anneau de 9 px autour du coussin d'eau (toit de l'orbite, fosse du lobe temporal, dessous du cervelet), percé du trou occipital.
+- **Oreille** : un pavillon (hélix enroulé, anthélix, conque, lobe, tragus devant le conduit) de y 185 à y 288. Dehors, son `<use>` pose `--oreille-opacite:1` : une variable traverse le clone, alors qu'un sélecteur d'ancêtre ne le ferait pas.
+- **Cheveux** : la lisière libère le front (vers (486,100)) et ne garde que deux petites mèches de frange. Dedans, la bande s'arrête au-dessus de la nuque creusée (y < 358). Dehors (`tools/gen-dehors.py`, `HAIRLINE`) : tempe, petite patte devant l'oreille, passage AU-DESSUS du pavillon (y ≈ 176), derrière l'oreille, puis la nuque.
+
+**Ce qui a raté.**
+1. Bord de mâchoire à y 365 : une sangle en travers du cou.
+2. Grande ombre pleine sous la mâchoire : un col roulé.
+3. Fil brodé le long de la mâchoire : trop dur, il coupait la moelle.
+4. Nuque convexe, tirée en diagonale de l'occiput au cou : la tête posée sur un sac. Elle est maintenant creusée.
+5. Cheveux coupés par `intersection(H.buffer(9))` : les boucles ont disparu. On ne coupe plus que sous la nuque.
+6. Oreille à .72 Dehors : on voyait les cheveux à travers. Corrigé par la variable `--oreille-opacite`.
+
+**Contrôles.**
+- Les deux générateurs reproduisent `index.html` à l'octet (md5 identique après une seconde passe).
+- `.w:not(.lite)` : 18 Dedans, 15 Dehors (plus 5 `<use>` ; la reprise ajoute au plus 4 pièces non lite).
+- 0 `.w[transform]`, console propre, 15/15 tests.
+- Pose couchée (−80° comme en Task 4, puis −90°) : la tête repose sur l'oreiller, le pivot (359,440) reste bon.
+- Données `d` de `#g-dedans` : 24 799 → 27 290 octets (pièces du visage en plus).
