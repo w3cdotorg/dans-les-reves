@@ -287,3 +287,11 @@ concrets : retour immédiat < 100 ms à chaque appui, cerveau-personnage, surpri
 récompenses, mouvement à ressort mais doux) et dans les Global Constraints du plan, pour
 que chaque sous-agent et chaque reviewer le portent. Les tâches déjà faites (1) seront
 reprises au polish (Task 18) pour les retours des boutons et curseurs.
+- **Correction après revue (tour 1)** — *trame du lin* : le « rect grain » de la v10 (aplat
+  `#e8ddc7` à .9 filtré par `#linenGrain`) **masque la trame à 90 %** ; la scène paraissait
+  lisse à côté du `body`. Désormais le rect grain est blanc (neutre) en `mix-blend-mode:multiply` :
+  il n'apporte que le bruit, la trame reste entière. *Isolation* : sans `isolation:isolate` sur
+  `#scene`, les `multiply` de la scène traversaient le SVG et se multipliaient avec le fond de la
+  carte (en riso, papier × papier → scène beige). *Onglet en arrière-plan* : rAF suspendus,
+  donc la mesure d'allègement n'a lieu que page visible, et est refaite au retour au premier plan
+  si la page se cache pendant le laps.
