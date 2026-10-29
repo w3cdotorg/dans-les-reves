@@ -55,11 +55,12 @@ peut vivre tout le cycle jour → nuit → matin.
     l'histoire du pouce, un badge en feutrine « Je connais mon cerveau ».
   - *Le mouvement est juteux* : easings à ressort (`cubic-bezier(.34,1.56,.64,1)`),
     squash & stretch léger sur les pièces, jamais linéaire ; mais tout reste **doux**
-    (pas de flash, pas de secousse violente, pas de son hors voix et chanson) et tout
+    (pas de flash, pas de secousse violente, aucun son) et tout
     est coupé par `prefers-reduced-motion`.
 - Un enfant de 5 ans pilote tout seul : gros boutons, pastilles, curseurs, cartes à toucher.
-- Chaque zone touchée est nommée et expliquée en deux phrases, lues à voix haute (voix
-  coupée par défaut, comme les deux grands frères).
+- Chaque zone touchée est nommée et expliquée en deux phrases, affichées en gros dans un
+  volet ; c'est l'adulte qui lit (décision du propriétaire, 2026-10-29 : **aucun son**, pas
+  de synthèse vocale).
 - Le mécanisme « journée → rangement → mélange → rêve » est **manipulable** : l'enfant
   compose sa journée avec des cartes-souvenirs, et le rêve de la nuit est fabriqué à partir
   de ses cartes. Chaque rêve est expliqué en une phrase (« parce que ton cerveau a mélangé
@@ -73,11 +74,11 @@ peut vivre tout le cycle jour → nuit → matin.
 
 **Non-objectifs (YAGNI)**
 - Pas de backend, pas de compte, pas de sauvegarde autre que les préférences locales
-  (thème, version allégée, son, prénom, chanson, carte réconfort, avatar : garçon/fille,
+  (thème, version allégée, prénom, chanson, carte réconfort, avatar : garçon/fille,
   carnation, cheveux).
 - Pas d'autre langue que le français.
-- Pas de son autre que la synthèse vocale et la vidéo YouTube sur demande (pas de
-  bruitages, pas de musique d'ambiance).
+- **Aucun son** produit par la page (pas de synthèse vocale, pas de bruitages, pas de
+  musique) ; la seule exception est la vidéo YouTube de la chanson, créée sur appui.
 - Pas de 3D, pas de bibliothèque externe (Three.js resterait possible plus tard en
   `vendor/` pour un bonus « tourne le cerveau », hors de ce projet).
 - Pas de générateur de rêves « intelligent » : les recettes sont des règles simples et
@@ -292,8 +293,8 @@ en nuit des rêves et au matin, qui pulse après un cauchemar. Appuyer :
    non : dans une **pièce de feutrine à fenêtre cousue**, et joue. Hors ligne, la pièce
    affiche « Chante ta chanson ! » avec le titre de la chanson saisi par le parent ;
 4. dit la **phrase-clé** que l'enfant pourra réutiliser la nuit sans écran : « C'est mon
-   cerveau qui a mélangé. C'est un rêve. Je change de chaîne. » — lue à voix haute et
-   affichée en gros, c'est l'outil que la page laisse à l'enfant.
+   cerveau qui a mélangé. C'est un rêve. Je change de chaîne. » — affichée en gros (l'adulte
+   la lit avec l'enfant), c'est l'outil que la page laisse à l'enfant.
 
 Au matin, la télécommande reste disponible : « Tu veux lui changer sa tête ? » (c'est la
 version de jour, celle que recommandent les psychologues : transformer le rêve en quelque
@@ -315,7 +316,7 @@ pièce de laine couleur bronze de 12 m à l'échelle de l'enfant (vingt fois sa 
 l'ongle et les plis, cliquable : « C'est une statue en bronze, faite par un artiste qui
 s'appelle César. Elle est très grande, mais elle ne bouge pas. »
 
-## 5. Les zones nommées (étiquette + deux phrases + voix)
+## 5. Les zones nommées (étiquette + deux phrases)
 
 Le constructeur écrit tous les textes avec le vocabulaire et les formulations-modèles de
 `docs/recherche-cerveau-sommeil.md` §5 (mots validés, métaphores honnêtes, tournures de
@@ -386,11 +387,72 @@ Typographie : Fredoka (titres) et Baloo 2 (interface) avec repli système, comme
 Les cartes d'interface (panneau d'info, boutons) sont elles aussi en feutrine (pièces
 bombées, bords cousus), **pas** en verre dépoli.
 
-## 7. Interactions reprises des aînés
+## 6 bis. L'interface « Plein ciel » (décision du propriétaire, 2026-10-29 19:54)
 
-- Zones cliquables : étiquette + explication + synthèse vocale française, **coupée par
-  défaut**, bouton 🔇 / 🎧 gros et visible ; tant qu'elle est coupée, les textes s'affichent
-  sans être lus.
+Le propriétaire n'a pas aimé l'habillage repris des aînés (cartes de feutrine à bord cousu,
+piles de boutons-pilules) et a choisi, sur une planche de trois maquettes, la direction
+**« Plein ciel »** : *la scène prend toute la place, l'habillage est moderne, calme et
+plat ; la feutrine ne concerne que le dessin.* Rien de l'interface des aînés n'est à
+reprendre.
+
+**Principes**
+- La scène SVG est la star : elle occupe toute la largeur disponible, dans un cadre arrondi
+  (rayon 24 px), sur un fond de page uni et clair (`#fffdf8`), sans trame de lin hors de la
+  scène, sans bord cousu, sans ombre « feutrine » sur les contrôles.
+- Un seul geste par idée ; chaque contrôle est à l'échelle d'un doigt de 5 ans (≥ 56 px).
+- Typographie : Fredoka (titres, boutons, étiquettes) et Nunito (texte courant), repli
+  système. Pas d'emoji comme seul libellé : emoji + mot.
+- Couleurs de l'habillage (jetons CSS, indépendants des thèmes de scène) : indigo
+  `#3b3f8f` (sélection), corail `#ff7a59`, vert `#2aa876`, sable `#efeae0` (fonds de
+  contrôles), encre `#2b2a33`, gris `#6c6a78`. Le thème riso ne change que la scène.
+
+**Disposition (bureau, ≥ 900 px)**
+1. **Bandeau haut** (une ligne) : à gauche le titre « 🌙 Dans les rêves » avec la tagline
+   en petit ; au centre le **sélecteur de vue** segmenté (`#cut` reste l'état interne
+   0..2 ; trois segments 🏞️ Dehors · 🧠 Dedans · 🔬 Tout près, segment actif indigo) ; à
+   droite un bouton rond « ⋯ » (`#reglages`) qui ouvre la feuille de réglages.
+2. **Scène** pleine largeur. Collé à son bord droit, le **rail du temps** (`#time`,
+   0..400) : une glissière verticale de 52 px de large, dégradé soleil → coucher → nuit
+   (`--p-soleil` en haut, `--nuit-2` en bas), étiquettes « jour » / « nuit », bouton rond
+   blanc de 64 px dont l'icône change avec le temps (☀️ 🌇 💤 🌙 🐓). Les cinq moments
+   restent accessibles au clavier (←→) et par cinq crans doux (aimantation légère).
+3. **Volet d'information** (`#info`) : il monte par-dessus le bas de la scène (fond blanc à
+   92 %, flou d'arrière-plan, rayon 20 px, ombre douce) avec une icône carrée à gauche
+   (`#infoEmoji`), un titre (`#infoTitle`) et deux phrases (`#infoText`), un bouton ✕.
+   Entrée à ressort (`cubic-bezier(.34,1.56,.64,1)`, 320 ms), sortie rapide. Le volet
+   sert aussi au récit guidé (`#recit` : texte + « Et après ? » + ✖) et aux mini-jeux.
+4. **Dock** sous la scène : trois gros boutons-pilules colorés, 🎯 Trouve la partie
+   (corail, `#jeu1`), 💭 Rêve ou pour de vrai ? (indigo, `#jeu2`), 📖 L'histoire du pouce
+   (vert, `#histoire`) ; à droite, plus petits et sable : ✨ Montrer les zones (`#zones`),
+   🔍 La loupe (`#loupeBtn`), 🌅 Nouvelle journée (`#journee`).
+5. **Feuille de réglages** (bouton « ⋯ », `#reglages`, `<dialog>` ou volet) : avatar
+   (garçon/fille, carnations, cheveux — les pastilles de Task 3 y déménagent), thème
+   (🧶 Feutrine / 🖨️ Riso, `#theme`), version allégée, et la carte « Pour les parents »
+   (§8) repliée en bas. Fermée par ✕ ou Échap.
+
+**Téléphone (< 900 px)** : bandeau sur deux lignes (titre, puis sélecteur de vue pleine
+largeur) ; le rail du temps passe **sous la scène**, horizontal, même dégradé, même bouton
+rond ; le dock s'empile sur deux lignes ; le volet d'information garde sa place sur la
+scène. Jamais de défilement horizontal.
+
+**Ce qui disparaît** : les boutons 🔊 Réécouter et 🔇 Son coupé, `speechSynthesis`,
+`soundOn`, la clé `reves.son`, la ligne de pastilles `.moment`, les pilules `.pill`, les
+cartes `.card` à bord cousu, la trame de lin sur le `body`, la ligne de pastilles d'avatar
+au-dessus de la scène.
+
+**Ce qui reste** : les ids que les tâches suivantes consomment (`#time`, `#cut`, `#info`,
+`#infoEmoji`, `#infoTitle`, `#infoText`, `#zones`, `#loupeBtn`, `#jeu1`, `#jeu2`,
+`#histoire`, `#journee`, `#theme`, `#parents`), `setCut`/`setTime`, les raccourcis clavier
+(←→ temps, ↑↓ vue), `prefers-reduced-motion`.
+
+**Fun** : le bouton du rail devient lune en glissant et « tombe » doucement dans le cran le
+plus proche ; chaque segment ou bouton s'enfonce de 2 px et rebondit ; le volet arrive à
+ressort ; le « ⋯ » tourne d'un quart de tour en s'ouvrant.
+
+## 7. Interactions (reprises des aînés, sauf l'habillage)
+
+- Zones cliquables : étiquette + explication dans le volet (§6 bis) ; pas de voix, pas de
+  bouton son.
 - **Loupe** au doigt ou à la souris (suivi cadencé sur `requestAnimationFrame`, comme dans
   le volcan après correction). La lentille clone la scène (`<use>`), donc elle **double
   temporairement** le nombre de pièces filtrées ; décision (après relecture) : en thème
@@ -417,7 +479,7 @@ bombées, bords cousus), **pas** en verre dépoli.
 - Prénom de l'enfant (optionnel, utilisé par la narration).
 - Chanson de réconfort : titre (texte) et lien YouTube (par défaut « Hey, ho, les chiens
   pirates ! », `jqGPppvVmBc`) ; carte réconfort par défaut (chanson / doudou / câlin).
-- Thème, version allégée, son.
+- Thème, version allégée.
 - Un court texte pour les parents, tiré de la recherche §3 : outil **de jour** ; la nuit,
   aller voir, câlin, « c'était un rêve », pas de chasse au monstre ; le lendemain, « changer
   le film » ; différence cauchemar / terreur nocturne (ne pas réveiller) ; quand consulter ;
@@ -433,8 +495,6 @@ bombées, bords cousus), **pas** en verre dépoli.
   **des données** (un tableau JS en tête de script), de même que les textes des zones, les
   banques des deux mini-jeux et les phrases de narration. Un test parcourt toutes les
   paires de cartes et vérifie qu'un rêve et une phrase existent.
-- Synthèse vocale : `speechSynthesis`, voix française si disponible, file d'attente
-  annulée à chaque nouveau clic (pas de chevauchement).
 - Tests : le projet reprend l'approche des aînés (vérification visuelle par captures
   Chrome headless à chaque étape, voir NOTES.md) ; en plus, un petit script de test sans
   dépendance (Node) pour les données (paires de cartes, zones avec texte et `aria-label`,
@@ -470,7 +530,7 @@ Dehors piloté par les cartes (§4.2, §5), loupe en laine complète avec pause 
   transforme le film, joue la chanson et dit la phrase-clé ; aucune séquence ne se termine
   sur l'ogre.
 - L'histoire du pouce se raconte de bout en bout, étape par étape.
-- Chaque zone est nommée et expliquée à voix haute ; les régions profondes sont à leur
+- Chaque zone est nommée et expliquée dans le volet ; les régions profondes sont à leur
   vraie place (checklist §5).
 - 3 vues × 5 moments sans état incohérent ni élément orphelin.
 - Les deux mini-jeux fonctionnent et félicitent l'enfant.
