@@ -21,7 +21,10 @@
 #        cadre agrandi par où le géant déborde.
 #   2. dans la scène, le contenu de #g-ecran, <!-- ECRAN-BEGIN --> … <!-- ECRAN-END --> :
 #      le nuage-écran #p-ecran (UNE pièce de laine complète, épinglée en haut à
-#      droite), #g-reve (le film), le bouton #encore, la légende #t-phrase.
+#      droite), #g-reve (le film), le bouton #encore, la légende #t-phrase (et la
+#      phrase-clé #t-cle), la place de la carte réconfort #g-reconfort (Task 11) ;
+#   3. dans #g-ui, <!-- TELECOMMANDE-BEGIN --> … <!-- TELECOMMANDE-END --> : la
+#      télécommande #telecommande (Task 11).
 # Toutes les pièces des dessins sont des .w.lite (filtre #woolMini), jamais de
 # transform sur un .w. Reprend les aides et les vignettes de tools/gen-cartes.py.
 #
@@ -304,11 +307,69 @@ G['maitresse'] = {'corps': [
     T("M30 20L58 -2", 'bois', 'rose', 3),
 ]}
 
+# Les greffes de la télécommande (Task 11, spec §4.6) : jamais tirées par le rêve,
+# posées par applyRemote. « lapin » : deux grandes oreilles roses (l'une retombe), un
+# nez rose qui remue, des moustaches et une carotte, sur la tête (les ancres de la base) ;
+# « chiens-pirates » : deux chiens à chapeau de pirate qui dansent de part et d'autre du
+# film (posés sans ancre : --corps-x/-y restent à 0, le centre de l'écran).
+OREILLE_G = "M-15-15C-27-38-29-70-17-75C-6-79-4-47-7-17Z"
+OREILLE_G_IN = "M-13-21C-21-40-22-63-15-67C-9-69-8-45-9-23Z"
+OREILLE_D = "M7-17C5-40 7-60 18-66C27-71 41-64 38-55C36-49 29-52 25-50C20-46 17-33 15-16Z"
+OREILLE_D_IN = "M10-22C9-40 11-56 19-61C25-64 33-60 32-56C30-53 26-55 22-53C17-48 15-36 13-22Z"
+
+G['lapin'] = {'tete': [
+    ('G', 'oreille-lapin', [W(OREILLE_G, 'glace-rose', 'rose'), W(OREILLE_G_IN, 'calleux', 'rose', 'pastel'),
+                            F("M-16-17Q-11-13-6-17", BRUN)], 0, 1),
+    ('G', 'oreille-lapin o2', [W(OREILLE_D, 'glace-rose', 'rose'), W(OREILLE_D_IN, 'calleux', 'rose', 'pastel'),
+                               F("M6-17Q11-13 16-17", BRUN)], 0, 1),
+    F("M-4 5L-18 2M-4 7.5L-18 10.5M4 5L18 2M4 7.5L18 10.5", BRUN),
+    ('G', 'nez-lapin', [W(ell(0, 3.5, 3.8, 2.8), 'glace-rose', 'rose'), F("M-1.6 2.6Q-.6 1.9.4 2.4", BLANC)], 0, 1),
+    ('G', 'carotte', [W("M3 11C11 6 27 2 35 3C31 9 15 16 5 17Z", 'piquant', 'jaune', 'orange'),
+                      F("M14 9L16 12.5M21 6.5L23 10M28 4.5L29.5 7.5", BRUN),
+                      T("M34 3Q37-4 43-5M35 4Q41 0 46 3", 'tracteur', 'jaune', 2.6, 'vert')], 0, 1),
+]}
+
+def chien_pirate(sens, cache):
+    """Un chien debout qui danse, de face, bras levés, chapeau de pirate ; pieds à y ≈ 34."""
+    m = (lambda d: d) if sens > 0 else miroir
+    L = [
+        T(m("M-9 8Q-19 2-21-10"), 'chien', 'jaune', 5.5, 'orange'),
+        T(m("M9 8Q19 5 23-4"), 'chien', 'jaune', 5.5, 'orange'),
+        W(circ(-21 * sens, -11, 3.4), 'chien-clair', 'jaune', 'pastel'),
+        W(circ(23 * sens, -5, 3.4), 'chien-clair', 'jaune', 'pastel'),
+        W(ell(-6, 31, 6.2, 3.6), 'chien-oreille', 'rose', 'brun'),
+        W(ell(6, 31, 6.2, 3.6), 'chien-oreille', 'rose', 'brun'),
+        W(ell(0, 15, 11.5, 14.5), 'chien', 'jaune', 'orange'),
+        W(ell(0, 18, 6.5, 8.5), 'chien-clair', 'jaune', 'pastel'),
+        W("M-8-14C-17-15-21-6-19 3C-18 8-14 8-12 4C-11-1-10-7-7-11Z", 'chien-oreille', 'rose', 'brun'),
+        W(miroir("M-8-14C-17-15-21-6-19 3C-18 8-14 8-12 4C-11-1-10-7-7-11Z"), 'chien-oreille', 'rose', 'brun'),
+        W(circ(0, -7, 11), 'chien', 'jaune', 'orange'),
+        W(ell(0, -2, 6.6, 4.8), 'chien-clair', 'jaune', 'pastel'),
+        W(ell(0, -4.6, 2.9, 2.1), 'roue', 'bleu'),
+        F("M-3.2 0Q0 2.6 3.2 0", BRUN),
+        W("M-1.9 .8C-1.9 4.8 1.9 4.8 1.9 .8Z", 'cerise', 'rose'),
+        N(-4.2, -10, 1.6, 'brun'), N(4.2, -10, 1.6, 'brun'),
+        W("M-16-15C-12-23-7-29 0-29C7-29 12-23 16-15C8-18-8-18-16-15Z", 'pirate', 'bleu'),
+        F("M-13-16.6Q0-20 13-16.6", SABLE),
+        W(circ(0, -23.5, 2.7), 'blanc-oeil', 'jaune', 'reserve'),
+    ]
+    if cache:   # le bandeau sur l'œil (côté extérieur)
+        L += [F(m("M-10-17L9-6"), BRUN), W(ell(4.2 * sens, -10, 3.2, 2.7), 'pirate', 'bleu')]
+    return L
+
+G['chiens-pirates'] = {'corps': [
+    ('G', 'danse-chien', chien_pirate(1, False), -88, 1.1),
+    ('G', 'danse-chien d2', chien_pirate(-1, True), 88, 1.1),
+]}
+
 def greffe_partie(els):
     L = []
     for e in els:
         if e[0] == 'REMUE':   # la queue qui remue : un groupe animé, jamais la pièce
             L.append('<g class="remue">' + ''.join(R(x) for x in e[1]) + '</g>')
+        elif e[0] == 'G':     # ('G', classes, éléments, dx, échelle) : un groupe animé (Task 11)
+            _, cls, sous, dx, s = e
+            L.append(f'<g class="{cls}">' + ''.join(rendu(x, s, dx, 0, fil_s=1.0, filtre='mini') for x in sous) + '</g>')
         else:
             L.append(R(e))
     return L
@@ -422,11 +483,78 @@ def bloc_ecran():
          '<g id="g-legende" class="legende">',
          '  <path class="legende-fond w lite reserve" style="--p:var(--riso-papier, var(--p-carte))" d=""/>',
          '  <path class="legende-bord fil couture" style="--f:var(--fil-sable)" d=""/>',
-         '  <foreignObject x="188" y="26" width="324" height="250">',
+         '<!-- … et, après un appui sur la télécommande (Task 11), la phrase-clé en gros (#t-cle) -->',
+         '  <foreignObject x="188" y="26" width="324" height="330">',
          '    <div xmlns="http://www.w3.org/1999/xhtml" id="t-phrase" class="t-phrase" aria-live="polite"></div>',
+         '    <div xmlns="http://www.w3.org/1999/xhtml" id="t-cle" class="t-cle" aria-live="polite" hidden=""></div>',
          '  </foreignObject>',
          '</g>',
+         '<!-- La carte réconfort que la télécommande épingle sur l\'écran (Task 11, rempli par le script) -->',
+         '<g id="g-reconfort" aria-hidden="true"></g>',
          '<!-- ECRAN-END -->']
+    return '\n'.join(I + l for l in L) + '\n'
+
+# ---------------------------------------------------------------------------
+# 4. La télécommande (Task 11, spec §4.6) : une pièce de feutrine grise ≈ 66 × 128, quatre
+#    boutons-pressions de couleur, une petite lampe rouge en haut (d'où partent les ondes),
+#    une télé brodée en bas ; une étiquette de feutre épinglée au-dessus porte le libellé
+#    (écrit par le script). En bas à droite de la scène, au-dessus de la boîte (y ≥ 466),
+#    jamais au-delà de x 860 (le rail du temps). Inclinée de −5° par un <g> de placement
+#    (aucune transform sur une pièce .w). La cible (transparente, non filtrée) couvre tout.
+TC_X, TC_Y, TC_W, TC_H = 788, 330, 66, 128
+TC_CX, TC_CY = TC_X + TC_W / 2, TC_Y + TC_H / 2
+TAG = (779, 272, 80, 50)
+PRESSIONS = [(806, 368, 'drapeau', 'rose', ''), (836, 368, 'soleil', 'jaune', ''),
+             (806, 398, 'couverture', 'bleu', ''), (836, 398, 'tracteur', 'jaune', 'vert')]
+
+def arc(cx, cy, r, a1, a2):
+    p1 = (cx + r * math.cos(math.radians(a1)), cy + r * math.sin(math.radians(a1)))
+    p2 = (cx + r * math.cos(math.radians(a2)), cy + r * math.sin(math.radians(a2)))
+    return f"M{f(p1[0])} {f(p1[1])}A{f(r)} {f(r)} 0 0 1 {f(p2[0])} {f(p2[1])}"
+
+def bloc_telecommande():
+    I = '            '
+    corps = rr(TC_X, TC_Y, TC_W, TC_H, 20)
+    tx, ty, tw, th = TAG
+    L = ['<!-- TELECOMMANDE-BEGIN -->',
+         '<!-- La télécommande (Task 11, généré par tools/gen-reve.py) : visible la nuit des rêves et au matin',
+         '     (classe tc-on), elle pulse après un cauchemar (.pulse), s\'enfonce sous le doigt (.appui). -->',
+         '<g id="telecommande" class="telecommande" role="button" tabindex="-1" aria-label="Je change de chaîne !" aria-hidden="true">',
+         '  <g class="tc-etiquette">',
+         f'    <path class="sous-tc" d="{rr(tx, ty, tw, th, 12)}"/>',
+         f'    <path class="w lite reserve tc-etiquette-fond" style="--p:var(--riso-papier, var(--p-carte))" d="{rr(tx, ty, tw, th, 12)}"/>',
+         f'    <path class="fil couture" style="--f:var(--fil-sable)" d="{rr(tx + 4, ty + 4, tw - 8, th - 8, 9)}"/>',
+         f'    <text class="tc-label" x="{f(tx + tw / 2)}" y="{f(ty + th / 2 + 4)}"></text>',
+         f'    <g transform="translate({tx + tw - 7} {ty + 4}) rotate(18)"><use href="#pin" style="color:var(--glass-red)"/></g>',
+         '  </g>',
+         f'  <g transform="rotate(-5 {f(TC_CX)} {f(TC_CY)})">',
+         '    <g class="tc-pulse">',
+         '      <g class="tc-corps">',
+         f'        <path class="tc-halo" d="{rr(TC_X - 5, TC_Y - 5, TC_W + 10, TC_H + 10, 25)}"/>',
+         f'        <path class="sous-tc" d="{corps}"/>',
+         f'        <path class="w pastel tc-laine" style="--p:var(--p-telecommande)" data-ink="bleu" d="{corps}"/>',
+         f'        <path class="fil couture" style="--f:var(--fil-blanc)" d="{rr(TC_X + 5, TC_Y + 5, TC_W - 10, TC_H - 10, 15)}"/>',
+         '        ' + rendu(W(ell(TC_CX, TC_Y + 11, 8, 4.6), 'drapeau', 'rose'), filtre='mini'),
+         '        ' + rendu(F(f"M{f(TC_CX - 4)} {TC_Y + 9.5}Q{f(TC_CX - 1)} {TC_Y + 8} {f(TC_CX + 2)} {TC_Y + 9}", BLANC)),
+         '        <g class="tc-boutons">']
+    for x, y, laine, ink, cls in PRESSIONS:
+        L += ['          ' + rendu(W(circ(x, y, 11), laine, ink, cls), filtre='mini'),
+              '          ' + rendu(F(circ(x, y, 6.6), BLANC)),
+              '          ' + rendu(N(x, y, 2.6))]
+    L += ['        </g>',
+          '        ' + rendu(F(rr(TC_CX - 12, 424, 24, 17, 3.5) + f"M{f(TC_CX - 5)} 424L{f(TC_CX - 9)} 417M{f(TC_CX + 5)} 424L{f(TC_CX + 9)} 417", BLANC, 'epais')),
+          '        ' + rendu(F(f"M{f(TC_CX - 7)} 433Q{f(TC_CX - 3.5)} 429 {f(TC_CX)} 433Q{f(TC_CX + 3.5)} 437 {f(TC_CX + 7)} 433", BLANC)),
+          '        <g class="tc-ondes">']
+    for k, r in enumerate((10, 17, 24)):
+        L.append(f'          <path class="fil tc-onde o{k + 1}" d="{arc(TC_CX, TC_Y + 8, r, -168, -92)}"/>')
+    L += ['        </g>',
+          f'        <path class="tc-focus" d="{rr(TC_X - 6, TC_Y - 6, TC_W + 12, TC_H + 12, 26)}"/>',
+          '      </g>',
+          '    </g>',
+          '  </g>',
+          '  <rect class="tc-cible" x="758" y="268" width="104" height="196" rx="18"/>',
+          '</g>',
+          '<!-- TELECOMMANDE-END -->']
     return '\n'.join(I + l for l in L) + '\n'
 
 if __name__ == '__main__':
@@ -449,5 +577,13 @@ if __name__ == '__main__':
         a = '          <g id="g-ecran"></g>\n'
         assert src.count(a) == 1
         src = src.replace(a, '          <g id="g-ecran">\n' + e + '          </g>\n')
+    t = bloc_telecommande()
+    m = re.search(r' *<!-- TELECOMMANDE-BEGIN -->.*?<!-- TELECOMMANDE-END -->\n', src, re.S)
+    if m:
+        src = src[:m.start()] + t + src[m.end():]
+    else:   # première fois (Task 11) : dans #g-ui, le groupe d'interface en haut de la scène
+        a = '          <g id="g-ui"></g>\n'
+        assert src.count(a) == 1
+        src = src.replace(a, '          <g id="g-ui">\n' + t + '          </g>\n')
     open(chemin, 'w', encoding='utf-8').write(src)
-    print('index.html : rêve et écran écrits,', len(d.encode()) + len(e.encode()), 'octets')
+    print('index.html : rêve, écran et télécommande écrits,', len(d.encode()) + len(e.encode()) + len(t.encode()), 'octets')

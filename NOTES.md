@@ -940,3 +940,73 @@ Contrôles : `node --test test/` 16/16 ; console 0 erreur / 0 avertissement (feu
 - **Pour Task 11** : `reveCourant`, `seed`, `renderDream(dream, {anim})`, `direPhrase(texte)`, `poserVerdict(v)`, `ancresDe(forme)` ; transformer le film = agir sur les `.reve-pose` (wrapper sans `.w`) ou y ajouter un `<use>` de greffe avec les variables d'ancre.
 - **Contrôles** : `node --test test/` 40/40. Budget Dedans, cartes rangées + écran : 19 `.w:not(.lite)` visibles. Playwright (Chromium, http://127.0.0.1:8810, `lite=0`) : console 0 / 0 ; `animateTime(3)` → rêve, `verdict` cauchemar, sourcil froncé (matrice mesurée), nuit `rgb(20,21,51)`, pose `scale(2.2)`, grand clip ; clic réel sur `#encore` → `seed` 0 → 1, rêve refait (retourné) ; `animateTime(4)` → gardé, plus de froncement ni de tremblement ; `animateTime(0)` → vidé, bouton caché, nuage à 0 ; `?temps=3` sans carte → flou + phrase `flou`, sans erreur ; `pickCard` forcé la nuit → refait, `resetDay()` → flou ; mouvement réduit : 0 animation, Entrée au clavier → `seed` 1. Captures : `shots/t10-ogre.png`, `t10-dehors.png`, `t10-glace.png`, `t10-flou.png`, `t10-riso.png`, `t10-riso-dehors.png`, `t10-pirates.png`, `t10-bizarre.png`, `t10-long.png`, `t10-finitbien.png`, `t10-matin.png`.
 - **Task 10, tour de correction 1** : en mode « seul », « desobeit » donnait « les sourcils fâchés étaient qui n'obéissaient pas » ; le verbe remplace maintenant « était » : « ne voulait / ne voulaient pas obéir » (« Dans le rêve, les sourcils fâchés ne voulaient pas obéir, parce que ton cerveau les a rejoués. »). `defini()` donne « les deux grands bras » au sujet (câlin seul). Tests : aucune phrase « était/étaient qui » (toutes les cartes seules et toutes les paires × graines 0–2 × genres), aucun sujet « deux … » sans article ; 43/43. **Pour Task 11** : `dream.reconfort` n'est non nul que les jours de cauchemar (charge 3, spec §4.5-4) ; `applyRemote` ajoute lui-même la carte réconfort d'après `prefs` et ne doit pas compter sur `dream.reconfort`.
+
+## Task 11 : la télécommande — changer de chaîne
+
+- **Dessins** (dans `tools/gen-reve.py`, toujours reproductible à l'octet ; deux relances successives ne changent rien) :
+  - `#g-greffe-lapin` : deux grandes oreilles roses (l'une retombe), nez rose, moustaches, carotte. Posée sur les ancres de tête de la base.
+  - `#g-greffe-chiens-pirates` : deux chiens debout, bras levés, chapeau de pirate, l'un avec un bandeau. Posée sans ancre, au centre du film, à ±88.
+  - Groupes animés (`.oreille-lapin`, `.nez-lapin`, `.carotte`, `.danse-chien`) : un nouveau tuple `('G', classes, éléments, dx, échelle)` dans `greffe_partie`.
+  - La télécommande : bloc `TELECOMMANDE-BEGIN/END`, que le générateur écrit dans `#g-ui`.
+    - Feutre gris `--p-telecommande` (UNE pièce `.w` complète), 66 × 128 en x 788–854, y 330–458, inclinée de −5° par un `<g>` de placement.
+    - Quatre boutons-pressions de couleur (laine + anneau brodé + nœud), une lampe rouge, une télé brodée, trois ondes.
+    - L'étiquette de feutre épinglée au-dessus (x 779–859, y 272–322).
+    - Une cible transparente (x 758–862, ≥ 44 px même sur téléphone).
+  - Dans le bloc écran : `#t-cle` (dans le `foreignObject` de la légende, hauteur 250 → 330) et `#g-reconfort`.
+- **Légende en vue Dedans (écart nécessaire)** : à x 524–860, elle passait exactement sous la télécommande. Elle est maintenant à x 504–772 (`translate` 342 → 322, largeur `324 − 68·min(1, --vue)`).
+  - `ajusterLegende` lit la largeur du texte et la hauteur de la phrase + la phrase-clé.
+  - Le `ResizeObserver` suit les deux, donc le fond se recale pendant le fondu.
+  - Le menton (x ≈ 492) reste dégagé.
+- **Phrase-clé** : `direPhrase(texte, cle)`. Avec une clé, la phrase passe à 16 px, puis vient une ligne de points et `PHRASES.cle` en Baloo 2 700 (ajouté au lien des polices), 19 px, au fil indigo (riso : bleu). C'est le « sous-titre » de l'écran.
+  - Après un appui : le texte de la transformation (`TRANSFOS`) + la clé.
+  - En finitBien automatique : « Ton doudou était dans ta tête, alors le film a changé tout seul. » (la queue de la phrase du rêve, sans « … mais ») + la clé. Ajouter la clé à la phrase complète aurait couvert l'enfant Dehors et le nuage Dedans.
+- **Machine à états** (`tc`, section 10) :
+  - `compteur` : il ne revient jamais à zéro, `remoteStep(compteur++)`.
+  - `utilise` : il coupe la pulsation.
+  - `transfo`, `texte`, `cle` : `journee + seed`.
+  - `enCours` : les éclairs.
+  - Deux minuteries : l'automatique et les 4 s de la chanson.
+  - Événement **`reve`** (`{anim}`), émis par `renderDream` et `effacerReve`. Le même rêve redessiné sans animation (l'avatar change) garde sa chaîne ; tout autre rendu remet à zéro (Encore, journée, nouvelle nuit des rêves). Au chargement, `surReve(false)` lit l'état.
+  - `temps` → `majTelecommande` : `tc-on` aux phases 3–4, libellé, `tabindex`, `aria-hidden`. Hors 3–4, la chanson est fermée sèchement.
+- **L'appui** : la pièce s'enfonce, les boutons descendent de 2 px, retour à ressort ; les ondes partent.
+  1. La carte réconfort de `prefs` file de la télécommande vers le bas du nuage, du côté opposé au contexte, et l'épingle se plante. Pas de carte si le film montre déjà la même (finitBien).
+  2. La chanson s'ouvre dans le geste même, pour que l'autoplay soit permis.
+  3. Deux éclairs doux du film (380 ms).
+  4. `transformer(id)` puis la phrase.
+- **`transformer`** :
+  - Il annule les animations de projection encore en cours, retire `m-<modif>`, et joue la descente en WAAPI depuis la transform du modificateur. L'origine 50 % 72 % du géant est gardée. Pendant ce temps, `transition:none` en ligne, sinon la transition CSS l'emporte sur l'animation.
+  - bronze : dégonflage à rebonds de 1,1 s, trois « pfff » de fil, greffes `.efface`, et `.bronze-teinte` (sépia) si la base n'est pas le pouce. Le contexte revient.
+  - lapin : un `<use>` par tête.
+  - danse : `.danse` sur les poses, contexte `.cache`, les chiens arrivent à ressort.
+  - Le grand cadre du géant est rendu au nuage après 1,15 s.
+  - Ensuite `poserVerdict('finitBien')` : nuit `--nuit-3`, plus d'alarme ni de froncement, sourire.
+- **Chanson** : `dialog#chanson.feuille.chanson`, en bas à gauche, fond voilé à 10 %. Échap, ✕ ou un appui sur le fond la ferment ; `close` vide la fenêtre, ce qui arrête la musique.
+  - `prefs.chanson` est validée (`ytid` `[\w-]{6,20}`).
+  - L'iframe est créée seulement dans `openSong` : `loading=lazy`, `referrerPolicy` `strict-origin-when-cross-origin` (YouTube refuse un lecteur sans référent).
+  - `allow` est posé seulement si `document.featurePolicy` connaît la fonction. Firefox signalait « Skipping unsupported feature name » dans la console.
+  - Hors ligne, sur `error`, ou sans `load` en 4 s : « 🎵 Chante ta chanson ! » + le titre.
+  - Le gestionnaire de clavier global se tait quand un `dialog` est ouvert.
+- **finitBien automatique** : à 3,2 s, après l'entrée de la carte apaisante de Task 10 (immédiat sans animation, et aussi au matin si on y saute), on joue la transformation et la phrase, sans chanson ni carte en plus.
+- **Riso** : `#g-ui` en `normal` + sous-couches de papier ; l'étiquette est en papier.
+- **Mouvement réduit** : tout est posé d'un coup (0 animation mesurée). Le halo jaune d'appel reste, immobile.
+- **Contrôles** :
+  - `node --test test/` : 49/49 (6 nouveaux dans `test/telecommande.test.js`, qui charge le bloc PURE lui-même : `_load.js` n'est pas touché).
+  - Playwright (Firefox, http://127.0.0.1:8812, `lite=0`) :
+    - au chargement, aucune requête YouTube ;
+    - 1er appui : bronze, `youtube-nocookie.com/embed/jqGPppvVmBc?autoplay=1` demandé à ce moment-là, et la vidéo joue ;
+    - Échap : fermé, la lecture s'arrête (`state=paused final=1`) ;
+    - hors ligne, 2e appui : lapin, « Chante ta chanson ! », aucune requête ;
+    - 3e appui : danse ;
+    - Tab (29) puis Entrée : déclenche ;
+    - `animateTime(4)` : « Tu veux lui changer sa tête ? » ;
+    - `animateTime(0)` avec la chanson ouverte : fermée, télécommande cachée, carte et clé retirées ;
+    - retour à 3 : pulse de nouveau. Encore : remis à zéro. Avatar : la chaîne reste ;
+    - finitBien (`pouce,ogre,doudou`) : transformation seule à 3,2 s, pas de dialog, aucune requête ;
+    - mouvement réduit + riso : immédiat, 0 animation ;
+    - 0 `.w[transform]` ; téléphone 420 : `scrollWidth` 420 ;
+    - console : 0 erreur, 0 avertissement de la page (les avertissements restants viennent du lecteur YouTube lui-même, `google.com/js/th`).
+  - Captures : `shots/t11-avant.png`, `t11-avant-pw.png`, `t11-apres-bronze.png`, `t11-apres-lapin.png`, `t11-apres-danse.png`, `t11-finitbien-dehors.png`, `t11-riso-bronze.png`, `t11-riso-lapin.png`, `t11-lapin-zoom.png`, `t11-danse-zoom.png`, `t11-chien-danse-dehors.png`, `t11-tel.png`.
+- **À surveiller** :
+  - Ouvert en `file://`, YouTube n'a pas de référent et peut refuser la lecture (erreur 153). L'iframe se charge quand même, donc pas de repli « Chante ta chanson ». GitHub Pages et http ne sont pas touchés.
+  - En danse, l'ogre garde ses crocs et ses sourcils : il danse, il ne change pas de tête.
+  - Chrome n'a pas été piloté (Playwright = Firefox). `allow` y est posé par détection.

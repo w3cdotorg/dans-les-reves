@@ -11,7 +11,7 @@
      (section 4 du script) part de l'exécution du script, donc n'en souffre pas. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    DANS LES RÊVES — mini-explorateur du cerveau et des rêves (4-5 ans)
@@ -90,6 +90,7 @@
   /* le rêve (Task 10) : l'écran teinté d'un beau rêve, le bouton « Encore un rêve »,
      l'alarme orange d'un rêve bizarre (la laine de l'amygdale et sa lueur) */
   --p-ecran-doux:#fff3c4; --p-ecran-bouton:#4b4f9e;
+  --p-telecommande:#9b9ea9;        /* la télécommande de feutre gris (Task 11) */
   --p-amygdale-bizarre:#f28c28; --amygdale-orange:#ff9a1f;
 
   /* têtes de verre des épingles (consommées par <use href="#pin" style="color:…">) */
@@ -787,7 +788,7 @@ body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ec
 /* le film : il se projette (script : iris + lumière, 400 ms), puis le modificateur.
    Les classes .m-<modif> sont posées sur chaque .reve-pose (et sur le contexte) */
 .reve-film,.reve-pose{transform-box:fill-box;transform-origin:50% 50%}
-.reve-pose{transition:transform .6s var(--ui-ressort)}
+.reve-pose{transition:transform .6s var(--ui-ressort), filter .8s ease}
 .reve-pose.m-gigantesque{transform-origin:50% 72%;transform:scale(2.2)}   /* il grandit vers le haut et déborde du nuage */
 .reve-pose.m-minuscule{transform:scale(.4)}
 .reve-pose.m-envers{transform:scale(1,-1)}
@@ -824,13 +825,75 @@ body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ec
    du nuage est le lit et le doudou ; sous le nuage, posée sur la boîte, en vue Dedans ; elle
    glisse avec le fondu (--vue, posée par setCut ; --leg-dy, la descente, par le script selon sa
    hauteur). Baloo 2, 18 px de la scène, brun foncé (riso : bleu) sur la feutrine crème */
-.legende{transform:translate(calc(min(1, var(--vue, 0)) * 342px),calc(min(1, var(--vue, 0)) * var(--leg-dy, 0px)));transition:opacity .3s}
+/* Task 11 : en vue Dedans, la phrase s'arrête à x 772 (la télécommande et son étiquette sont à
+   droite, x ≥ 779) ; elle commence à x 504, juste devant le menton, et perd 68 de large */
+.legende{transform:translate(calc(min(1, var(--vue, 0)) * 322px),calc(min(1, var(--vue, 0)) * var(--leg-dy, 0px)));transition:opacity .3s}
 .legende.vide{opacity:0;visibility:hidden}
 .legende-fond{filter:var(--legende-filtre, var(--w-lite-filter))}
 .t-phrase{margin:0;padding:9px 13px 11px;font-family:"Baloo 2",var(--font-display);font-weight:600;font-size:18px;line-height:1.18;
   color:var(--fil-encre, var(--encre));text-wrap:pretty;hyphens:none}
+.t-phrase{width:calc(324px - min(1, var(--vue, 0)) * 68px)}
+/* la phrase-clé (Task 11) : sous la phrase, en gros, au fil indigo, après une ligne de points ;
+   la phrase au-dessus passe alors en plus petit */
+.t-phrase.avec-cle{font-size:16px;padding-bottom:8px}
+.t-cle{margin:0 13px;padding:7px 0 11px;width:calc(298px - min(1, var(--vue, 0)) * 68px);border-top:2px dashed var(--fil-encre, var(--fil-sable));
+  font-family:"Baloo 2",var(--font-display);font-weight:700;font-size:19px;line-height:1.14;
+  color:var(--fil-encre, var(--p-ecran-bouton));text-wrap:balance;hyphens:none}
+.t-cle[hidden]{display:none}
 /* les cartes du cortex qui ne servent pas au rêve pâlissent (spec §4.5-1) */
 .hippo-carte.oubliee{opacity:.4}
+
+/* ===== 7 nonies. La télécommande (Task 11, spec §4.6) =====
+   #telecommande, dans #g-ui (le groupe du dessus) : visible la nuit des rêves et au matin
+   (classe tc-on, posée par le script), et seulement là où l'écran se voit (--vue < 2 ;
+   comme #g-ecran, elle s'efface vers Tout près). États posés sur les éléments eux-mêmes
+   (RÈGLE DU <use> : la loupe reprendra la scène) : .pulse (cauchemar pas encore changé)
+   sur .tc-pulse et .tc-halo, .appui sur .tc-corps et .tc-boutons. La cible transparente
+   (.tc-cible, non filtrée) couvre la pièce et son étiquette. */
+[data-theme=riso] #scene-inner>#g-ui{mix-blend-mode:normal}   /* sur la toile assombrie : pas de multiply */
+.sous-tc{fill:var(--riso-papier, none)}
+body[data-vue="2"]{--tc-vis:hidden}
+#telecommande{cursor:pointer;outline:none;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease, visibility 0s .35s}
+#telecommande.tc-on{opacity:calc(1 - max(0, var(--vue, 0) - 1));visibility:var(--tc-vis, visible);pointer-events:auto;transition:opacity .35s ease}
+.tc-cible{fill:transparent}
+.tc-label{font-family:var(--font-display);font-weight:600;font-size:12px;text-anchor:middle;fill:var(--fil-encre, var(--ui-encre));pointer-events:none}
+.tc-pulse,.tc-corps,.tc-boutons{transform-box:fill-box;transform-origin:50% 50%}
+.tc-pulse.pulse{animation:tc-pulse 1.5s ease-in-out infinite}
+@keyframes tc-pulse{0%,100%{transform:scale(1)}45%{transform:scale(1.08,1.06)}60%{transform:scale(1.03,1.05)}}
+.tc-corps{transition:transform .4s var(--ui-ressort)}
+.tc-corps.appui{transform:scale(.95,.93);transition-duration:.06s}
+.tc-boutons{transition:transform .4s var(--ui-ressort)}
+.tc-boutons.appui{transform:translateY(2px) scale(.97);transition-duration:.06s}
+@media (hover:hover){#telecommande:hover .tc-corps:not(.appui){transform:translateY(-2px) rotate(-1.5deg)}}
+/* le halo d'appel : immobile en mouvement réduit, mais toujours là */
+.tc-halo{fill:none;stroke:var(--glass-yellow);stroke-width:5;opacity:0;filter:blur(1.6px);transition:opacity .4s}
+.tc-halo.pulse{opacity:.95;animation:tc-halo 1.5s ease-in-out infinite}
+@keyframes tc-halo{45%{opacity:.35}}
+.tc-focus{fill:none;stroke:var(--ui-indigo);stroke-width:3;opacity:0}
+#telecommande:focus-visible .tc-focus{opacity:1}
+.fil.tc-onde{--f:var(--glass-yellow);stroke-width:2.8;stroke-dasharray:none;opacity:0}
+/* la carte réconfort épinglée sur l'écran */
+#g-reconfort{pointer-events:none}
+/* les transformations du film (posées par le script sur les éléments du film) */
+.reve-greffe{transition:opacity .7s ease}
+.reve-greffe.efface{opacity:0}
+.reve-pose.bronze-teinte{filter:sepia(.55) saturate(1.25) hue-rotate(-6deg)}
+.reve-contexte.cache{opacity:0}
+.reve-pose.danse{transform-origin:50% 100%;animation:var(--amb-anim, danse-pose) .55s ease-in-out infinite alternate}
+@keyframes danse-pose{from{transform:rotate(-6deg)}to{transform:translateY(-6px) rotate(6deg)}}
+.danse-chien{transform-box:fill-box;transform-origin:50% 100%;animation:var(--amb-anim, danse-chien) .55s ease-in-out infinite alternate}
+.danse-chien.d2{animation-direction:alternate-reverse}
+@keyframes danse-chien{from{transform:rotate(-10deg)}to{transform:translateY(-7px) rotate(9deg)}}
+.oreille-lapin{transform-box:fill-box;transform-origin:50% 100%;animation:var(--amb-anim, oreille) 1.3s ease-in-out infinite alternate}
+.oreille-lapin.o2{animation-delay:-.65s}
+@keyframes oreille{from{transform:rotate(-7deg)}to{transform:rotate(6deg)}}
+.nez-lapin{transform-box:fill-box;transform-origin:50% 50%;animation:var(--amb-anim, nez) .32s ease-in-out infinite alternate}
+@keyframes nez{to{transform:translateY(-.8px) scale(1.15,.88)}}
+.carotte{transform-box:fill-box;transform-origin:0% 70%;animation:var(--amb-anim, grignote) .4s ease-in-out infinite alternate}
+@keyframes grignote{to{transform:rotate(-6deg) translateX(-1px)}}
+.fil.pfff{--f:var(--fil-blanc);stroke-width:2.4;stroke-dasharray:none}
+/* après les raccourcis « animation » ci-dessus (qui remettent l'état à running) */
+:is(.tc-pulse.pulse,.tc-halo.pulse,.reve-pose.danse,.danse-chien,.oreille-lapin,.nez-lapin,.carotte){animation-play-state:var(--amb-play, running)}
 
 /* ===== 8. Volet d'information (#info) =====
    Il monte par-dessus le bas de la scène ; caché tant qu'il n'a pas la classe
@@ -915,6 +978,19 @@ body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ec
   min-height:var(--ui-cible);display:flex;align-items:center;gap:.5em;cursor:pointer;border-radius:12px;
   font-family:var(--font-display);font-weight:600;font-size:1rem;
 }
+
+/* ===== 11. La chanson (dialog#chanson, Task 11) =====
+   Même habillage que la feuille de réglages, posée en bas à gauche (la télécommande et
+   l'écran sont à droite : on voit le film changer pendant la chanson) ; fond à peine voilé.
+   La fenêtre 16:9 reçoit l'iframe youtube-nocookie.com, créée au seul appui. */
+.feuille.chanson{top:auto;right:auto;bottom:16px;left:16px;width:min(460px, calc(100vw - 32px))}
+.feuille.chanson::backdrop{background:color-mix(in srgb, var(--ui-encre) 10%, transparent)}
+.chanson h2{font-size:1.25rem}
+.chanson-fenetre{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:var(--ui-sable);
+  display:grid;place-items:center;text-align:center}
+.chanson-fenetre iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.chanson-chante{margin:0;padding:12px;font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1.2;color:var(--ui-indigo)}
+.chanson-chante small{display:block;margin-top:.4em;font-family:var(--font-texte);font-weight:600;font-size:1rem;color:var(--ui-gris-fonce)}
 
 /* ===== 12. Téléphone (< 900 px) =====
    Bandeau sur deux lignes, rail horizontal SOUS la scène (même dégradé, même
@@ -2061,6 +2137,21 @@ html:not([data-pret]) *{transition:none!important}
             <path class="w lite mini trait" style="--p:var(--p-bois);--tw:3" data-ink="rose" d="M30 20L58-2"/>
           </g>
           </symbol>
+          <symbol id="g-greffe-lapin" overflow="visible">
+          <g class="a-tete">
+            <g class="oreille-lapin"><path class="w lite mini" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-15-15C-27-38-29-70-17-75C-6-79-4-47-7-17Z"/><path class="w lite mini pastel" style="--p:var(--p-calleux)" data-ink="rose" d="M-13-21C-21-40-22-63-15-67C-9-69-8-45-9-23Z"/><path class="fil" style="--f:var(--fil-brun)" d="M-16-17Q-11-13-6-17"/></g>
+            <g class="oreille-lapin o2"><path class="w lite mini" style="--p:var(--p-glace-rose)" data-ink="rose" d="M7-17C5-40 7-60 18-66C27-71 41-64 38-55C36-49 29-52 25-50C20-46 17-33 15-16Z"/><path class="w lite mini pastel" style="--p:var(--p-calleux)" data-ink="rose" d="M10-22C9-40 11-56 19-61C25-64 33-60 32-56C30-53 26-55 22-53C17-48 15-36 13-22Z"/><path class="fil" style="--f:var(--fil-brun)" d="M6-17Q11-13 16-17"/></g>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-4 5L-18 2M-4 7.5L-18 10.5M4 5L18 2M4 7.5L18 10.5"/>
+            <g class="nez-lapin"><path class="w lite mini" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-3.8 3.5C-3.8 2-2.1 .7 0 .7C2.1 .7 3.8 2 3.8 3.5C3.8 5 2.1 6.3 0 6.3C-2.1 6.3-3.8 5-3.8 3.5Z"/><path class="fil" style="--f:var(--fil-blanc)" d="M-1.6 2.6Q-.6 1.9 .4 2.4"/></g>
+            <g class="carotte"><path class="w lite mini orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M3 11C11 6 27 2 35 3C31 9 15 16 5 17Z"/><path class="fil" style="--f:var(--fil-brun)" d="M14 9L16 12.5M21 6.5L23 10M28 4.5L29.5 7.5"/><path class="w lite mini trait vert" style="--p:var(--p-tracteur);--tw:2.6" data-ink="jaune" d="M34 3Q37-4 43-5M35 4Q41 0 46 3"/></g>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-chiens-pirates" overflow="visible">
+          <g class="a-corps">
+            <g class="danse-chien"><path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:6.1" data-ink="jaune" d="M-97.9 8.8Q-108.9 2.2-111.1-11"/><path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:6.1" data-ink="jaune" d="M-78.1 8.8Q-67.1 5.5-62.7-4.4"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M-114.8-12.1C-114.8-14.2-113.2-15.8-111.1-15.8C-109-15.8-107.4-14.2-107.4-12.1C-107.4-10-109-8.4-111.1-8.4C-113.2-8.4-114.8-10-114.8-12.1Z"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M-66.4-5.5C-66.4-7.6-64.8-9.2-62.7-9.2C-60.6-9.2-59-7.6-59-5.5C-59-3.4-60.6-1.8-62.7-1.8C-64.8-1.8-66.4-3.4-66.4-5.5Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M-101.4 34.1C-101.4 31.9-98.4 30.1-94.6 30.1C-90.8 30.1-87.8 31.9-87.8 34.1C-87.8 36.3-90.8 38.1-94.6 38.1C-98.4 38.1-101.4 36.3-101.4 34.1Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M-88.2 34.1C-88.2 31.9-85.2 30.1-81.4 30.1C-77.6 30.1-74.6 31.9-74.6 34.1C-74.6 36.3-77.6 38.1-81.4 38.1C-85.2 38.1-88.2 36.3-88.2 34.1Z"/><path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-100.7 16.5C-100.7 7.7-95 .6-88 .6C-81 .6-75.3 7.7-75.3 16.5C-75.3 25.3-81 32.5-88 32.5C-95 32.5-100.7 25.3-100.7 16.5Z"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M-95.2 19.8C-95.2 14.6-91.9 10.5-88 10.5C-84.1 10.5-80.8 14.6-80.8 19.8C-80.8 25-84.1 29.2-88 29.2C-91.9 29.2-95.2 25-95.2 19.8Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M-96.8-15.4C-106.7-16.5-111.1-6.6-108.9 3.3C-107.8 8.8-103.4 8.8-101.2 4.4C-100.1-1.1-99-7.7-95.7-12.1Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M-79.2-15.4C-69.3-16.5-64.9-6.6-67.1 3.3C-68.2 8.8-72.6 8.8-74.8 4.4C-75.9-1.1-77-7.7-80.3-12.1Z"/><path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-100.1-7.7C-100.1-14.4-94.7-19.8-88-19.8C-81.3-19.8-75.9-14.4-75.9-7.7C-75.9-1-81.3 4.4-88 4.4C-94.7 4.4-100.1-1-100.1-7.7Z"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M-95.3-2.2C-95.3-5.1-92-7.5-88-7.5C-84-7.5-80.7-5.1-80.7-2.2C-80.7 .7-84 3.1-88 3.1C-92 3.1-95.3 .7-95.3-2.2Z"/><path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-91.2-5.1C-91.2-6.3-89.8-7.4-88-7.4C-86.2-7.4-84.8-6.3-84.8-5.1C-84.8-3.8-86.2-2.7-88-2.7C-89.8-2.7-91.2-3.8-91.2-5.1Z"/><path class="fil" style="--f:var(--fil-brun)" d="M-91.5 0Q-88 2.9-84.5 0"/><path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M-90.1 .9C-90.1 5.3-85.9 5.3-85.9 .9Z"/><circle class="noeud-brun" cx="-92.6" cy="-11" r="1.8"/><circle class="noeud-brun" cx="-83.4" cy="-11" r="1.8"/><path class="w lite mini" style="--p:var(--p-pirate)" data-ink="bleu" d="M-105.6-16.5C-101.2-25.3-95.7-31.9-88-31.9C-80.3-31.9-74.8-25.3-70.4-16.5C-79.2-19.8-96.8-19.8-105.6-16.5Z"/><path class="fil" style="--f:var(--fil-sable)" d="M-102.3-18.3Q-88-22-73.7-18.3"/><path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-91-25.9C-91-27.5-89.6-28.8-88-28.8C-86.4-28.8-85-27.5-85-25.9C-85-24.2-86.4-22.9-88-22.9C-89.6-22.9-91-24.2-91-25.9Z"/></g>
+            <g class="danse-chien d2"><path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:6.1" data-ink="jaune" d="M97.9 8.8Q108.9 2.2 111.1-11"/><path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:6.1" data-ink="jaune" d="M78.1 8.8Q67.1 5.5 62.7-4.4"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M107.4-12.1C107.4-14.2 109-15.8 111.1-15.8C113.2-15.8 114.8-14.2 114.8-12.1C114.8-10 113.2-8.4 111.1-8.4C109-8.4 107.4-10 107.4-12.1Z"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M59-5.5C59-7.6 60.6-9.2 62.7-9.2C64.8-9.2 66.4-7.6 66.4-5.5C66.4-3.4 64.8-1.8 62.7-1.8C60.6-1.8 59-3.4 59-5.5Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M74.6 34.1C74.6 31.9 77.6 30.1 81.4 30.1C85.2 30.1 88.2 31.9 88.2 34.1C88.2 36.3 85.2 38.1 81.4 38.1C77.6 38.1 74.6 36.3 74.6 34.1Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M87.8 34.1C87.8 31.9 90.8 30.1 94.6 30.1C98.4 30.1 101.4 31.9 101.4 34.1C101.4 36.3 98.4 38.1 94.6 38.1C90.8 38.1 87.8 36.3 87.8 34.1Z"/><path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M75.3 16.5C75.3 7.7 81 .6 88 .6C95 .6 100.7 7.7 100.7 16.5C100.7 25.3 95 32.5 88 32.5C81 32.5 75.3 25.3 75.3 16.5Z"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M80.8 19.8C80.8 14.6 84.1 10.5 88 10.5C91.9 10.5 95.2 14.6 95.2 19.8C95.2 25 91.9 29.2 88 29.2C84.1 29.2 80.8 25 80.8 19.8Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M79.2-15.4C69.3-16.5 64.9-6.6 67.1 3.3C68.2 8.8 72.6 8.8 74.8 4.4C75.9-1.1 77-7.7 80.3-12.1Z"/><path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M96.8-15.4C106.7-16.5 111.1-6.6 108.9 3.3C107.8 8.8 103.4 8.8 101.2 4.4C100.1-1.1 99-7.7 95.7-12.1Z"/><path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M75.9-7.7C75.9-14.4 81.3-19.8 88-19.8C94.7-19.8 100.1-14.4 100.1-7.7C100.1-1 94.7 4.4 88 4.4C81.3 4.4 75.9-1 75.9-7.7Z"/><path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M80.7-2.2C80.7-5.1 84-7.5 88-7.5C92-7.5 95.3-5.1 95.3-2.2C95.3 .7 92 3.1 88 3.1C84 3.1 80.7 .7 80.7-2.2Z"/><path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M84.8-5.1C84.8-6.3 86.2-7.4 88-7.4C89.8-7.4 91.2-6.3 91.2-5.1C91.2-3.8 89.8-2.7 88-2.7C86.2-2.7 84.8-3.8 84.8-5.1Z"/><path class="fil" style="--f:var(--fil-brun)" d="M84.5 0Q88 2.9 91.5 0"/><path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M85.9 .9C85.9 5.3 90.1 5.3 90.1 .9Z"/><circle class="noeud-brun" cx="83.4" cy="-11" r="1.8"/><circle class="noeud-brun" cx="92.6" cy="-11" r="1.8"/><path class="w lite mini" style="--p:var(--p-pirate)" data-ink="bleu" d="M70.4-16.5C74.8-25.3 80.3-31.9 88-31.9C95.7-31.9 101.2-25.3 105.6-16.5C96.8-19.8 79.2-19.8 70.4-16.5Z"/><path class="fil" style="--f:var(--fil-sable)" d="M73.7-18.3Q88-22 102.3-18.3"/><path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M85-25.9C85-27.5 86.4-28.8 88-28.8C89.6-28.8 91-27.5 91-25.9C91-24.2 89.6-22.9 88-22.9C86.4-22.9 85-24.2 85-25.9Z"/><path class="fil" style="--f:var(--fil-brun)" d="M99-18.7L78.1-6.6"/><path class="w lite mini" style="--p:var(--p-pirate)" data-ink="bleu" d="M79.9-11C79.9-12.6 81.4-14 83.4-14C85.3-14 86.9-12.6 86.9-11C86.9-9.4 85.3-8 83.4-8C81.4-8 79.9-9.4 79.9-11Z"/></g>
+          </g>
+          </symbol>
           <symbol id="g-reve-flou" overflow="visible"><g class="flou">
             <path class="tache" style="--t:var(--p-lune)" d="M-96 -10C-96 -26.569 -75.4058 -40 -50 -40C-24.5942 -40 -4 -26.569 -4 -10C-4 6.568999999999999 -24.5942 20 -50 20C-75.4058 20 -96 6.568999999999999 -96 -10Z"/>
             <path class="tache" style="--t:var(--p-pineale)" d="M-10 -30C-10 -44.3598 7.908000000000001 -56 30 -56C52.092 -56 70 -44.3598 70 -30C70 -15.6402 52.092 -4 30 -4C7.908000000000001 -4 -10 -15.6402 -10 -30Z"/>
@@ -2568,10 +2659,14 @@ html:not([data-pret]) *{transition:none!important}
             <g id="g-legende" class="legende">
               <path class="legende-fond w lite reserve" style="--p:var(--riso-papier, var(--p-carte))" d=""/>
               <path class="legende-bord fil couture" style="--f:var(--fil-sable)" d=""/>
-              <foreignObject x="188" y="26" width="324" height="250">
+            <!-- … et, après un appui sur la télécommande (Task 11), la phrase-clé en gros (#t-cle) -->
+              <foreignObject x="188" y="26" width="324" height="330">
                 <div xmlns="http://www.w3.org/1999/xhtml" id="t-phrase" class="t-phrase" aria-live="polite"></div>
+                <div xmlns="http://www.w3.org/1999/xhtml" id="t-cle" class="t-cle" aria-live="polite" hidden=""></div>
               </foreignObject>
             </g>
+            <!-- La carte réconfort que la télécommande épingle sur l'écran (Task 11, rempli par le script) -->
+            <g id="g-reconfort" aria-hidden="true"></g>
             <!-- ECRAN-END -->
           </g>
           <!-- ===== Boîte à souvenirs (cartes de la journée) ===== -->
@@ -2598,7 +2693,56 @@ html:not([data-pret]) *{transition:none!important}
           <!-- ===== Zones cliquables ===== -->
           <g id="g-hs"></g>
           <!-- ===== Interface dans la scène ===== -->
-          <g id="g-ui"></g>
+          <g id="g-ui">
+            <!-- TELECOMMANDE-BEGIN -->
+            <!-- La télécommande (Task 11, généré par tools/gen-reve.py) : visible la nuit des rêves et au matin
+                 (classe tc-on), elle pulse après un cauchemar (.pulse), s'enfonce sous le doigt (.appui). -->
+            <g id="telecommande" class="telecommande" role="button" tabindex="-1" aria-label="Je change de chaîne !" aria-hidden="true">
+              <g class="tc-etiquette">
+                <path class="sous-tc" d="M791 272H847C853.6276 272 859 277.3724 859 284V310C859 316.6276 853.6276 322 847 322H791C784.3724 322 779 316.6276 779 310V284C779 277.3724 784.3724 272 791 272Z"/>
+                <path class="w lite reserve tc-etiquette-fond" style="--p:var(--riso-papier, var(--p-carte))" d="M791 272H847C853.6276 272 859 277.3724 859 284V310C859 316.6276 853.6276 322 847 322H791C784.3724 322 779 316.6276 779 310V284C779 277.3724 784.3724 272 791 272Z"/>
+                <path class="fil couture" style="--f:var(--fil-sable)" d="M792 276H846C850.9707 276 855 280.0293 855 285V309C855 313.9707 850.9707 318 846 318H792C787.0293 318 783 313.9707 783 309V285C783 280.0293 787.0293 276 792 276Z"/>
+                <text class="tc-label" x="819" y="301"></text>
+                <g transform="translate(852 276) rotate(18)"><use href="#pin" style="color:var(--glass-red)"/></g>
+              </g>
+              <g transform="rotate(-5 821 394)">
+                <g class="tc-pulse">
+                  <g class="tc-corps">
+                    <path class="tc-halo" d="M808 325H834C847.8075 325 859 336.1925 859 350V438C859 451.8075 847.8075 463 834 463H808C794.1925 463 783 451.8075 783 438V350C783 336.1925 794.1925 325 808 325Z"/>
+                    <path class="sous-tc" d="M808 330H834C845.046 330 854 338.954 854 350V438C854 449.046 845.046 458 834 458H808C796.954 458 788 449.046 788 438V350C788 338.954 796.954 330 808 330Z"/>
+                    <path class="w pastel tc-laine" style="--p:var(--p-telecommande)" data-ink="bleu" d="M808 330H834C845.046 330 854 338.954 854 350V438C854 449.046 845.046 458 834 458H808C796.954 458 788 449.046 788 438V350C788 338.954 796.954 330 808 330Z"/>
+                    <path class="fil couture" style="--f:var(--fil-blanc)" d="M808 335H834C842.2845 335 849 341.7155 849 350V438C849 446.2845 842.2845 453 834 453H808C799.7155 453 793 446.2845 793 438V350C793 341.7155 799.7155 335 808 335Z"/>
+                    <path class="w lite mini" style="--p:var(--p-drapeau)" data-ink="rose" d="M813 341C813 338.5 816.6 336.4 821 336.4C825.4 336.4 829 338.5 829 341C829 343.5 825.4 345.6 821 345.6C816.6 345.6 813 343.5 813 341Z"/>
+                    <path class="fil" style="--f:var(--fil-blanc)" d="M817 339.5Q820 338 823 339"/>
+                    <g class="tc-boutons">
+                      <path class="w lite mini" style="--p:var(--p-drapeau)" data-ink="rose" d="M795 368C795 361.9 799.9 357 806 357C812.1 357 817 361.9 817 368C817 374.1 812.1 379 806 379C799.9 379 795 374.1 795 368Z"/>
+                      <path class="fil" style="--f:var(--fil-blanc)" d="M799.4 368C799.4 364.4 802.4 361.4 806 361.4C809.6 361.4 812.6 364.4 812.6 368C812.6 371.6 809.6 374.6 806 374.6C802.4 374.6 799.4 371.6 799.4 368Z"/>
+                      <circle cx="806" cy="368" r="2.6" fill="url(#knot)"/>
+                      <path class="w lite mini" style="--p:var(--p-soleil)" data-ink="jaune" d="M825 368C825 361.9 829.9 357 836 357C842.1 357 847 361.9 847 368C847 374.1 842.1 379 836 379C829.9 379 825 374.1 825 368Z"/>
+                      <path class="fil" style="--f:var(--fil-blanc)" d="M829.4 368C829.4 364.4 832.4 361.4 836 361.4C839.6 361.4 842.6 364.4 842.6 368C842.6 371.6 839.6 374.6 836 374.6C832.4 374.6 829.4 371.6 829.4 368Z"/>
+                      <circle cx="836" cy="368" r="2.6" fill="url(#knot)"/>
+                      <path class="w lite mini" style="--p:var(--p-couverture)" data-ink="bleu" d="M795 398C795 391.9 799.9 387 806 387C812.1 387 817 391.9 817 398C817 404.1 812.1 409 806 409C799.9 409 795 404.1 795 398Z"/>
+                      <path class="fil" style="--f:var(--fil-blanc)" d="M799.4 398C799.4 394.4 802.4 391.4 806 391.4C809.6 391.4 812.6 394.4 812.6 398C812.6 401.6 809.6 404.6 806 404.6C802.4 404.6 799.4 401.6 799.4 398Z"/>
+                      <circle cx="806" cy="398" r="2.6" fill="url(#knot)"/>
+                      <path class="w lite mini vert" style="--p:var(--p-tracteur)" data-ink="jaune" d="M825 398C825 391.9 829.9 387 836 387C842.1 387 847 391.9 847 398C847 404.1 842.1 409 836 409C829.9 409 825 404.1 825 398Z"/>
+                      <path class="fil" style="--f:var(--fil-blanc)" d="M829.4 398C829.4 394.4 832.4 391.4 836 391.4C839.6 391.4 842.6 394.4 842.6 398C842.6 401.6 839.6 404.6 836 404.6C832.4 404.6 829.4 401.6 829.4 398Z"/>
+                      <circle cx="836" cy="398" r="2.6" fill="url(#knot)"/>
+                    </g>
+                    <path class="fil epais" style="--f:var(--fil-blanc)" d="M812.5 424H829.5C831.4 424 833 425.6 833 427.5V437.5C833 439.4 831.4 441 829.5 441H812.5C810.6 441 809 439.4 809 437.5V427.5C809 425.6 810.6 424 812.5 424ZM816 424L812 417M826 424L830 417"/>
+                    <path class="fil" style="--f:var(--fil-blanc)" d="M814 433Q817.5 429 821 433Q824.5 437 828 433"/>
+                    <g class="tc-ondes">
+                      <path class="fil tc-onde o1" d="M811.2 335.9A10 10 0 0 1 820.7 328"/>
+                      <path class="fil tc-onde o2" d="M804.4 334.5A17 17 0 0 1 820.4 321"/>
+                      <path class="fil tc-onde o3" d="M797.5 333A24 24 0 0 1 820.2 314"/>
+                    </g>
+                    <path class="tc-focus" d="M808 324H834C848.3598 324 860 335.6402 860 350V438C860 452.3598 848.3598 464 834 464H808C793.6402 464 782 452.3598 782 438V350C782 335.6402 793.6402 324 808 324Z"/>
+                  </g>
+                </g>
+              </g>
+              <rect class="tc-cible" x="758" y="268" width="104" height="196" rx="18"/>
+            </g>
+            <!-- TELECOMMANDE-END -->
+          </g>
         </g>
       </svg>
       <!-- ce que disent les bulles de la boîte (« Oups, trop de choses ! »…), pour les lecteurs d'écran -->
@@ -2675,6 +2819,18 @@ html:not([data-pret]) *{transition:none!important}
   </details>
 </dialog>
 
+<!-- ======================= LA CHANSON (Task 11) ======================= -->
+<!-- Ouverte par la télécommande. La fenêtre 16:9 reçoit l'iframe youtube-nocookie.com,
+     créée au seul appui (jamais au chargement : aucune requête vers YouTube avant) ;
+     hors ligne, sur erreur ou sans réponse en 4 s : « 🎵 Chante ta chanson ! ». -->
+<dialog id="chanson" class="feuille chanson" aria-labelledby="chansonTitre">
+  <div class="feuille-tete">
+    <h2 id="chansonTitre">🎵 Ta chanson</h2>
+    <button type="button" id="chansonClose" class="croix" aria-label="Fermer la chanson"><span aria-hidden="true">✕</span></button>
+  </div>
+  <div id="chansonFenetre" class="chanson-fenetre"></div>
+</dialog>
+
 <script>
 /* PURE-BEGIN */
 /* ==========================================================================
@@ -2689,7 +2845,7 @@ html:not([data-pret]) *{transition:none!important}
      E. Zones nommées : INFO
      F. Mini-jeux : JEU_PARTIES, JEU_REVE
      G. L'histoire du pouce : HISTOIRE
-     H. La télécommande : TRANSFOS
+     H. La télécommande : TRANSFOS, remoteStep
      I. Gabarits de phrases : PHRASES
      J. Le générateur de rêve : composeDream
    Règles d'écriture (recherche §5) : tutoiement, deux phrases, un fait qui
@@ -3003,6 +3159,11 @@ const TRANSFOS = [
   { id:'danse',
     texte:"Les chiens pirates débarquent en chantant, et tout le rêve se met à danser. Ça danse très mal, ça se marche sur les pieds, et ça rigole !" }
 ];
+/* l'appui n (0, 1, 2…) sur la télécommande : la transformation qu'il joue (en rotation) */
+function remoteStep(n){
+  const k = TRANSFOS.length;
+  return TRANSFOS[((Math.floor(n) % k) + k) % k].id;
+}
 
 /* ===== I. Gabarits de phrases (spec §4.5-5, §4.6) =====
    Remplis par le générateur de rêve : {BASE} {GREFFE} {MODIF} {C1} {C2} {VRAI}
@@ -3196,6 +3357,7 @@ function phraseDuReve({ mode, base, greffe, reconfort, modif }, genre){
      7. Volet d'information, feuille de réglages, clavier
      8. Cartes-souvenirs : la boîte, les épingles, la journée
      9. Le rêve : l'écran, renderDream, les verdicts
+    10. La télécommande : changer de chaîne, la chanson, la phrase-clé
    ========================================================================== */
 
 /* ===== 1. Paramètres d'URL et préférences =====
@@ -3737,11 +3899,11 @@ requestAnimationFrame(() => requestAnimationFrame(() => { root.dataset.pret = '1
 /* Clavier (le seul gestionnaire) : ←→ le temps (pas 0,25, puis le moment voisin
    après un répit : pasTemps), ↑↓ la vue (pas 0,5, puis la vue voisine : pasCut ;
    ↓ = on entre plus profond), Échap ferme le volet. Partout sauf dans un champ de
-   saisie et quand la feuille de réglages est ouverte. Sur le rail lui-même, ces
+   saisie et quand un dialog est ouvert (réglages, chanson). Sur le rail lui-même, ces
    touches remplacent celles du navigateur (un pas de 1/400 ne se verrait pas). */
 const SAISIE = 'input:not([type=range]):not([type=checkbox]), textarea, select, [contenteditable]';
 document.addEventListener('keydown', e => {
-  if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || feuille.open) return;
+  if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || document.querySelector('dialog[open]')) return;
   if(e.target.closest && e.target.closest(SAISIE)) return;
   if(e.key === 'Escape'){
     if(infoBox.classList.contains('open')){ closeInfo(); e.preventDefault(); }
@@ -4307,13 +4469,15 @@ const legende = document.getElementById('g-legende');
 const legendeFond = legende.querySelector('.legende-fond');
 const legendeBord = legende.querySelector('.legende-bord');
 const tPhrase = document.getElementById('t-phrase');
+const tCle = document.getElementById('t-cle');
 const encore = document.getElementById('encore');
 const encoreCorps = encore.querySelector('.encore-corps');
 const sourcil = document.getElementById('p-sourcil');
 /* le fond de la phrase, à sa place de la vue Dehors (le mur, à gauche du nuage) ; en vue Dedans
-   elle glisse de DX vers la droite et son bas se pose sur la boîte (BAS) : une phrase longue
-   monte sur le bas du nuage, vide (le film est au milieu) */
-const LEGENDE = { x: 182, y: 20, w: 336, dx: 342, bas: 462 };
+   elle glisse de DX vers la droite (CSS) et son bas se pose sur la boîte (BAS) : une phrase longue
+   monte sur le bas du nuage, vide (le film est au milieu). Sa largeur est celle du texte : 336
+   Dehors, 268 Dedans (Task 11 : la télécommande est à droite, CSS .t-phrase). */
+const LEGENDE = { x: 182, y: 20, dx: 322, bas: 462 };
 const HEUREUX = ['beau', 'rigolo', 'finitBien'];
 /* « multiplié » : trois exemplaires (x, y, échelle, inclinaison) ; le contexte : en bas à gauche */
 const MULTI = [[-84, 22, .54, -8], [0, -12, .6, 0], [84, 22, .54, 8]];
@@ -4321,21 +4485,30 @@ const CONTEXTE = { x: -100, y: 30, taille: 62 };
 let seed = 0;               /* la graine du rêve : « Encore un rêve » l'augmente */
 let reveCourant = null;     /* le rêve affiché (résultat de composeDream), null sinon */
 
-/* la phrase, et son fond de feutrine réglé sur la hauteur du texte */
-function direPhrase(texte){
+/* la phrase, et son fond de feutrine réglé sur la taille du texte ; `cle` (Task 11) : la
+   phrase-clé de la télécommande, en gros sous la phrase (#t-cle), qui passe alors en plus petit */
+const typo = t => (t || '').replace(/ ([!?:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
+function direPhrase(texte, cle){
   /* typographie française : pas de « ! » ni de « » » seul en début de ligne */
-  tPhrase.textContent = (texte || '').replace(/ ([!?:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
+  tPhrase.textContent = typo(texte);
+  tCle.textContent = typo(cle);
+  tCle.hidden = !cle;
+  tPhrase.classList.toggle('avec-cle', !!cle);
   legende.classList.toggle('vide', !texte);
   ajusterLegende();
 }
 function ajusterLegende(){
   if(!tPhrase.textContent) return;
-  const h = tPhrase.offsetHeight;   /* px CSS du foreignObject = unités de la scène */
-  legendeFond.setAttribute('d', rrD(LEGENDE.x, LEGENDE.y, LEGENDE.w, h + 12, 16));
-  legendeBord.setAttribute('d', rrD(LEGENDE.x + 5, LEGENDE.y + 5, LEGENDE.w - 10, h + 2, 12));
+  /* px CSS du foreignObject = unités de la scène ; la largeur suit la vue (CSS) */
+  const w = tPhrase.offsetWidth + 12, h = tPhrase.offsetHeight + (tCle.hidden ? 0 : tCle.offsetHeight);
+  legendeFond.setAttribute('d', rrD(LEGENDE.x, LEGENDE.y, w, h + 12, 16));
+  legendeBord.setAttribute('d', rrD(LEGENDE.x + 5, LEGENDE.y + 5, w - 10, h + 2, 12));
   legende.style.setProperty('--leg-dy', `${LEGENDE.bas - (h + 12) - LEGENDE.y}px`);
 }
-new ResizeObserver(ajusterLegende).observe(tPhrase);   /* Baloo 2 arrive après le premier rendu */
+/* Baloo 2 arrive après le premier rendu ; la largeur change avec la vue */
+const legendeRO = new ResizeObserver(ajusterLegende);
+legendeRO.observe(tPhrase);
+legendeRO.observe(tCle);
 
 /* les points d'accroche d'une base : [[x, y, échelle]…] (data-tete, data-corps du <symbol>) */
 function ancresDe(forme){
@@ -4437,6 +4610,7 @@ function renderDream(dream, opts = {}){
     montrerEncore(false);
     marquerOublies([]);
     if(anim) projeter(film, null);
+    annoncerReve(anim);
     return;
   }
   if(dream.contexte) poserContexte(film, dream.contexte, dream.modif === 'gigantesque');
@@ -4452,6 +4626,7 @@ function renderDream(dream, opts = {}){
   montrerEncore(true);
   marquerOublies(dream.oublies);
   if(anim) projeter(film, dream);
+  annoncerReve(anim);
 }
 function effacerReve(){
   reveCourant = null;
@@ -4461,7 +4636,10 @@ function effacerReve(){
   poserVerdict(null);
   montrerEncore(false);
   marquerOublies([]);
+  annoncerReve(false);
 }
+/* événement « reve » (detail : { anim }) : le film vient d'être dessiné ou effacé (Task 11) */
+function annoncerReve(anim){ document.dispatchEvent(new CustomEvent('reve', { detail: { anim: !!anim } })); }
 const reveDuJour = () => composeDream(journee, { seed, genre: root.dataset.genre });
 /* phase 3 : le rêve ; phase 4 : il reste (refait sans animation s'il manque : on a sauté
    la nuit des rêves) ; les autres moments : rien à l'écran */
@@ -4503,6 +4681,321 @@ encore.addEventListener('keydown', e => {
 /* au chargement (?temps=3&cartes=…) : aucun événement « temps » n'est émis, on lit la phase */
 montrerEncore(false);
 majReve(false, true);
+
+/* ===== 10. La télécommande : changer de chaîne (Task 11, spec §4.6) =====
+   #telecommande (dans #g-ui, dessinée par tools/gen-reve.py) : visible la nuit des rêves et
+   au matin (classe tc-on), libellé « Je change de chaîne ! » (nuit) puis « Tu veux lui changer
+   sa tête ? » (matin), écrit dans l'étiquette ET dans aria-label depuis LIBELLES. Elle pulse
+   (.pulse, avec un halo qui reste en mouvement réduit) tant que le rêve est un cauchemar qu'on
+   n'a pas encore changé.
+   applyRemote() — l'appui (clic, Entrée, Espace ; la pièce s'enfonce, les ondes partent) :
+     1. épingle la carte réconfort choisie par le parent (prefs reconfort : chanson | doudou |
+        calin) sur l'écran, dans #g-reconfort — sauf si le film la montre déjà (finitBien) ;
+     3. ouvre la chanson (openSong, dialog#chanson) dans le geste même (l'autoplay est permis) :
+        l'iframe youtube-nocookie.com n'est créée qu'ici, jamais au chargement ; hors ligne, sur
+        erreur, ou sans « load » en 4 s : « 🎵 Chante ta chanson ! » et le titre ;
+     puis l'écran change de chaîne (deux éclairs doux, 380 ms) et :
+     2. transformer(remoteStep(compteur)) : « bronze » (tout se dégonfle comme un vieux ballon,
+        la greffe s'efface, une base qui n'est pas le pouce prend la teinte du bronze),
+        « lapin » (oreilles roses, nez qui remue, carotte), « danse » (les chiens pirates
+        débarquent, tout danse) ; le modificateur est retiré, le verdict devient finitBien
+        (la nuit redevient --nuit-3, l'amygdale se calme, le sourcil se défronce, il sourit) ;
+     4. la phrase de la transformation (TRANSFOS) et, en gros dessous, la phrase-clé (#t-cle).
+   finitBien (une carte apaisante dans la journée, Task 10) : la carte entre d'elle-même dans
+   l'écran (renderDream), puis les étapes 2 et 4 se jouent seules (à 3,2 s), sans chanson.
+   Un nouveau rêve (Encore, la journée, une nouvelle nuit des rêves) remet tout à zéro ; le
+   même rêve redessiné sans animation (l'avatar change) garde sa chaîne. Le compteur, lui,
+   continue : chaque appui change de chaîne. Écoute « reve » (section 9) et « temps ». */
+const telecommande = document.getElementById('telecommande');
+const tcPulse = telecommande.querySelector('.tc-pulse');
+const tcHalo = telecommande.querySelector('.tc-halo');
+const tcCorps = telecommande.querySelector('.tc-corps');
+const tcBoutons = telecommande.querySelector('.tc-boutons');
+const tcLabel = telecommande.querySelector('.tc-label');
+const tcOndes = [...telecommande.querySelectorAll('.tc-onde')];
+const gReconfort = document.getElementById('g-reconfort');
+const chanson = document.getElementById('chanson');
+const chansonFenetre = document.getElementById('chansonFenetre');
+const chansonTitre = document.getElementById('chansonTitre');
+const LIBELLES = { 3: ['Je change', 'de chaîne !'], 4: ['Tu veux lui', 'changer', 'sa tête ?'] };
+const LIBELLE_PAS = 13.5;
+const CHANSON = { titre: 'Hey, ho, les chiens pirates !', ytid: 'jqGPppvVmBc' };
+const RECONFORTS = ['chanson', 'doudou', 'calin'];
+const CHANSON_ATTENTE = 4000;   /* sans « load » de l'iframe en 4 s : on chante soi-même */
+const TC_AUTO = 3200;           /* finitBien : après l'entrée de la carte apaisante (1,9 + 0,8 s) */
+/* d'où part le film quand on change de chaîne : la transform de son modificateur (CSS .m-…) */
+const DEPART = { gigantesque: ['scale(2.2)', '50% 72%'], minuscule: ['scale(.4)', '50% 50%'], envers: ['scale(1,-1)', '50% 50%'] };
+/* les « pfff » de l'air qui sort du ballon : [x, y, sens] dans le film */
+const PFFF = [[-58, -62, -1], [44, -50, 1], [-14, -96, 0]];
+const tc = {
+  compteur: 0,       /* combien de fois on a changé de chaîne (remoteStep) */
+  utilise: false,    /* déjà changé, pour ce rêve-ci : plus de pulsation */
+  transfo: null,     /* la transformation à l'écran (id), ou null */
+  texte: '',         /* la phrase posée avec la phrase-clé */
+  cle: '',           /* le rêve transformé (journée + graine) : un même rêve redessiné la garde */
+  enCours: false,    /* l'écran change de chaîne (les éclairs) */
+  auto: 0,           /* minuterie du finitBien automatique */
+  attente: 0         /* minuterie de la chanson (4 s) */
+};
+const cleDuReve = () => reveCourant ? journee.join(',') + '#' + seed : '';
+const tcVisible = () => phaseCourante === 3 || phaseCourante === 4;
+
+/* --- l'état visible : présente ou non, libellé, pulsation --- */
+function poserLibelle(){
+  const lignes = LIBELLES[phaseCourante === 4 ? 4 : 3];
+  const x = tcLabel.getAttribute('x');
+  tcLabel.replaceChildren();
+  lignes.forEach((l, k) => { svgEl('tspan', { x, dy: k ? LIBELLE_PAS : -(lignes.length - 1) * LIBELLE_PAS / 2 }, tcLabel).textContent = l; });
+  telecommande.setAttribute('aria-label', lignes.join(' '));
+}
+function majPulse(){
+  const p = tcVisible() && document.body.dataset.verdict === 'cauchemar' && !tc.utilise;
+  tcPulse.classList.toggle('pulse', p);
+  tcHalo.classList.toggle('pulse', p);
+}
+function majTelecommande(){
+  const on = tcVisible();
+  telecommande.classList.toggle('tc-on', on);
+  telecommande.setAttribute('aria-hidden', String(!on));
+  telecommande.setAttribute('tabindex', on ? '0' : '-1');
+  if(!on && document.activeElement === telecommande) telecommande.blur();
+  poserLibelle();
+  majPulse();
+  if(!on) closeSong(true);
+}
+
+/* --- 1. la carte réconfort, épinglée sur l'écran (du côté où le contexte n'est pas) --- */
+function reconfortChoisi(){
+  const r = prefs.get('reconfort', 'chanson');
+  return RECONFORTS.includes(r) ? r : 'chanson';
+}
+function epinglerReconfort(slug, anim){
+  if(reveG.querySelector(`.reve-reconfort use[href="#v-${slug}"]`)) return;   /* finitBien : déjà dans le film */
+  if(gReconfort.querySelector(`[data-slug="${slug}"]`)) return;
+  gReconfort.replaceChildren();
+  const [x, y, r] = seed % 2 ? [588, 226, -9] : [812, 226, 9];   /* le contexte est de l'autre côté */
+  const place = svgEl('g', { transform: `translate(${x} ${y}) rotate(${r})` }, gReconfort);
+  const carte = svgEl('g', { class: 'reconfort-carte', 'data-slug': slug }, place);
+  svgEl('path', { class: 'w lite reserve carte-fond', style: '--p:var(--riso-papier, var(--p-carte))', d: rrD(-17, -19, 34, 38, 5) }, carte);
+  svgEl('path', { class: 'fil couture', style: '--f:var(--fil-sable)', d: rrD(-14, -16, 28, 32, 3.5) }, carte);
+  svgEl('use', { href: '#v-' + slug, transform: 'translate(0 2) scale(.66)' }, carte);
+  const pin = svgEl('use', { href: '#pin', style: 'color:var(--glass-red)', transform: 'translate(0 -16) scale(.8)' }, carte);
+  if(!anim) return;
+  /* elle part de la télécommande, file vers l'écran, et l'épingle se plante */
+  animer(carte, [{ transform: `translate(${821 - x}px,${380 - y}px) scale(.3)`, opacity: 0 }, { transform: 'scale(1.15)', opacity: 1, offset: .72 }, { transform: 'none', opacity: 1 }],
+    { duration: 620, easing: 'cubic-bezier(.3,.7,.4,1)' });
+  animer(pin, [{ transform: 'translate(0px,-34px) scale(.8)', opacity: 0 }, { transform: 'translate(0px,-16px) scale(.8)', opacity: 1 }],
+    { duration: 280, delay: 560, easing: RESSORT, fill: 'backwards' });
+}
+
+/* --- 3. la chanson : dialog#chanson, l'iframe créée au seul appui --- */
+function chansonPrefs(){
+  const c = prefs.get('chanson', null) || {};
+  return {
+    titre: typeof c.titre === 'string' && c.titre.trim() ? c.titre.trim() : CHANSON.titre,
+    ytid: typeof c.ytid === 'string' && /^[\w-]{6,20}$/.test(c.ytid) ? c.ytid : CHANSON.ytid
+  };
+}
+function chanteTaChanson(titre){
+  clearTimeout(tc.attente);
+  const p = document.createElement('p');
+  p.className = 'chanson-chante';
+  p.textContent = '🎵 Chante ta chanson !';
+  p.appendChild(document.createElement('small')).textContent = titre;
+  chansonFenetre.replaceChildren(p);
+}
+function openSong(){
+  const { titre, ytid } = chansonPrefs();
+  chansonTitre.textContent = '🎵 ' + titre;
+  if(!chanson.open){ chanson.classList.remove('sort'); chanson.showModal(); }
+  clearTimeout(tc.attente);
+  if(!navigator.onLine){ chanteTaChanson(titre); return; }
+  const f = document.createElement('iframe');
+  let charge = false;
+  f.title = titre;
+  /* autoplay et encrypted-media, là où le navigateur les connaît (Firefox les ignore en le
+     signalant dans la console) */
+  const pp = document.featurePolicy;
+  const permis = pp && pp.features ? ['autoplay', 'encrypted-media'].filter(x => pp.features().includes(x)) : [];
+  if(permis.length) f.allow = permis.join('; ');
+  f.loading = 'lazy';
+  f.referrerPolicy = 'strict-origin-when-cross-origin';   /* YouTube refuse un lecteur sans référent */
+  f.addEventListener('load', () => { charge = true; clearTimeout(tc.attente); });
+  f.addEventListener('error', () => { if(f.isConnected) chanteTaChanson(titre); });
+  f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(ytid)}?autoplay=1`;
+  chansonFenetre.replaceChildren(f);
+  tc.attente = setTimeout(() => { if(!charge && f.isConnected) chanteTaChanson(titre); }, CHANSON_ATTENTE);
+}
+/* fermeture : sortie rapide (140 ms), ou sèche (sec : le matin est fini, la nuit revient) ;
+   « close » vide la fenêtre : la musique s'arrête avec l'iframe */
+function closeSong(sec){
+  clearTimeout(tc.attente);
+  if(!chanson.open){ chansonFenetre.replaceChildren(); return; }
+  if(sec || REDUIT.matches){ chanson.close(); return; }
+  if(chanson.classList.contains('sort')) return;
+  chanson.classList.add('sort');
+  setTimeout(() => { chanson.classList.remove('sort'); if(chanson.open) chanson.close(); }, 140);
+}
+document.getElementById('chansonClose').addEventListener('click', () => closeSong());
+chanson.addEventListener('cancel', e => { e.preventDefault(); closeSong(); });
+chanson.addEventListener('close', () => {
+  chanson.classList.remove('sort');
+  clearTimeout(tc.attente);
+  chansonFenetre.replaceChildren();
+  if(tcVisible() && (document.activeElement === document.body || !document.activeElement)) telecommande.focus({ preventScroll: true });
+});
+chanson.addEventListener('click', e => {   /* un appui sur le fond (hors de la feuille) la referme */
+  const r = chanson.getBoundingClientRect();
+  if(e.target === chanson && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) closeSong();
+});
+
+/* --- 2. transformer le film (sans jamais le faire disparaître d'un coup) --- */
+/* le ballon qui se dégonfle : il part de la transform du modificateur, flotte, et se pose */
+const degonfle = ([de, o]) => [
+  { transform: de, transformOrigin: o },
+  { transform: `${de} rotate(-6deg) scale(1.06,.94)`, transformOrigin: o, offset: .2 },
+  { transform: 'scale(1.22,1.1) rotate(5deg)', transformOrigin: o, offset: .5 },
+  { transform: 'scale(.9,1.06) rotate(-2deg)', transformOrigin: o, offset: .76 },
+  { transform: 'none', transformOrigin: o }
+];
+const retrecit = ([de, o]) => [{ transform: de, transformOrigin: o }, { transform: 'none', transformOrigin: o }];
+function transformer(id, anim){
+  const film = reveG.querySelector('.reve-film'), dream = reveCourant;
+  if(!film || !dream) return;
+  anim = anim && !REDUIT.matches;
+  const m = 'm-' + dream.modif;
+  const depart = DEPART[dream.modif] || ['none', '50% 50%'];
+  /* la chaîne d'avant s'en va */
+  film.querySelectorAll('.tc-ajout').forEach(el => el.remove());
+  const poses = [...film.querySelectorAll('.reve-pose')];
+  /* plus jamais le modificateur : tout revient à sa taille, comme dans la journée */
+  poses.forEach(p => {
+    const avait = p.classList.contains(m);
+    p.getAnimations().forEach(a => a.cancel());   /* la projection de Task 10, si elle grandit encore */
+    p.classList.remove(m, 'danse', 'bronze-teinte');
+    if(!anim) return;
+    /* la transition CSS l'emporterait sur l'animation : coupée le temps du dégonflage */
+    p.style.transition = 'none';
+    const a = animer(p, (id === 'bronze' ? degonfle : retrecit)(avait ? depart : ['none', '50% 50%']),
+      { duration: id === 'bronze' ? 1100 : 650, easing: id === 'bronze' ? 'ease-out' : RESSORT });
+    a.onfinish = a.oncancel = () => { p.style.transition = ''; };
+  });
+  film.querySelectorAll('.reve-contexte').forEach(c => {
+    c.getAnimations().forEach(a => a.cancel());
+    c.classList.remove(m);
+    c.classList.toggle('cache', id === 'danse');   /* les chiens prennent sa place */
+  });
+  film.querySelectorAll('.reve-greffe').forEach(g => g.classList.toggle('efface', id === 'bronze'));
+  /* le grand cadre du géant : rendu au nuage une fois le film revenu à sa taille */
+  const auNuage = () => { if(film.isConnected) reveCadre.setAttribute('clip-path', 'url(#clip-ecran)'); };
+  if(anim) setTimeout(auNuage, 1150); else auNuage();
+  if(id === 'bronze'){
+    if(dream.base.slug !== 'pouce') poses.forEach(p => p.classList.add('bronze-teinte'));   /* le pouce l'est déjà */
+    if(anim) PFFF.forEach(([x, y, sens], k) => {
+      const g = svgEl('g', { class: 'tc-ajout', transform: `translate(${x} ${y})` }, film);
+      animer(svgEl('path', { class: 'fil pfff', d: 'M0 0q5-6 10 0t10 0t10 0' }, g),
+        [{ transform: 'scale(.5)', opacity: 0 }, { opacity: 1, offset: .25 }, { transform: `translate(${sens * 26}px,-24px) scale(1.2)`, opacity: 0 }],
+        { duration: 900, delay: 150 + k * 140, easing: 'ease-out', fill: 'both' });
+    });
+  }else if(id === 'lapin'){
+    const ancres = dream.base.base ? ancresDe(dream.base.greffe.forme) : null;
+    const tetes = ancres ? ancres.tetes : [[0, -34, 1.25]];   /* une vignette en grand : sur sa tête */
+    poses.forEach(p => tetes.forEach(([x, y, s]) => {
+      const u = svgEl('use', { class: 'tc-ajout', href: '#g-greffe-lapin', style: `--tete-x:${x};--tete-y:${y};--tete-s:${s}` }, p);
+      if(anim) animer(u, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 480, delay: 300, easing: RESSORT, fill: 'backwards' });
+    }));
+  }else if(id === 'danse'){
+    poses.forEach(p => p.classList.add('danse'));
+    const u = svgEl('use', { class: 'tc-ajout', href: '#g-greffe-chiens-pirates' }, film);
+    if(anim) animer(u, [{ opacity: 0, transform: 'scale(.35)' }, { opacity: 1, transform: 'none' }], { duration: 650, delay: 280, easing: RESSORT, fill: 'backwards' });
+  }
+  tc.transfo = id;
+  tc.cle = cleDuReve();
+  poserVerdict('finitBien');
+  majPulse();
+}
+function direTransfo(texte){
+  tc.texte = texte;
+  direPhrase(texte, PHRASES.cle);
+}
+
+/* --- l'appui --- */
+function ondes(){
+  tcOndes.forEach((o, k) => animer(o, [{ opacity: 0 }, { opacity: 1, offset: .3 }, { opacity: 0 }], { duration: 520, delay: k * 110, easing: 'ease-out' }));
+}
+/* l'écran change de chaîne : deux éclairs doux, puis `ensuite` (tout de suite en mouvement réduit) */
+function changerDeChaine(film, ensuite){
+  const a = film && animer(film, [{ filter: 'brightness(1)' }, { filter: 'brightness(1.6) saturate(.6)', offset: .18 }, { filter: 'brightness(.92)', offset: .4 },
+    { filter: 'brightness(1.5) saturate(.6)', offset: .62 }, { filter: 'brightness(1)' }], { duration: 380, easing: 'linear' });
+  if(!a){ ensuite(); return; }
+  tc.enCours = true;
+  a.onfinish = a.oncancel = () => { tc.enCours = false; ensuite(); };
+}
+function applyRemote(){
+  if(!tcVisible() || tc.enCours) return;
+  clearTimeout(tc.auto);
+  const id = remoteStep(tc.compteur++);
+  tc.utilise = true;
+  majPulse();
+  ondes();
+  epinglerReconfort(reconfortChoisi(), !REDUIT.matches);   /* 1 */
+  openSong();                                              /* 3 */
+  const film = reveG.querySelector('.reve-film'), reve = reveCourant;
+  changerDeChaine(film, () => {
+    if(!film || !film.isConnected || reveCourant !== reve) return;   /* un autre rêve entre-temps */
+    if(reve) transformer(id, true);                                  /* 2 */
+    direTransfo(reve ? TRANSFOS.find(t => t.id === id).texte : PHRASES.flou);   /* 4 */
+  });
+}
+const appui = on => { tcCorps.classList.toggle('appui', on); tcBoutons.classList.toggle('appui', on); };
+telecommande.addEventListener('pointerdown', () => appui(true));
+addEventListener('pointerup', () => appui(false));
+addEventListener('pointercancel', () => appui(false));
+telecommande.addEventListener('click', applyRemote);
+telecommande.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  if(e.repeat) return;
+  appui(true);
+  setTimeout(() => appui(false), 120);
+  applyRemote();
+});
+
+/* --- un rêve vient d'être dessiné (ou effacé) --- */
+/* finitBien : « … mais ta chanson était dans ta tête… », dit seul */
+function queueFinitBien(dream){
+  const i = dream.phrase.indexOf('…');
+  const q = i < 0 ? '' : dream.phrase.slice(i).replace(/^…\s*mais\s+/, '');
+  return q.charAt(0).toUpperCase() + q.slice(1);
+}
+function surReve(anim){
+  clearTimeout(tc.auto);
+  if(reveCourant && tc.transfo && !anim && cleDuReve() === tc.cle){
+    /* le même rêve, redessiné (l'avatar change) : il garde sa chaîne */
+    transformer(tc.transfo, false);
+    direTransfo(tc.texte);
+  }else{
+    tc.utilise = false;
+    tc.transfo = null;
+    tc.texte = '';
+    gReconfort.replaceChildren();
+    const reve = reveCourant;
+    if(reve && reve.verdict === 'finitBien' && tcVisible()){
+      /* la carte apaisante entre d'elle-même (Task 10), puis le film change tout seul */
+      const anime = anim && !REDUIT.matches;
+      tc.auto = setTimeout(() => {
+        if(reveCourant !== reve) return;
+        transformer(remoteStep(tc.compteur++), anime);
+        direTransfo(queueFinitBien(reve));
+      }, anime ? TC_AUTO : 0);
+    }
+  }
+  majTelecommande();
+}
+document.addEventListener('reve', e => surReve(e.detail.anim));
+document.addEventListener('temps', majTelecommande);
+/* au chargement : le rêve est déjà dessiné (section 9), aucun événement n'a été entendu */
+surReve(false);
 </script>
 </body>
 </html>
