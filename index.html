@@ -1000,12 +1000,14 @@ html:not([data-pret]) *{transition:none!important}
                  puis la fenêtre de la chambre -->
             <path id="p-ciel-lune" class="w" style="--p:var(--p-ciel-nuit)" data-ink="bleu" data-nuit="1" d="M22 22h108v148h-108Z"/>
             <!-- la lune : #g-lune l'enveloppe (clin d'œil, Task 7 / 18) ;
-                 #fil-lune-clin, caché, remplacera #fil-lune-oeil le temps du clin -->
+                 deux yeux ; #fil-lune-clin, caché, remplace l'œil gauche #fil-lune-oeil
+                 le temps du clin, #fil-lune-oeil-2 reste ouvert -->
             <g id="g-lune">
               <g id="p-lune" data-nuit="1">
                 <path class="w reserve" style="--p:var(--p-lune)" data-ink="jaune" d="M93.2 62.8A25 25 0 1 0 93.2 105.2A22 22 0 0 1 93.2 62.8Z"/>
-                <circle id="fil-lune-oeil" class="oeil-lune" cx="66" cy="79" r="2.2"/>
-                <path id="fil-lune-clin" class="fil" style="--f:var(--fil-brun)" d="M62 79q4 3.5 8 0"/>
+                <circle id="fil-lune-oeil" class="oeil-lune" cx="61" cy="79" r="2.2"/>
+                <circle id="fil-lune-oeil-2" class="oeil-lune" cx="72" cy="79" r="2.2"/>
+                <path id="fil-lune-clin" class="fil" style="--f:var(--fil-brun)" d="M57 79q4 3.5 8 0"/>
                 <path class="fil" style="--f:var(--fil-brun)" d="M62 92q4 4.5 9 1"/>
               </g>
             </g>

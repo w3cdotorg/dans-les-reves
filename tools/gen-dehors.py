@@ -167,9 +167,12 @@ out['soleil-visage'] = (f"M{nums([SX-11, SY-4])}q3.5 3.5 7 0M{nums([SX+4, SY-4])
                         f"M{nums([SX-7, SY+7])}q7 7 14 0")
 LX, LY = 80, 84
 out['lune'] = crescent(LX, LY, 25, 58, 22)
-# œil ouvert (point) / œil qui fait un clin (trait), sourire, sur le corps du croissant
-out['lune-oeil'] = (LX-14, LY-5)
-out['lune-clin'] = f"M{nums([LX-18, LY-5])}q4 3.5 8 0"
+# deux yeux (points) sur le corps du croissant, 11 px d'écart (le croissant n'a que
+# 22 px de large à leur hauteur : x 55,5 → 77,7) ; le gauche (lune-oeil) fait le clin
+# d'œil (trait lune-clin), le droit (lune-oeil-2) reste ouvert ; sourire au milieu
+out['lune-oeil'] = (LX-19, LY-5)
+out['lune-oeil-2'] = (LX-8, LY-5)
+out['lune-clin'] = f"M{nums([LX-23, LY-5])}q4 3.5 8 0"
 out['lune-sourire'] = f"M{nums([LX-18, LY+8])}q4 4.5 9 1"
 
 # étoiles : croix brodée + nœud au centre, toutes DANS la vitre, entre les rideaux
@@ -246,11 +249,13 @@ GABARIT = r"""
                  puis la fenêtre de la chambre -->
             <path id="p-ciel-lune" class="w" style="--p:var(--p-ciel-nuit)" data-ink="bleu" data-nuit="1" d="{{vitre}}"/>
             <!-- la lune : #g-lune l'enveloppe (clin d'œil, Task 7 / 18) ;
-                 #fil-lune-clin, caché, remplacera #fil-lune-oeil le temps du clin -->
+                 deux yeux ; #fil-lune-clin, caché, remplace l'œil gauche #fil-lune-oeil
+                 le temps du clin, #fil-lune-oeil-2 reste ouvert -->
             <g id="g-lune">
               <g id="p-lune" data-nuit="1">
                 <path class="w reserve" style="--p:var(--p-lune)" data-ink="jaune" d="{{lune}}"/>
                 <circle id="fil-lune-oeil" class="oeil-lune" cx="{{lune-oeil-x}}" cy="{{lune-oeil-y}}" r="2.2"/>
+                <circle id="fil-lune-oeil-2" class="oeil-lune" cx="{{lune-oeil-2-x}}" cy="{{lune-oeil-2-y}}" r="2.2"/>
                 <path id="fil-lune-clin" class="fil" style="--f:var(--fil-brun)" d="{{lune-clin}}"/>
                 <path class="fil" style="--f:var(--fil-brun)" d="{{lune-sourire}}"/>
               </g>
@@ -327,7 +332,7 @@ GABARIT = r"""
             </g>
 """
 
-for k in ('lune-oeil', 'doudou-nez'):
+for k in ('lune-oeil', 'lune-oeil-2', 'doudou-nez'):
     x, y = out.pop(k)
     out[k + '-x'], out[k + '-y'] = f(x), f(y)
 

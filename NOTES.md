@@ -877,3 +877,7 @@ Contrôles : `node --test test/` 16/16 ; console 0 erreur / 0 avertissement (feu
     - En riso, l'amygdale allumée est rose × jaune (`#ff4631`), avec des couronnes jaunes et un halo papier : rouge ou rose sur le rose du cerveau, rien ne se voyait.
   - La pinéale bat (`@property --pineale-pouls`, intensité selon `--pineale-lueur`). Sa règle riso passe par des variables (`--pineale-c1..3` : papier et bleu pâle).
   - `setCut` pose `--amb-play` et `--pres-play` à `paused` sur une vue à opacité 0, puis les retire quand elle revient, pour que l'héritage de la loupe reste intact. Mesuré : à Dedans, 8 animations en pause dans Dehors, 11 dans Tout près, 7 en cours dans Dedans.
+  - **La lune a deux yeux** (demande du propriétaire : « la lune n'a qu'un œil »).
+    - `#fil-lune-oeil` est à (61,79), le nouveau `#fil-lune-oeil-2` à (72,79), séparés de 11 px : le croissant n'a que 22 px de large à leur hauteur. Le sourire est centré dessous.
+    - Le clin d'œil ne ferme que l'œil gauche (`#fil-lune-clin` déplacé en `M57 79`) ; l'autre reste ouvert.
+    - Fait aussi dans `tools/gen-dehors.py` (géométrie `lune-oeil` / `lune-oeil-2` / `lune-clin` et gabarit) pour qu'une régénération garde les deux yeux. Le script n'a pas été relancé : shapely est absent ici.
