@@ -10,6 +10,6 @@ module.exports = function load(){
   const m = src.match(/\/\* PURE-BEGIN \*\/([\s\S]*?)\/\* PURE-END \*\//);
   if(!m) throw new Error('Bloc /* PURE-BEGIN */ … /* PURE-END */ introuvable dans index.html');
   const ctx = {};
-  vm.runInNewContext(m[1] + ';this.__x = {CARTES, MODIFS, INFO, JEU_PARTIES, JEU_REVE, HISTOIRE, TRANSFOS, PHRASES, inflect, lerpArr, composeDream: typeof composeDream==="function"?composeDream:null}', ctx);
+  vm.runInNewContext(m[1] + ';this.__x = {CARTES, MODIFS, INFO, ZONES: typeof ZONES==="undefined"?null:ZONES, JEU_PARTIES, JEU_REVE, HISTOIRE, TRANSFOS, PHRASES, inflect, lerpArr, composeDream: typeof composeDream==="function"?composeDream:null}', ctx);
   return ctx.__x;
 };

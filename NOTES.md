@@ -1033,3 +1033,14 @@ Contrôles : `node --test test/` 16/16 ; console 0 erreur / 0 avertissement (feu
   - lapin et danse : l'ogre sourit, sans crocs ;
   - console de la page propre ; le fond referme la feuille de réglages.
   - Captures : `shots/t11f-*.png`.
+
+## Task 12 : zones cliquables, volet d'info, « Montrer les zones »
+- `ZONES` (bloc PURE, donnée pure) : id de INFO → `{cible:'#id'|[ids], forme, marge 6-10, enfants?, bande?}`. 33 entrées (INFO a 46 zones : 13 `decor-*` naissent avec les cartes, `ZONE_DECOR`). `test/zones.test.js` teste la table (couverture de INFO, cibles présentes dans index.html, marges, code d'accessibilité) ; `_load.js` expose `ZONES`.
+- Génération (section 11 du script, après `document.fonts.ready` + rAF) : `getBBox` + `getScreenCTM` → repère de `#g-hs`, borné à la scène et au rail (x ≤ 866), élargi de la marge ; ellipse = boîte × 1,1 + marge. Triées par aire (les petites dessus). `enfants` : une forme par enfant (neurones, étincelles, bandes de vagues, fuseaux). `#hs-0/1/2` en HTML ; écran et boîte ont une forme dans 0 et 1.
+- `boite` : `bande:6`, seul le rebord (sinon la zone couvrirait les cartes). `ecran` : `#scene[data-encore]` (MutationObserver sur `#encore`) rend la zone inerte tant que la pilule « Encore un rêve » est visible.
+- Vue active : `majZones()` appelée par `setCut` ; groupes inactifs `display:none` (ni clic, ni focus, ni lecteur d'écran), tabindex 0/-1.
+- `showInfo(id, evt)` → `openInfo`; `.sel` posé par `marquerZone` (appelée par openInfo/closeInfo, aucun code de volet dupliqué) ; étiquette `#label` seulement souris/stylet. Entrée/Espace au clavier.
+- Zones `decor-*` : événement `journee` → rAF puis +900 ms (le décor s'installe).
+- « Montrer les zones » : `#scene.hint` 6 s, `aria-pressed`, battement `--amb-anim` ; mouvement réduit : liserés fixes.
+- Limites connues : zones de vagues/fuseaux mesurées au chargement (elles glissent) ; zones de décor présentes même quand le décor est éteint la nuit ; les formes ne suivent pas le « respire » (×1,01) de Dedans.
+- `window.__zonesManquantes()` → `[]`.
