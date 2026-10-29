@@ -138,13 +138,24 @@ for spec in NEURONES:
     neurone(*spec)
 
 # ---------------------------------------------------------------- les étincelles
+def R1(p): return (round(p[0], 1), round(p[1], 1))
+def traits(segs):
+    """Traits isolés (p → q) en commandes relatives : « m » vers le début du trait
+    depuis la fin du précédent, puis « l » ; points arrondis AVANT les écarts."""
+    out_, cur = '', (0, 0)
+    for i, (p, q) in enumerate(segs):
+        p, q = R1(p), R1(q)
+        out_ += ('M' + nums(p)) if i == 0 else ('m' + nums((p[0] - cur[0], p[1] - cur[1])))
+        out_ += 'l' + nums((q[0] - p[0], q[1] - p[1]))
+        cur = q
+    return out_
 def etincelle(s, r0=7.5, r1=15, n=8, a0=0):
     segs = []
     for i in range(n):
         a = a0 + i * 360 / n
         p, q = pol(s, a, r0), pol(s, a, r1 if i % 2 == 0 else r1 - 3)
-        segs.append(f"M{nums(p)}L{nums(q)}")
-    return ''.join(segs)
+        segs.append((p, q))
+    return traits(segs)
 for k, s in SYN.items():
     out[k] = etincelle(s, a0=rng.uniform(0, 60))
     out[k + '-x'], out[k + '-y'] = f(s[0]), f(s[1])
@@ -175,7 +186,9 @@ def fuseau(c, L=74, amp=11, n=15, rot=0):
         y = (amp * math.sin(math.pi * t) ** 1.4) * (1 if i % 2 else -1)
         a = rad(rot)
         pts.append((c[0] + x * math.cos(a) - y * math.sin(a), c[1] + x * math.sin(a) + y * math.cos(a)))
-    return 'M' + ' '.join(nums(p) for p in pts)
+    pts = [R1(p) for p in pts]
+    d = [(b[0] - a[0], b[1] - a[1]) for a, b in zip(pts, pts[1:])]
+    return 'M' + nums(pts[0]) + 'l' + nums([v for q in d for v in q])
 # Les fuseaux sont posés sur les crêtes des vagues 1 et 3 (comme dans le sommeil
 # profond, où les fuseaux arrivent sur la crête des ondes lentes) et glissent avec
 # elles : crête de la vague (y0, amp, phase) en x = P·(3π/2 − phase)/2π (+ k·P).
@@ -196,7 +209,8 @@ for i, (c, s) in enumerate(GOUTTES, 1):
     out[f'g{i}'] = goutte(c, s)
     x, y = c
     # le sillage : deux petits points de piqûre au-dessus de la goutte
-    out[f'g{i}-sillage'] = f"M{nums((x - 3 * s, y - 20 * s))}L{nums((x - 3 * s, y - 27 * s))}M{nums((x + 3 * s, y - 22 * s))}L{nums((x + 3 * s, y - 33 * s))}"
+    out[f'g{i}-sillage'] = traits([((x - 3 * s, y - 20 * s), (x - 3 * s, y - 27 * s)),
+                                   ((x + 3 * s, y - 22 * s), (x + 3 * s, y - 33 * s))])
     hx, hy = x - 2.4 * s, y + 2 * s
     out[f'g{i}-hx'], out[f'g{i}-hy'] = f(hx), f(hy)
 
@@ -272,14 +286,12 @@ GABARIT = r"""
             </g>
 
             <!-- les petites rafales qui collent (fuseaux) : de petits traits blancs, très rapides,
-                 posés sur les crêtes des vagues 1 et 3 ; leur enveloppe glisse avec elles
-                 (même animation que .glisse-1) -->
+                 posés sur les crêtes des vagues 1 et 3 ; chacun glisse avec elles (300 px en 8 s,
+                 comme .glisse-1) et éclate deux fois par tour, éteint au retour (CSS .rafale) -->
             <g id="g-fuseaux" data-phase="nuit">
-              <g class="glisse glisse-1">
-                <path class="fil fuseau rafale rafale-1" d="{{f1}}"/>
-                <path class="fil fuseau rafale rafale-2" d="{{f2}}"/>
-                <path class="fil fuseau rafale rafale-3" d="{{f3}}"/>
-              </g>
+              <path class="fil fuseau rafale rafale-1" d="{{f1}}"/>
+              <path class="fil fuseau rafale rafale-2" d="{{f2}}"/>
+              <path class="fil fuseau rafale rafale-3" d="{{f3}}"/>
             </g>
 
             <!-- le rinçage : des gouttes bleu pâle qui descendent doucement -->
@@ -287,18 +299,18 @@ GABARIT = r"""
               <g class="descend descend-1">
                 <path class="fil sillage" d="{{g1-sillage}} {{g3-sillage}}"/>
                 <path class="papier-pres" d="{{g1}}"/>
-                <path class="w lite pale" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g1}}"/>
+                <path class="w lite" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g1}}"/>
                 <path class="papier-pres" d="{{g3}}"/>
-                <path class="w lite pale" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g3}}"/>
+                <path class="w lite" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g3}}"/>
                 <circle class="reflet" cx="{{g1-hx}}" cy="{{g1-hy}}" r="1.6"/>
                 <circle class="reflet" cx="{{g3-hx}}" cy="{{g3-hy}}" r="1.6"/>
               </g>
               <g class="descend descend-2">
                 <path class="fil sillage" d="{{g2-sillage}} {{g4-sillage}}"/>
                 <path class="papier-pres" d="{{g2}}"/>
-                <path class="w lite pale" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g2}}"/>
+                <path class="w lite" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g2}}"/>
                 <path class="papier-pres" d="{{g4}}"/>
-                <path class="w lite pale" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g4}}"/>
+                <path class="w lite" style="--p:var(--p-rincage)" data-ink="bleu" d="{{g4}}"/>
                 <circle class="reflet" cx="{{g2-hx}}" cy="{{g2-hy}}" r="1.5"/>
                 <circle class="reflet" cx="{{g4-hx}}" cy="{{g4-hy}}" r="1.4"/>
               </g>
