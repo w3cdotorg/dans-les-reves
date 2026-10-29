@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="feutrine">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dans les rêves — petit explorateur du cerveau et des rêves</title>
+<meta name="description" content="Petit explorateur du cerveau et des rêves pour les enfants de 4-5 ans : mets ta journée dans ta tête, fais venir la nuit, et regarde ton cerveau ranger tes souvenirs et fabriquer un rêve. En laine feutrée.">
+<!-- Polices : Google Fonts, avec repli système dans --font-* (hors ligne, la
+     page reste entière). Feuille bloquante comme chez les aînés : les captures
+     headless montrent ainsi la vraie police ; la mesure de la version allégée
+     (section 4 du script) part de l'exécution du script, donc n'en souffre pas. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DANS LES RÊVES — mini-explorateur du cerveau et des rêves (4-5 ans)
+   Petit frère de « Dans mon corps » et « Dans le volcan » : même
+   squelette (deux curseurs croisés, carte info, barre de boutons),
+   mais un tout autre habit : de la LAINE FEUTRÉE À L'AIGUILLE sur
+   une toile de lin, et un second thème RISO sur la même géométrie.
+   Un seul fichier, aucune dépendance obligatoire.
+   ============================================================ */
+
+/* ===== 1. Palettes (Global Constraints du plan) ===== */
+:root{
+  /* toile de lin */
+  --toile:#e8ddc7; --toile-trame:#d8cbb0;
+  --toile-chaine:#dccfb5;          /* fils verticaux du lin (motif #linen de la maquette v10) */
+
+  /* pièces de laine */
+  --p-peau:#f1c19c; --p-peau-ombre:#c98e66; --p-cheveux:#4a2c1a;
+  --p-cerveau:#ec8aa2; --p-cerveau-sombre:#d4657f; --p-cervelet:#c96a84; --p-tronc:#b9607a;
+  --p-hippocampe:#f6c04f; --p-amygdale:#e0493f; --p-thalamus:#9fb8e6; --p-pineale:#b48be0;
+  --p-ecran:#fbf3e0; --p-carte:#fbf3e0; --p-pouce:#b9b2a0; --p-soleil:#f3c74a; --p-lune:#fff1c9;
+
+  /* fils de broderie */
+  --fil-blanc:#fff6f1; --fil-brun:#7a4b3a; --fil-sable:#c9b58d; --fil-rouge:#e0493f;
+
+  /* la nuit qui tombe sur la toile */
+  --nuit-1:#8d8cae; --nuit-2:#3f3f74; --nuit-3:#262a58;
+
+  /* têtes de verre des épingles (consommées par <use href="#pin" style="color:…">) */
+  --glass-red:#f05a4a; --glass-blue:#3f9be0; --glass-yellow:#f3c73a;
+
+  /* encres riso */
+  --ink-jaune:#ffe14a; --ink-rose:#ff4fa8; --ink-bleu:#0f6fb8; --papier:#f7f2e8;
+
+  /* interface */
+  --encre:#4a2c1a;                 /* texte : brun foncé, lisible sur crème */
+  --encre-douce:#7a4b3a;
+  --ombre:59,42,28;                /* rgb de l'ombre portée des pièces (#3b2a1c, filtre wool F) */
+  --pad:clamp(12px, 2.2vw, 26px);
+  --r-card:22px;
+  --font-display:"Fredoka","Chalkboard SE","Comic Sans MS",system-ui,sans-serif;
+  --font-ui:"Baloo 2","Chalkboard SE","Comic Sans MS",system-ui,sans-serif;
+
+  /* fibres de laine pour les pièces d'interface : bruit fin en SVG inline
+     (data: URI, donc hors ligne), brun très transparent. */
+  --fibres:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6 1.2' numOctaves='2' seed='12' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .29 0 0 0 0 .17 0 0 0 0 .1 0 0 0 .22 -.02'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  /* grain du lin / du papier (équivalent CSS des filtres #linenGrain et #paperGrain) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* ===== 2. Base et toile de fond ===== */
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  font-family:var(--font-ui);
+  color:var(--encre);
+  /* la toile de lin : même motif que <pattern id="linen"> (pas de 7 px,
+     fil de trame horizontal #d8cbb0 de 1,4 px, fil de chaîne vertical #dccfb5),
+     la trame posée PAR-DESSUS la chaîne comme dans le SVG, puis le grain. */
+  background-color:var(--toile);
+  background-image:
+    var(--grain),
+    repeating-linear-gradient(0deg, transparent 0 2.8px, var(--toile-trame) 2.8px 4.2px, transparent 4.2px 7px),
+    repeating-linear-gradient(90deg, transparent 0 2.8px, var(--toile-chaine) 2.8px 4.2px, transparent 4.2px 7px);
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+[data-theme=riso] body{
+  background-color:var(--papier);
+  background-image:var(--grain);
+}
+
+/* ===== 3. En-tête ===== */
+header{
+  padding:clamp(14px,3vw,30px) var(--pad) 0;
+  text-align:center;
+}
+h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(2rem,6.4vw,4rem);
+  line-height:1;
+  margin:.2em 0 .1em;
+  color:var(--fil-brun);
+  /* lettres de laine posées sur la toile : liseré de fil clair + ombre portée douce */
+  text-shadow:0 2px 0 var(--fil-blanc), 0 5px 8px rgba(var(--ombre),.28);
+}
+.tagline{
+  margin:.2em auto 0;max-width:46ch;
+  color:var(--encre-douce);font-size:clamp(.95rem,2.1vw,1.15rem);font-weight:600;
+}
+[data-theme=riso] h1{color:var(--ink-rose);text-shadow:2px 1.5px 0 var(--ink-bleu);mix-blend-mode:multiply}
+[data-theme=riso] .tagline{color:var(--ink-bleu)}
+
+/* ===== 4. Structure : .wrap en deux colonnes ===== */
+.wrap{
+  max-width:1240px;margin:0 auto;
+  padding:var(--pad);
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);
+  gap:clamp(18px,2.6vw,32px);
+  align-items:start;
+}
+
+/* ===== 5. Cartes d'interface : pièces de feutrine à bord cousu =====
+   Le point de couture (bordure en tirets) est rentré dans la pièce : un anneau
+   de box-shadow de la couleur de la carte déborde AU-DELÀ de la bordure, donc
+   le fil sable court à quelques pixels du bord, comme une vraie couture.
+   Le bombé : reflet clair en haut à gauche, creux doux en bas à droite.
+   Pas de verre dépoli, pas de transparence : c'est de la laine. */
+.card{
+  position:relative;
+  background-color:var(--p-carte);
+  background-image:
+    radial-gradient(130% 90% at 22% 8%, rgba(255,255,255,.55), transparent 55%),
+    radial-gradient(120% 90% at 85% 105%, rgba(var(--ombre),.10), transparent 60%),
+    var(--fibres);
+  border:2px dashed var(--fil-sable);
+  border-radius:var(--r-card);
+  padding:clamp(14px,2.2vw,22px);
+  margin:6px;                      /* place pour l'anneau extérieur */
+  box-shadow:
+    0 0 0 6px var(--p-carte),
+    0 12px 20px -8px rgba(var(--ombre),.42),
+    0 3px 5px rgba(var(--ombre),.18);
+}
+[data-theme=riso] .card{
+  background:var(--papier);
+  border:2px solid var(--ink-bleu);
+  box-shadow:4px 3px 0 var(--ink-rose);
+  margin:0 4px 4px 0;
+}
+
+/* ===== 6. Scène (la tête, la toile) ===== */
+.scene{display:flex;flex-direction:column;gap:clamp(10px,2vw,16px)}
+/* --hauteur-svg : hauteur maximale du dessin ; la largeur en est déduite au
+   ratio 900:560 (= 45/28) du viewBox, pour éviter le letterboxing (leçon du volcan). */
+.svgbox{
+  --hauteur-svg:min(58vh,560px);
+  position:relative;
+  margin:0 auto;width:100%;
+  max-width:calc(var(--hauteur-svg) * 45 / 28);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(var(--ombre),.15);
+}
+svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);margin:0 auto}
+
+/* ===== 7. Pièces de laine et fils (règle de thème) =====
+   Une pièce = un élément .w qui déclare sa laine et son encre :
+     <path class="w" style="--p:var(--p-peau)" data-ink="jaune" …/>
+   Feutrine : filtre #wool (ou #woolLite en version allégée / petits détails).
+   Riso : même forme, remplie de son encre, légèrement décalée (mauvais repérage).
+   ⚠ RÈGLE : aucune pièce .w ne porte d'attribut transform. Le thème riso pose
+   une `transform` CSS sur .w pour le décalage d'encre, et une transform CSS
+   REMPLACE l'attribut SVG. Dessiner en coordonnées absolues, ou envelopper la
+   pièce dans un <g transform="…"> de positionnement. */
+.w{fill:var(--p)}
+[data-theme=feutrine] .w{filter:url(#wool)}
+/* l'ordre compte : la règle riso, plus bas et de même poids, l'emporte sur
+   [data-lite="1"] .w quand les deux s'appliquent */
+[data-theme=feutrine] .w.lite,
+[data-lite="1"] .w{filter:url(#woolLite)}
+[data-theme=riso] .w{filter:url(#riso)}
+[data-theme=riso] .w[data-ink=jaune]{fill:var(--ink-jaune);transform:translate(-1.6px,1.1px)}
+[data-theme=riso] .w[data-ink=rose]{fill:var(--ink-rose);transform:translate(1.5px,-1.3px)}
+[data-theme=riso] .w[data-ink=bleu]{fill:var(--ink-bleu);transform:translate(.6px,.4px)}
+/* Les groupes de la scène se superposent comme des passages d'encre.
+   (#scene-inner>g et non #scene>g : tous les groupes vivent dans #scene-inner,
+   pour que la loupe clone la scène d'un seul <use>.) Les pièces elles-mêmes se
+   multiplient aussi entre elles, sinon un jaune posé sur un rose le cacherait. */
+[data-theme=riso] #scene-inner>g,
+[data-theme=riso] .w{mix-blend-mode:multiply}
+
+/* Contours brodés .fil : fil blanc au point de tige par défaut ; --f change le fil. */
+.fil{fill:none;stroke:var(--f, var(--fil-blanc));stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+[data-theme=feutrine] .fil{stroke-dasharray:2.6 1;filter:url(#thread)}
+[data-theme=riso] .fil{stroke:var(--ink-bleu);stroke-dasharray:none;filter:url(#riso)}
+
+/* La toile du SVG : lin + grain en feutrine, papier + grain en riso. */
+.toile-lin{fill:url(#linen)}
+.toile-grain{fill:var(--toile);filter:url(#linenGrain);opacity:.9}
+[data-theme=riso] .toile-lin{fill:var(--papier)}
+[data-theme=riso] .toile-grain{fill:var(--papier);filter:url(#paperGrain);opacity:1}
+
+/* ===== 8. Curseur du temps et ses cinq moments ===== */
+.time-control{display:flex;flex-direction:column;gap:10px}
+#time{width:100%;height:48px}    /* la zone sensible d'un range EST sa boîte : 48 px au pouce */
+.moments{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+
+/* ===== 9. Boutons de laine : .moment, .pill, .btn =====
+   Petites pièces de feutrine bombées : reflet en haut à gauche, point de
+   couture rentré (même astuce d'anneau que .card), ombre portée courte.
+   --b = couleur de la laine du bouton. */
+.moment,.pill,.btn{
+  --b:var(--p-carte);
+  cursor:pointer;
+  font-family:var(--font-display);font-weight:600;
+  color:var(--encre);
+  background-color:var(--b);
+  background-image:
+    radial-gradient(120% 140% at 28% 12%, rgba(255,255,255,.6), transparent 50%),
+    radial-gradient(110% 120% at 75% 110%, rgba(var(--ombre),.16), transparent 60%),
+    var(--fibres);
+  border:1.5px dashed var(--fil-sable);
+  box-shadow:0 0 0 4px var(--b), 0 6px 10px -4px rgba(var(--ombre),.45);
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+}
+.moment{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15em;
+  padding:.5em .15em .45em;border-radius:18px;
+  min-height:58px;margin:4px;
+  font-size:clamp(.62rem,1.4vw,.84rem);line-height:1.05;text-align:center;
+}
+.moment .em{font-size:clamp(1.2rem,3vw,1.6rem);line-height:1}
+.pill{
+  display:flex;align-items:center;gap:.55em;
+  padding:.45em .9em;border-radius:999px;
+  min-height:46px;margin:4px;
+  font-size:clamp(.85rem,1.7vw,1rem);
+}
+.pill .em{font-size:1.3em;line-height:1}
+.btn{
+  display:inline-flex;align-items:center;gap:.4em;
+  padding:.5em 1.05em;border-radius:999px;
+  min-height:46px;margin:4px;
+  font-size:clamp(.85rem,1.8vw,1rem);
+}
+.moment:hover,.btn:hover{transform:translateY(-2px)}
+.pill:hover{transform:translateX(3px)}
+.moment:active,.pill:active,.btn:active{transform:translateY(1px) scale(.97);box-shadow:0 0 0 4px var(--b), 0 2px 4px -2px rgba(var(--ombre),.5)}
+/* couleurs de laine : jeux en rose cerveau, outils en crème, état actif en bleu thalamus */
+.btn.play{--b:var(--p-cerveau)}
+.btn.ghostbtn{--b:#f3e9d4}
+.moment.active,.pill.active{--b:var(--p-thalamus)}
+.btn[aria-pressed="false"]{color:var(--encre-douce)}
+
+/* riso : aplats d'encre jaune, trait bleu, pas de bombé */
+[data-theme=riso] .moment,[data-theme=riso] .pill,[data-theme=riso] .btn{
+  --b:var(--papier);
+  background-image:none;
+  border:2px solid var(--ink-bleu);
+  box-shadow:2px 2px 0 var(--ink-rose);
+  color:var(--ink-bleu);
+}
+[data-theme=riso] .btn.play{--b:var(--ink-jaune)}
+[data-theme=riso] .moment.active,[data-theme=riso] .pill.active{--b:var(--ink-jaune)}
+
+/* focus clavier : un seul anneau, seulement au clavier (:focus-visible) */
+.btn:focus-visible,.pill:focus-visible,.moment:focus-visible{
+  outline:3px solid var(--fil-brun);
+  outline-offset:6px;
+}
+
+/* ===== 10. Curseurs à gros pouce =====
+   Piste = bande de feutrine cousue ; pouce = pompon de laine de 42 px. */
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{
+  height:22px;border-radius:999px;
+  background:var(--piste);
+  border:1.5px dashed rgba(255,255,255,.75);
+  box-shadow:0 0 0 3px var(--fil-sable), inset 0 3px 5px rgba(var(--ombre),.25);
+}
+input[type=range]::-moz-range-track{
+  height:22px;border-radius:999px;
+  background:var(--piste);
+  border:1.5px dashed rgba(255,255,255,.75);
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:42px;height:42px;margin-top:-11.5px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff, var(--p-carte) 45%, var(--fil-sable) 100%);
+  border:2px dashed var(--fil-brun);
+  box-shadow:0 0 0 3px var(--p-carte), 0 7px 12px -3px rgba(var(--ombre),.55);
+  transition:transform .15s;
+}
+input[type=range]::-moz-range-thumb{
+  width:42px;height:42px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff, var(--p-carte) 45%, var(--fil-sable) 100%);
+  border:2px dashed var(--fil-brun);
+  box-shadow:0 0 0 3px var(--p-carte), 0 7px 12px -3px rgba(var(--ombre),.55);
+}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
+input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset:6px;border-radius:999px}
+/* temps : jour → soir → nuit profonde → nuit des rêves → matin */
+#time{--piste:linear-gradient(90deg, var(--p-soleil), #ee9a62 25%, var(--nuit-2) 50%, var(--nuit-3) 75%, #f6d98a)}
+/* vue : dehors (peau) → dedans (cerveau) → tout près (thalamus) */
+#cut{--piste:linear-gradient(90deg, var(--p-peau), var(--p-cerveau) 50%, var(--p-thalamus))}
+[data-theme=riso] input[type=range]::-webkit-slider-runnable-track{border:2px solid var(--ink-bleu);box-shadow:none}
+[data-theme=riso] input[type=range]::-webkit-slider-thumb{background:var(--ink-jaune);border:2px solid var(--ink-bleu);box-shadow:2px 2px 0 var(--ink-rose)}
+[data-theme=riso] input[type=range]::-moz-range-thumb{background:var(--ink-jaune);border:2px solid var(--ink-bleu);box-shadow:2px 2px 0 var(--ink-rose)}
+
+/* ===== 11. Panneau : vues, carte info, barre de boutons ===== */
+.panel{display:flex;flex-direction:column;gap:clamp(14px,2vw,20px)}
+.cuts{display:flex;align-items:center;gap:16px}
+.pills{display:flex;flex-direction:column;gap:4px;flex:1}
+.cut-wrap{width:48px;height:200px;margin:4px auto 0;display:flex;align-items:center;justify-content:center}
+#cut{flex:none;width:200px;height:48px;transform:rotate(90deg)}   /* une fois tourné, 48 px = largeur de la cible */
+
+.info{min-height:170px;display:flex;flex-direction:column}
+.info .big{font-size:clamp(2.4rem,6.4vw,3.2rem);line-height:1}
+.info h2{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(1.3rem,3.6vw,1.85rem);line-height:1.05;margin:.28em 0 .12em;
+  color:var(--fil-brun);
+}
+.info p{margin:.4em 0 0;font-size:clamp(.98rem,2vw,1.08rem);line-height:1.5;font-weight:500}
+[data-theme=riso] .info h2{color:var(--ink-rose)}
+[data-theme=riso] .info p{color:var(--ink-bleu)}
+
+.tools .btnbar{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ===== 12. Petits écrans : une seule colonne ===== */
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  .svgbox{--hauteur-svg:52vh}
+}
+
+/* ===== 13. Mouvement réduit : tout est coupé =====
+   (la version allégée est en plus activée par le script, section 4) */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Dans les rêves <span aria-hidden="true">🌙</span></h1>
+  <p class="tagline">Mets ta journée dans ta tête, et regarde ce que ton cerveau en fait la nuit&nbsp;!</p>
+</header>
+
+<div class="wrap">
+
+  <!-- ======================= SCÈNE ======================= -->
+  <main class="scene card" aria-label="La tête et les rêves">
+    <div class="svgbox">
+      <svg id="scene" viewBox="0 0 900 560" role="group" aria-label="La tête d'un enfant, son cerveau et ses rêves">
+        <defs>
+          <!-- ===== Laine feutrée à l'aiguille (maquette v10, NOTES.md « v6 → v7 » et « v8 ») =====
+               Recopié de la maquette, pas réinventé. Seule retouche : la primitive
+               « dyeGrey » de la maquette, dont le résultat n'était lu par personne,
+               est retirée (rendu identique). -->
+          <filter id="wool" x="-16%" y="-16%" width="132%" height="132%" color-interpolation-filters="sRGB">
+            <!-- A. halo de fibres : la couleur de la pièce, dilatée puis ébouriffée, à demi transparente -->
+            <feMorphology in="SourceGraphic" operator="dilate" radius="1.3" result="dil"/>
+            <feTurbulence type="turbulence" baseFrequency="1.5" numOctaves="2" seed="3" result="hair"/>
+            <feDisplacementMap in="dil" in2="hair" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="halo0"/>
+            <feGaussianBlur in="halo0" stdDeviation=".35" result="halo1"/>
+            <feComponentTransfer in="halo1" result="halo"><feFuncA type="linear" slope=".5"/></feComponentTransfer>
+            <!-- B. corps de la pièce : contour un peu mou (feutré, pas découpé) -->
+            <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="7" result="cut"/>
+            <feDisplacementMap in="SourceGraphic" in2="cut" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="body0"/>
+            <feTurbulence type="turbulence" baseFrequency=".8" numOctaves="1" seed="4" result="fz"/>
+            <feDisplacementMap in="body0" in2="fz" scale="1.4" xChannelSelector="R" yChannelSelector="B" result="body"/>
+            <!-- C. laine : fibres fines (v8) + taches de teinture presque imperceptibles -->
+            <feTurbulence type="fractalNoise" baseFrequency="2 1.6" numOctaves="2" seed="12" result="fiber"/>
+            <feDiffuseLighting in="fiber" surfaceScale="1.05" diffuseConstant="1" lighting-color="#fff" result="flit0"><feDistantLight azimuth="230" elevation="52"/></feDiffuseLighting>
+            <feComponentTransfer in="flit0" result="flit"><feFuncR type="linear" slope=".27" intercept=".765"/><feFuncG type="linear" slope=".27" intercept=".765"/><feFuncB type="linear" slope=".27" intercept=".765"/></feComponentTransfer>
+            <feTurbulence type="fractalNoise" baseFrequency=".12" numOctaves="2" seed="40" result="dye0"/>
+            <feComponentTransfer in="dye0" result="dye"><feFuncR type="linear" slope=".06" intercept=".95"/><feFuncG type="linear" slope=".06" intercept=".95"/><feFuncB type="linear" slope=".06" intercept=".95"/><feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer>
+            <feComposite in="flit" in2="body" operator="in" result="flitIn"/>
+            <feBlend in="body" in2="flitIn" mode="multiply" result="tex1"/>
+            <feComposite in="dye" in2="body" operator="in" result="dyeIn"/>
+            <feBlend in="tex1" in2="dyeIn" mode="multiply" result="tex"/>
+            <!-- D. volume bombé : relief calculé sur l'alpha flouté, lumière douce du haut-gauche.
+                 ⚠ intercept + slope jamais > 1 (liseré blanc brûlé) ; spéculaire quasi nul (laine mate). -->
+            <feGaussianBlur in="body" stdDeviation="2.6" result="dome"/>
+            <feDiffuseLighting in="dome" surfaceScale="5" diffuseConstant="1" lighting-color="#fff" result="shade0"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting>
+            <feComponentTransfer in="shade0" result="shade"><feFuncR type="linear" slope=".3" intercept=".7"/><feFuncG type="linear" slope=".3" intercept=".7"/><feFuncB type="linear" slope=".3" intercept=".7"/></feComponentTransfer>
+            <feComposite in="shade" in2="body" operator="in" result="shadeIn"/>
+            <feBlend in="tex" in2="shadeIn" mode="multiply" result="shaded"/>
+            <feSpecularLighting in="dome" surfaceScale="5" specularConstant=".12" specularExponent="6" lighting-color="#fff8ea" result="spec0"><feDistantLight azimuth="225" elevation="55"/></feSpecularLighting>
+            <feComposite in="spec0" in2="body" operator="in" result="spec"/>
+            <feComposite in="spec" in2="shaded" operator="arithmetic" k2="1" k3="1" result="volumed"/>
+            <!-- E. bouloches rares -->
+            <feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="1" seed="31" result="pn"/>
+            <feColorMatrix in="pn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 60 -46.5" result="p0"/>
+            <feMorphology in="p0" operator="dilate" radius=".55" result="p1"/>
+            <feGaussianBlur in="p1" stdDeviation=".45" result="p2"/>
+            <feMorphology in="body" operator="erode" radius="1.5" result="inner"/>
+            <feComposite in="p2" in2="inner" operator="in" result="pills"/>
+            <feFlood flood-color="#fff" flood-opacity=".4" result="pw"/><feComposite in="pw" in2="pills" operator="in" result="pillsHi"/>
+            <feOffset in="pills" dx=".5" dy=".7" result="ps0"/><feFlood flood-color="#3a2a1e" flood-opacity=".22" result="pd"/><feComposite in="pd" in2="ps0" operator="in" result="pillsSh"/>
+            <!-- F. assemblage + ombre portée d'un objet épais -->
+            <feMerge result="piece"><feMergeNode in="halo"/><feMergeNode in="volumed"/><feMergeNode in="pillsSh"/><feMergeNode in="pillsHi"/></feMerge>
+            <feDropShadow in="piece" dx="1.4" dy="3" stdDeviation="2" flood-color="#3b2a1c" flood-opacity=".4"/>
+          </filter>
+
+          <!-- Laine allégée : seulement A (halo), B (découpe feutrée) et F (ombre portée)
+               de #wool. Pour les petits détails et la version allégée (data-lite="1"). -->
+          <filter id="woolLite" x="-16%" y="-16%" width="132%" height="132%" color-interpolation-filters="sRGB">
+            <!-- A. halo -->
+            <feMorphology in="SourceGraphic" operator="dilate" radius="1.3" result="dil"/>
+            <feTurbulence type="turbulence" baseFrequency="1.5" numOctaves="2" seed="3" result="hair"/>
+            <feDisplacementMap in="dil" in2="hair" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="halo0"/>
+            <feGaussianBlur in="halo0" stdDeviation=".35" result="halo1"/>
+            <feComponentTransfer in="halo1" result="halo"><feFuncA type="linear" slope=".5"/></feComponentTransfer>
+            <!-- B. découpe feutrée -->
+            <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="7" result="cut"/>
+            <feDisplacementMap in="SourceGraphic" in2="cut" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="body0"/>
+            <feTurbulence type="turbulence" baseFrequency=".8" numOctaves="1" seed="4" result="fz"/>
+            <feDisplacementMap in="body0" in2="fz" scale="1.4" xChannelSelector="R" yChannelSelector="B" result="body"/>
+            <!-- F. assemblage + ombre portée -->
+            <feMerge result="piece"><feMergeNode in="halo"/><feMergeNode in="body"/></feMerge>
+            <feDropShadow in="piece" dx="1.4" dy="3" stdDeviation="2" flood-color="#3b2a1c" flood-opacity=".4"/>
+          </filter>
+
+          <!-- fil de broderie : un peu irrégulier, avec son relief -->
+          <filter id="thread" x="-6%" y="-6%" width="112%" height="112%">
+            <feTurbulence type="fractalNoise" baseFrequency=".5" numOctaves="1" seed="19" result="t"/>
+            <feDisplacementMap in="SourceGraphic" in2="t" scale=".9" xChannelSelector="R" yChannelSelector="G" result="d"/>
+            <feDropShadow in="d" dx=".3" dy=".6" stdDeviation=".35" flood-color="#2b1d12" flood-opacity=".4"/>
+          </filter>
+          <!-- nœud français : petite boule de fil (fill="url(#knot)") -->
+          <radialGradient id="knot" cx="35%" cy="32%" r="65%"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#f3ecdc"/><stop offset="1" stop-color="#cfc4ad"/></radialGradient>
+
+          <!-- ===== Toile de lin et son assombrissement ===== -->
+          <pattern id="linen" width="7" height="7" patternUnits="userSpaceOnUse">
+            <rect width="7" height="7" fill="#e8ddc7"/>
+            <line x1="0" y1="3.5" x2="7" y2="3.5" stroke="#d8cbb0" stroke-width="1.4"/>
+            <line x1="3.5" y1="0" x2="3.5" y2="7" stroke="#dccfb5" stroke-width="1.4"/>
+          </pattern>
+          <!-- grain du lin (le « rect grain » de #g-toile, thème feutrine) -->
+          <filter id="linenGrain" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="2"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .16 0"/>
+            <feComposite in2="SourceGraphic" operator="in"/>
+            <feBlend in="SourceGraphic" mode="multiply"/>
+          </filter>
+          <!-- la nuit : blanc (neutre en multiply) jusqu'à 42 %, puis --nuit-1, -2, -3 -->
+          <linearGradient id="dusk" x1="0" x2="1" y1="0" y2="0">
+            <stop offset=".42" stop-color="#ffffff"/><stop offset=".58" stop-color="#8d8cae"/><stop offset=".72" stop-color="#3f3f74"/><stop offset="1" stop-color="#262a58"/>
+          </linearGradient>
+
+          <!-- ===== Épingle plantée (v10, « parfaite », référence figée) ===== -->
+          <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#8e949c"/><stop offset=".45" stop-color="#f4f6f8"/><stop offset="1" stop-color="#7d838b"/></linearGradient>
+          <radialGradient id="glassRed" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#ffd6cf"/><stop offset=".25" stop-color="#f05a4a"/><stop offset=".85" stop-color="#9c1f18"/><stop offset="1" stop-color="#5e0f0b"/></radialGradient>
+          <radialGradient id="glassBlue" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#d9f1ff"/><stop offset=".25" stop-color="#3f9be0"/><stop offset=".85" stop-color="#1a4f8a"/><stop offset="1" stop-color="#0f2f55"/></radialGradient>
+          <radialGradient id="glassYellow" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#fff7d0"/><stop offset=".25" stop-color="#f3c73a"/><stop offset=".85" stop-color="#a77d0c"/><stop offset="1" stop-color="#6a4e05"/></radialGradient>
+          <!-- Modelé de verre commun aux trois couleurs : posé PAR-DESSUS la tête
+               en currentColor, il reproduit les arrêts des #glassRed/Blue/Yellow
+               (point clair à 0, couleur pure à .25, assombrie à .85 et au bord). -->
+          <radialGradient id="glassShade" cx="34%" cy="30%" r="70%"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".25" stop-color="#fff" stop-opacity="0"/><stop offset=".85" stop-color="#000" stop-opacity=".38"/><stop offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient>
+          <!-- Choix (NOTES.md v10 : un sélecteur CSS ne traverse pas l'arbre fantôme
+               d'un <use>) : UNE épingle #pin dont la tête prend currentColor, et
+               l'usage donne la couleur :
+                 <g transform="translate(x,y) rotate(a)"><use href="#pin" style="color:var(--glass-red)"/></g>
+               Dessinée verticale, tête en (0,0), PLANTÉE : on ne voit que ~10 px de
+               tige, qui entre dans la laine par un petit creux sombre entouré de
+               fibres repoussées en clair. -->
+          <g id="pin">
+            <ellipse cx="0" cy="10.6" rx="2.6" ry="1.5" fill="#fff" opacity=".35"/>
+            <ellipse cx=".1" cy="10.4" rx="1.5" ry=".85" fill="#1d1510" opacity=".55"/>
+            <path d="M1.4,3 L3.2,11 L1.2,11.2 L-.6,3.4 Z" fill="#000" opacity=".22"/>
+            <path d="M-1.4,2 L1.4,2 L1.05,10.4 L-1.05,10.4 Z" fill="url(#steel)"/>
+            <path d="M-.55,3 L-.4,9.8" stroke="#fff" stroke-width=".55" opacity=".85" stroke-linecap="round"/>
+            <path d="M.9,3 L.75,9.6" stroke="#5c6269" stroke-width=".35" opacity=".6" stroke-linecap="round"/>
+            <circle cx="0" cy="0" r="4.6" fill="#000" opacity=".26" transform="translate(1.1,1.6)"/>
+            <circle cx="0" cy="0" r="4.6" class="pinhead" fill="currentColor"/>
+            <circle cx="0" cy="0" r="4.6" fill="url(#glassShade)"/>
+            <circle cx="-1.5" cy="-1.7" r="1.25" fill="#fff" opacity=".9"/>
+            <ellipse cx="1.4" cy="2.2" rx="1.6" ry=".8" fill="#fff" opacity=".18"/>
+          </g>
+
+          <!-- ===== Riso (maquette v10 « riso2 », renommé #riso) ===== -->
+          <filter id="riso" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" result="n"/>
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 .05" result="m"/>
+            <feComposite in="SourceGraphic" in2="m" operator="in" result="inked"/>
+            <feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="2" seed="8" result="b"/>
+            <feDisplacementMap in="inked" in2="b" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency=".95" numOctaves="2" seed="3"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .2 0"/>
+            <feComposite in2="SourceGraphic" operator="in"/>
+            <feBlend in="SourceGraphic" mode="multiply"/>
+          </filter>
+        </defs>
+
+        <!-- Tous les groupes de la scène vivent dans #scene-inner : la loupe
+             clonera la scène entière d'un seul <use href="#scene-inner">. -->
+        <g id="scene-inner">
+          <!-- ===== La toile : lin, grain, et la nuit qui tombe (opacité pilotée par le temps) ===== -->
+          <g id="g-toile">
+            <rect class="toile-lin" width="900" height="560"/>
+            <rect class="toile-grain" width="900" height="560"/>
+            <rect class="nuit" width="900" height="560" fill="url(#dusk)" style="mix-blend-mode:multiply" opacity="0"/>
+          </g>
+          <!-- ===== Vue « Dehors » ===== -->
+          <g id="g-dehors"></g>
+          <!-- ===== Vue « Dedans » ===== -->
+          <g id="g-dedans">
+            <!-- TEST Task 1 (à retirer en Task 3) : une pièce de laine, son contour
+                 brodé et une épingle, pour vérifier les filtres dans les deux thèmes. -->
+            <rect class="w" x="270" y="130" width="160" height="120" rx="34" style="--p:var(--p-cerveau)" data-ink="rose"/>
+            <rect class="fil" x="282" y="142" width="136" height="96" rx="24"/>
+            <g transform="translate(300,140) rotate(-24)"><use href="#pin" style="color:var(--glass-red)"/></g>
+          </g>
+          <!-- ===== Vue « Tout près » ===== -->
+          <g id="g-pres"></g>
+          <!-- ===== Écran du rêve (nuage-écran) ===== -->
+          <g id="g-ecran"></g>
+          <!-- ===== Boîte à souvenirs (cartes de la journée) ===== -->
+          <g id="g-boite"></g>
+          <!-- ===== Zones cliquables ===== -->
+          <g id="g-hs"></g>
+          <!-- ===== Interface dans la scène ===== -->
+          <g id="g-ui"></g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="time-control">
+      <input type="range" id="time" min="0" max="400" value="0" aria-label="Faire passer la journée et la nuit">
+      <div class="moments" role="group" aria-label="Les moments de la journée et de la nuit">
+        <button type="button" class="moment" data-time="0"><span class="em" aria-hidden="true">☀️</span><span class="lbl">La journée</span></button>
+        <button type="button" class="moment" data-time="1"><span class="em" aria-hidden="true">🌇</span><span class="lbl">Le soir</span></button>
+        <button type="button" class="moment" data-time="2"><span class="em" aria-hidden="true">💤</span><span class="lbl">La nuit profonde</span></button>
+        <button type="button" class="moment" data-time="3"><span class="em" aria-hidden="true">🌙</span><span class="lbl">La nuit des rêves</span></button>
+        <button type="button" class="moment" data-time="4"><span class="em" aria-hidden="true">🐓</span><span class="lbl">Le matin</span></button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================= PANNEAU ======================= -->
+  <aside class="panel">
+
+    <div class="card cuts">
+      <div class="pills" role="group" aria-label="Choisir la vue">
+        <button type="button" class="pill" data-cut="0"><span class="em" aria-hidden="true">🏞️</span><span class="lbl">Dehors</span></button>
+        <button type="button" class="pill" data-cut="1"><span class="em" aria-hidden="true">🧠</span><span class="lbl">Dedans</span></button>
+        <button type="button" class="pill" data-cut="2"><span class="em" aria-hidden="true">🔬</span><span class="lbl">Tout près</span></button>
+      </div>
+      <div class="cut-wrap">
+        <input type="range" id="cut" min="0" max="200" value="0" aria-label="Choisir la vue">
+      </div>
+    </div>
+
+    <!-- L'émoji double le titre : décoratif. Seule l'explication est une région live. -->
+    <div class="card info" id="info">
+      <div class="big" id="infoEmoji" aria-hidden="true">🧠</div>
+      <h2 id="infoTitle">Touche la tête&nbsp;!</h2>
+      <p id="infoText" aria-live="polite">Appuie sur ce que tu veux découvrir, ou tourne les deux gros boutons.</p>
+    </div>
+
+    <div class="card tools">
+      <div class="btnbar">
+        <button type="button" id="say" class="btn">🔊 Réécouter</button>
+        <button type="button" id="sound" class="btn ghostbtn" aria-pressed="false">🔇 Son coupé</button>
+        <button type="button" id="zones" class="btn ghostbtn">✨ Montrer les zones</button>
+        <button type="button" id="loupeBtn" class="btn ghostbtn">🔍 La loupe</button>
+        <button type="button" id="jeu1" class="btn play">🎯 Trouve la partie</button>
+        <button type="button" id="jeu2" class="btn play">💭 Rêve ou pour de vrai&nbsp;?</button>
+        <button type="button" id="histoire" class="btn play">📖 L'histoire du pouce</button>
+        <button type="button" id="journee" class="btn">🌅 Nouvelle journée</button>
+        <button type="button" id="theme" class="btn ghostbtn">🧶 Feutrine</button>
+        <button type="button" id="parents" class="btn ghostbtn">👪 Pour les parents</button>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+/* ==========================================================================
+   DANS LES RÊVES — script principal
+   Sections :
+     1. Paramètres d'URL et préférences
+     2. Thème (feutrine / riso)
+     3. Version allégée
+     4. Détection automatique de la version allégée
+     5. Curseurs : état initial et pastilles
+   ========================================================================== */
+
+/* ===== 1. Paramètres d'URL et préférences =====
+   Paramètres de test lus au chargement :
+     ?vue=0..2&temps=0..4&theme=feutrine|riso&lite=1|0&cartes=pouce,ogre,copains
+   Préférences : localStorage, valeurs en JSON, clés préfixées « reves. ».
+   Tout accès est protégé : stockage bloqué ou valeur illisible → valeur par défaut. */
+const Q = new URLSearchParams(location.search);
+
+const prefs = {
+  get(k, def){
+    try{
+      const v = localStorage.getItem('reves.' + k);
+      return v === null ? def : JSON.parse(v);
+    }catch(e){ return def; }
+  },
+  set(k, v){
+    try{ localStorage.setItem('reves.' + k, JSON.stringify(v)); }catch(e){ /* stockage indisponible : tant pis */ }
+  }
+};
+
+/* État demandé par l'URL, nombres bornés ; null = paramètre absent ou illisible.
+   `cartes` est consommé par la tâche des cartes-souvenirs. */
+function urlNombre(k, max){
+  const v = parseFloat(Q.get(k));
+  return Number.isFinite(v) ? Math.min(max, Math.max(0, v)) : null;
+}
+const URL_ETAT = {
+  vue: urlNombre('vue', 2),
+  temps: urlNombre('temps', 4),
+  cartes: Q.has('cartes') ? Q.get('cartes').split(',').map(s => s.trim()).filter(Boolean) : null
+};
+
+const root = document.documentElement;
+
+/* ===== 2. Thème (feutrine / riso) ===== */
+const THEMES = { feutrine: '🧶 Feutrine', riso: '🖨️ Riso' };
+const themeBtn = document.getElementById('theme');
+
+function setTheme(name){
+  if(!Object.hasOwn(THEMES, name)) name = 'feutrine';
+  root.dataset.theme = name;
+  prefs.set('theme', name);
+  themeBtn.textContent = THEMES[name];
+  themeBtn.setAttribute('aria-label', `Style : ${name}. Appuie pour changer de style.`);
+}
+themeBtn.addEventListener('click', () => setTheme(root.dataset.theme === 'riso' ? 'feutrine' : 'riso'));
+setTheme(Q.get('theme') || prefs.get('theme', 'feutrine'));
+
+/* ===== 3. Version allégée =====
+   data-lite="1" sur <html> : toutes les pièces passent de #wool à #woolLite.
+   setLite ne mémorise rien : un choix EXPLICITE de l'utilisateur s'enregistre
+   à part avec prefs.set('lite', true|false) (la détection automatique, elle,
+   ne doit pas se figer dans le stockage). */
+function setLite(on){
+  if(on) root.dataset.lite = '1';
+  else delete root.dataset.lite;
+}
+
+/* ===== 4. Détection automatique de la version allégée =====
+   Ordre de priorité : ?lite=1|0 dans l'URL, puis reves.lite enregistré
+   (true → allégé, false → jamais d'allègement automatique), puis détection :
+   mouvement réduit demandé, OU premier rendu complet trop lent.
+   « Premier rendu complet » : le 1er requestAnimationFrame tombe AVANT la
+   première peinture ; le 2e tombe après. On mesure performance.now() entre
+   l'exécution de ce script (fin du <body>, rien n'est encore peint) et ce 2e
+   rappel : c'est le coût de la mise en page + peinture des filtres de laine.
+   ⚠ Pas performance.now() brut (temps depuis le début de la navigation) : en
+   Chrome headless à froid, le script ne s'exécute qu'à ~140 ms alors que la
+   peinture elle-même coûte ~10 ms ; la valeur brute mesurait le démarrage du
+   navigateur et allégeait toutes les captures. Au-delà de LITE_SEUIL_MS de
+   rendu, la machine peine : on allège. */
+const LITE_SEUIL_MS = 120;
+const REDUIT = matchMedia('(prefers-reduced-motion: reduce)');
+
+(function initLite(){
+  const viaUrl = Q.get('lite');
+  if(viaUrl !== null){ setLite(viaUrl === '1'); return; }
+  const choix = prefs.get('lite', null);
+  if(choix === true){ setLite(true); return; }
+  if(choix === false) return;
+  if(REDUIT.matches){ setLite(true); return; }
+  const t0 = performance.now();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if(performance.now() - t0 > LITE_SEUIL_MS) setLite(true);
+  }));
+})();
+
+/* ===== 5. Curseurs : état initial et pastilles =====
+   Squelette : les pastilles placent les curseurs, les curseurs allument la
+   pastille la plus proche. setCut / setTime (qui animent la scène) viendront
+   s'abonner aux événements « input » de #cut et #time. */
+const cutRange = document.getElementById('cut');
+const timeRange = document.getElementById('time');
+const pills = [...document.querySelectorAll('.pill')];
+const moments = [...document.querySelectorAll('.moment')];
+
+function allumer(boutons, attr, valeur){
+  const proche = Math.round(valeur / 100);
+  boutons.forEach(b => {
+    const on = Number(b.dataset[attr]) === proche;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+}
+function brancher(range, boutons, attr){
+  range.addEventListener('input', () => allumer(boutons, attr, Number(range.value)));
+  boutons.forEach(b => b.addEventListener('click', () => {
+    range.value = Number(b.dataset[attr]) * 100;
+    range.dispatchEvent(new Event('input'));
+  }));
+}
+brancher(cutRange, pills, 'cut');
+brancher(timeRange, moments, 'time');
+
+if(URL_ETAT.vue !== null) cutRange.value = URL_ETAT.vue * 100;
+if(URL_ETAT.temps !== null) timeRange.value = URL_ETAT.temps * 100;
+allumer(pills, 'cut', Number(cutRange.value));
+allumer(moments, 'time', Number(timeRange.value));
+</script>
+</body>
+</html>

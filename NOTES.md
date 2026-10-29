@@ -244,3 +244,38 @@ réalisation en sous-agents »). Plan : `docs/superpowers/plans/2026-10-29-dans-
 - Copies locales des aînés dans `refs/aines/` (ignorées par git) pour les patterns de code.
 - Coordonnées anatomiques fixées en pixels de scène (dérivées de la recherche §2.8) pour que
   le dessinateur ne place pas l'hippocampe « au centre ».
+
+## 2026-10-29 — Task 1 : squelette
+
+`index.html` (toile, deux thèmes, paramètres d'URL), `test/shot.sh`, `shots/` ignoré.
+Découvertes et choix non évidents :
+- **Détection de la version allégée** : `performance.now()` brut au 2e `requestAnimationFrame`
+  vaut ~140 ms en Chrome headless à froid alors que la peinture coûte ~10 ms (le script ne
+  s'exécute qu'à ~135 ms : c'est le démarrage du navigateur). Avec la valeur brute, **toutes
+  les captures `theme=feutrine` sortaient en version allégée**, identiques octet pour octet à
+  `lite=1`. Mesure retenue : `performance.now()` entre l'exécution du script (fin du
+  `<body>`, rien n'est peint) et le 2e rAF (après la 1re peinture), seuil 120 ms. Si une
+  future scène chargée (40 pièces en laine) dépasse ce seuil en headless `--disable-gpu`,
+  ajouter `&lite=0` aux captures qui doivent montrer la laine complète.
+- **Polices** : la feuille Google Fonts non bloquante (`media="print"` + `onload`) faisait
+  partir la capture headless avant les polices (titre en Chalkboard). Gardée bloquante,
+  comme chez les aînés ; hors ligne, la requête échoue vite et le repli système prend le relais.
+- **Curseur vertical `#cut`** : dans `.cut-wrap` (flex, 48 px de large), l'input de 200 px
+  était rétréci par le flex avant la rotation (piste de ~110 px). `flex:none` sur `#cut`.
+- **Épingle** : une seule `#pin`, tête `fill="currentColor"` + un cercle `#glassShade`
+  (dégradé radial blanc→transparent→noir aux arrêts 0 / .25 / .85 / 1 des `#glassRed…`)
+  posé par-dessus : même modelé de verre pour n'importe quelle couleur, donnée à l'usage
+  `<use href="#pin" style="color:var(--glass-red)">`. Les trois dégradés `#glass*` restent
+  définis (recopiés de la v10).
+- **Riso** : `#scene>g` du plan devient `#scene-inner>g` (tous les groupes sont dans
+  `#scene-inner` pour la loupe) ; les `.w` sont aussi en `multiply`, sinon deux pièces
+  d'encres différentes du même groupe se cachent au lieu de se superposer. La règle riso
+  est placée APRÈS `[data-lite="1"] .w` (même poids) pour garder `#riso` en riso allégé.
+- **Toile** : `#linenGrain` (le grain du lin de la v10) est gardé à côté de `#paperGrain` :
+  c'est lui que porte le « rect grain » de `#g-toile` en feutrine. La primitive `dyeGrey` de
+  `#wool`, jamais lue, est retirée (rendu identique).
+- **`#dusk` est horizontal** (blanc jusqu'à x = 42 %, puis la nuit vers la droite) : avec
+  la seule opacité du rect `.nuit`, la moitié gauche de la scène reste en plein jour. La
+  tâche qui pilote la nuit devra soit déplacer le dégradé, soit en faire un autre.
+- **Règle `.w`** : aucune pièce ne porte d'attribut `transform` (la `transform` CSS du
+  décalage d'encre riso le remplacerait) ; écrit en commentaire à côté de la règle CSS.
