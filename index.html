@@ -725,14 +725,15 @@ symbol{overflow:visible}
 .decor{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
 [data-theme=riso]{--decor-iso:isolate}   /* riso : un décor ne se multiplie pas avec l'expo derrière lui */
 .decor-pop{transform-box:fill-box;transform-origin:50% 100%}
-.grandis{opacity:var(--grandis, 0);font-family:var(--font-display);font-weight:600;font-size:8.5px;text-anchor:middle;
-  fill:var(--fil-encre, var(--fil-brun));filter:var(--fil-filter);pointer-events:none}
+.grandis{opacity:var(--grandis, 0);font-family:var(--font-display);font-weight:600;font-size:10.5px;text-anchor:middle;letter-spacing:.3px;
+  fill:var(--fil-encre, var(--fil-brun));stroke:var(--riso-papier, var(--fil-blanc));stroke-width:2.6;stroke-linejoin:round;paint-order:stroke;
+  filter:var(--fil-filter);pointer-events:none}
 .hippo-carte .points{opacity:0;filter:var(--fil-filter)}
 .points .fil{filter:none;stroke-width:.9}   /* le filtre sur le groupe : un trait droit n'a pas de boîte pour le sien */
 .hippo-carte.range .points{opacity:1}
 .hippo-carte.range .pin-mini{opacity:0}
 #g-cortex-cartes{pointer-events:none}
-.fil-amygdale{stroke-width:2.4;--fil-encre:var(--ink, var(--c))}
+.fil-amygdale{stroke-width:3;--fil-encre:var(--ink, var(--c))}
 .fil-amygdale.c3{--c:var(--fil-rouge)} .fil-amygdale.c2{--c:var(--fil-orange)}
 .fil-amygdale.c1{--c:var(--fil-rose-doux)} .fil-amygdale.cm2{--c:var(--fil-bleu-doux)}
 /* riso : le cortex est imprimé en rose, un fil rose y disparaîtrait : peur = bleu, colère = jaune, joie = papier (réserve), apaisant = bleu léger */
@@ -1723,11 +1724,6 @@ html:not([data-pret]) *{transition:none!important}
               <g id="g-cartes-rangees"></g>
             </g>
 
-            <!-- l'étiquette brodée « je grandis », sur la bande d'os de l'arrière du crâne
-                 (opacité : --grandis, posée par setTime ; nuit profonde seulement) -->
-            <path id="chemin-grandis" d="M479 138Q477 178 470 216" fill="none"/>
-            <text id="t-grandis" class="grandis"><textPath href="#chemin-grandis" startOffset="50%">je grandis</textPath></text>
-
             <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui se repose la nuit
                  (Task 7 : opacité par le temps, ils montent doucement) -->
             <g id="g-zzz" style="--f:var(--nuit-2)">
@@ -1802,6 +1798,12 @@ html:not([data-pret]) *{transition:none!important}
               <path class="fil meches" d="M472.2 110.8c-3.1-3.9-6-7.9-9.3-11.7-3.4-3.7-7-7.1-10.5-10.7 M440.1 78.1c-4-2.9-8-5.9-12.2-8.7-4.2-2.7-8.6-5.1-12.9-7.7 M400.6 54.9c-4.8-1.6-9.4-3.4-14.2-4.8-4.8-1.4-9.7-2.4-14.6-3.7 M356.1 43.7c-5-.4-10-1-15-1.2-5-.1-10 .2-15 .3 M310.2 44.6c-4.8 1.3-9.7 2.2-14.5 3.7-4.8 1.5-9.3 3.6-14 5.5 M267.3 60.6c-4.4 2.5-8.8 4.7-13.1 7.4-4.2 2.7-8.1 5.8-12.2 8.7 M230.2 87.4c-3.4 3.7-6.9 7.3-10.1 11.1-3.2 3.9-6 8-9.1 12 M202.9 124.2c-2.1 4.6-4.3 9.1-6.2 13.7-1.8 4.6-3.3 9.4-4.9 14.1 M187.9 167.6c-.7 4.9-1.7 9.8-2.2 14.8-.6 5-.8 10-1.2 14.9 M184.7 213.3c.4 5 .7 10 1.2 15 .6 5 1.4 9.9 2.1 14.8 M189.9 259c.4 5 .4 10 1 15 .7 4.9 2 9.8 3 14.7 M198.7 303.9c1.7 4.7 2.6 9.7 4.9 14.2 2.2 4.4 5.7 8.1 8.5 12.2"/>
               <path class="fil epi" d="M350,36 C348,24 354,16 362,18 C369,20 368,29 361,29 C356,29 356,23 360,23"/>
             </g>
+
+            <!-- l'étiquette brodée « je grandis », le long du bord extérieur de la bande d'os sur le
+                 sommet du crâne, par-dessus les cheveux (opacité : --grandis, posée par setTime ;
+                 nuit profonde seulement) -->
+            <path id="chemin-grandis" d="M236 98Q335 22 440 92" fill="none"/>
+            <text id="t-grandis" class="grandis"><textPath href="#chemin-grandis" startOffset="50%">je grandis</textPath></text>
 
             <!-- le visage : joue, œil-bouton, paupière (fermée la nuit), sourcil, sourire -->
             <!-- le visage entier -->
@@ -3327,7 +3329,7 @@ function poserHippo(slug){
   svgEl('path', { class: 'w lite reserve carte-fond', style: '--p:var(--riso-papier, var(--p-carte))', d: rrD(-12, -12, 24, 26, 4) }, el);
   svgEl('use', { href: '#v-' + slug, transform: `translate(0 1) scale(${HIPPO_ECHELLE})` }, el);
   svgEl('use', { class: 'pin-mini', href: '#pin', style: `color:var(${EPINGLES[PAR_SLUG[slug].i % 3]})`, transform: 'translate(0 -10) scale(.6)' }, el);
-  /* les points de couture de la nuit profonde : six traits courts autour de la carte */
+  /* les points de couture de la nuit profonde : huit traits courts autour de la carte */
   const points = svgEl('g', { class: 'points' }, el);
   POINTS.forEach(d => svgEl('path', { class: 'fil', style: '--f:var(--fil-brun)', d }, points));
   placerHippo(el, journee.indexOf(slug));
@@ -3414,10 +3416,14 @@ function rangerCortex(){
     if(r.ligne){ r.ligne.setAttribute('x1', CORTEX[k][0]); r.ligne.setAttribute('y1', CORTEX[k][1]); }
   });
 }
+/* les cartes sont au cortex dès la phase 2, même si le curseur saute la nuit profonde
+   (de 0 à 3 ou 4) ; animé seulement quand on entre en phase 2 par le bas */
+let phaseAvant = phaseCourante ?? 0;
 document.addEventListener('temps', e => {
   const { phase } = e.detail;
-  if(phase === 2) rangerTout(!REDUIT.matches);
+  if(phase >= 2) rangerTout(!REDUIT.matches && phase === 2 && phaseAvant < 2);
   else if(phase === 0) sortirTout(!REDUIT.matches);
+  phaseAvant = phase;
 });
 
 /* --- les voyages (décoratifs : l'état est déjà posé) --- */
