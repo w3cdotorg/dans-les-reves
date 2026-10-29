@@ -365,6 +365,13 @@ latérale elles se superposent vraiment (l'amygdale est 2 cm plus en dehors). Le
 à y 234 (et non 250) pour rejoindre le thalamus ; son sommet passe sous l'hippocampe. Le
 cervelet a un petit « bras » (pédoncule) qui le rattache au tronc : séparé du cerveau, pas du
 tronc.
+**Trois écarts HORS de la tolérance de ±10 px** (ratifiés par le contrôleur au tour de
+correction 1, déclarés ici) :
+- sillon central : il finit en (380,226) et non (380,210) (16 px), pour rejoindre le sillon
+  latéral ; sinon le frontal et le pariétal ne seraient pas séparés jusqu'en bas ;
+- queue de l'hippocampe : elle monte jusqu'à (300,203) et non (300,223) (20 px), enroulée
+  vers le splénium du corps calleux (Kenhub : l'hippocampe s'étend « jusqu'au splénium ») ;
+- sommet du tronc : y 234 et non 250 (16 px), pour rejoindre le thalamus.
 
 **Astuces de dessin.**
 - Tracés générés UNE fois par un petit script Python + shapely (hors dépôt) à partir de points
@@ -412,3 +419,14 @@ paupière, sourcil).
 **Avatar** : la 2e carnation (par défaut) prend la laine chair de la palette (#f1c19c /
 #c98e66) au lieu de #f7c79c / #d9976a du corps, pour que la tête par défaut soit exactement la
 palette du plan. Pastilles de 44 px (cible au pouce), pompons de laine.
+
+## 2026-10-29 — Task 3, tour de correction 1
+
+- **Générateur versionné** : `tools/gen-tete.py`. C'est un outil de dessin, pas livré (le seul fichier livré reste index.html). Il est autonome : le gabarit SVG est dans le fichier, il réécrit `#g-dedans`, et `--sec` affiche seulement les positions et les octets. Il lui faut shapely, à installer dans un venv (mode d'emploi en tête du fichier).
+- **Tracés allégés** : tous les tracés passent en commandes relatives (`c`), avec des nombres courts (`.5`, aucun séparateur devant `-`). Chaque point absolu est arrondi au dixième AVANT le calcul de l'écart, donc l'erreur ne s'accumule pas. Les sommets à moins de 1,6 px du précédent sont retirés après `simplify`. Le joint de nombres est testé aller-retour sur 2000 tirages : « 1.2.5 » se relit bien 1.2 puis .5. **Données `d` de `#g-dedans` : 35 875 → 23 242 octets à dessin égal (−35 %)**, puis 24 799 octets (−31 %) après les ajouts de ce tour (trois coutures, sillons ondulés).
+- **Riso, le cerveau était brique** : même en voile, le rose multiplié par la tête jaune donne du rouge brique. Option retenue : le cerveau entier (cortex, lobes, cervelet) est **imprimé en réserve** (`mix-blend-mode:normal`), comme les régions profondes. Le cortex y est un rose clair (`color-mix` encre rose 45 % / papier), qu'on voit dans les sillons. C'est l'option la plus propre : elle continue la règle déjà posée pour les régions profondes (réserve = sans multiply), alors qu'imprimer la tête en papier sous le cerveau aurait percé un trou blanc dans la tête jaune et cassé la silhouette.
+- `#g-hippocampe` enveloppe la pièce, sa couture et son œil, et porte le `transform-origin` : on fera gonfler le groupe, jamais la pièce `.w` (le piège du décalage d'encre riso). `#p-bouche` reste un `.fil` : en riso, les fils n'ont pas de transform, donc rien à craindre.
+- Jetons ajoutés : `--fil-bouche` et `--lueur-pineale`. Le fil du sourire devient la 3e valeur de `SKINS` (foncé sur les peaux claires, rose clair sur la plus foncée) : CSS ne sait pas choisir une couleur selon la luminance d'une variable. Une inversion `oklch(from …)` échouait sur les peaux moyennes.
+- Pinéale agrandie (7 × 5,6) et cousue ; coutures aussi pour l'hypothalamus et l'hypophyse ; liseré clair (`.bord-bouton`, `--fil-blanc`) autour de l'œil-bouton.
+- Sillons central et pariéto-occipital ondulés : un point d'onde (±4 px, alternant de côté) entre deux ancres du plan, les ancres sont inchangées.
+- Budget inchangé : 18 `.w:not(.lite)`.
