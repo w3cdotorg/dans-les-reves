@@ -5,3 +5,4 @@
 # Copies locales des aînés (MIT), références de code : non versionnées
 refs/aines/
 shots/
+__pycache__/
