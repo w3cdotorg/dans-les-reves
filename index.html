@@ -11,15 +11,16 @@
      (section 4 du script) part de l'exécution du script, donc n'en souffre pas. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    DANS LES RÊVES — mini-explorateur du cerveau et des rêves (4-5 ans)
    Petit frère de « Dans mon corps » et « Dans le volcan » : même
-   squelette (deux curseurs croisés, carte info, barre de boutons),
-   mais un tout autre habit : de la LAINE FEUTRÉE À L'AIGUILLE sur
-   une toile de lin, et un second thème RISO sur la même géométrie.
-   Un seul fichier, aucune dépendance obligatoire.
+   mécanique (deux états croisés, la vue et le temps), mais la scène est
+   en LAINE FEUTRÉE À L'AIGUILLE sur une toile de lin, avec un second
+   thème RISO sur la même géométrie. L'habillage autour, « Plein ciel »
+   (spec §6 bis), est plat, clair et calme : la laine n'est que dans le
+   dessin. Aucun son. Un seul fichier, aucune dépendance obligatoire.
    ============================================================ */
 
 /* ===== 1. Palettes (Global Constraints du plan) ===== */
@@ -65,123 +66,190 @@
   /* encres riso */
   --ink-jaune:#ffe14a; --ink-rose:#ff4fa8; --ink-bleu:#0f6fb8; --papier:#f7f2e8;
 
-  /* interface */
-  --encre:#4a2c1a;                 /* texte : brun foncé, lisible sur crème */
-  --encre-douce:#7a4b3a;
-  --ombre:59,42,28;                /* rgb de l'ombre portée des pièces (#3b2a1c, filtre wool F) */
-  --pad:clamp(12px, 2.2vw, 26px);
-  --r-card:22px;
-  --font-display:"Fredoka","Chalkboard SE","Comic Sans MS",system-ui,sans-serif;
-  --font-ui:"Baloo 2","Chalkboard SE","Comic Sans MS",system-ui,sans-serif;
+  /* --encre : brun foncé ; les pièces riso le redéfinissent localement (règle .w[data-ink]) */
+  --encre:#4a2c1a;
 
-  /* fibres de laine pour les pièces d'interface : bruit fin en SVG inline
-     (data: URI, donc hors ligne), brun très transparent. */
-  --fibres:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6 1.2' numOctaves='2' seed='12' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .29 0 0 0 0 .17 0 0 0 0 .1 0 0 0 .22 -.02'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
-  /* grain du lin / du papier (équivalent CSS des filtres #linenGrain et #paperGrain) */
-  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* ===== habillage « Plein ciel » (spec §6 bis) =====
+     Jetons propres à l'interface, indépendants des thèmes de scène :
+     le riso ne change que le SVG. */
+  --ui-fond:#fffdf8; --ui-encre:#2b2a33; --ui-gris:#6c6a78; --ui-sable:#efeae0;
+  --ui-indigo:#3b3f8f; --ui-corail:#ff7a59; --ui-vert:#2aa876;
+  --ui-ciel:#9fc9ff;                     /* fond de l'icône du volet (maquette) */
+  /* le rail du temps : soleil → coucher → crépuscule → nuit (valeurs de
+     --p-soleil, --nuit-1 et --nuit-2, figées ici pour que le riso n'y touche pas) */
+  --ui-soleil:#f3c74a; --ui-coucher:#ffb27d; --ui-crepuscule:#8d8cae; --ui-nuit:#3f3f74;
+  --ui-ressort:cubic-bezier(.34,1.56,.64,1);   /* spec §2 « le mouvement est juteux » */
+  --ui-cible:56px;                       /* un doigt de 5 ans */
+  --ui-gouttiere:clamp(16px, 2.4vw, 24px);
+  --font-display:"Fredoka","Chalkboard SE","Comic Sans MS",system-ui,sans-serif;
+  --font-texte:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 
-/* ===== 2. Base et toile de fond ===== */
+/* ===== 2. Base : fond de page uni (spec §6 bis) =====
+   Le lin et le grain ne vivent plus que DANS la scène (le SVG). La page est
+   plate et claire ; l'habillage ne lit que les jetons --ui-*, jamais ceux des
+   thèmes de scène : le riso ne change que le dessin. */
 *{box-sizing:border-box}
 html,body{min-height:100%}
 body{
   margin:0;
-  font-family:var(--font-ui);
-  color:var(--encre);
-  /* la toile de lin : même motif que <pattern id="linen"> (pas de 7 px,
-     fil de trame horizontal #d8cbb0 de 1,4 px, fil de chaîne vertical #dccfb5),
-     la trame posée PAR-DESSUS la chaîne comme dans le SVG, puis le grain. */
-  background-color:var(--toile);
-  background-image:
-    var(--grain),
-    repeating-linear-gradient(0deg, transparent 0 2.8px, var(--toile-trame) 2.8px 4.2px, transparent 4.2px 7px),
-    repeating-linear-gradient(90deg, transparent 0 2.8px, var(--toile-chaine) 2.8px 4.2px, transparent 4.2px 7px);
+  font-family:var(--font-texte);
+  color:var(--ui-encre);
+  background:var(--ui-fond);
   overflow-x:hidden;
   -webkit-tap-highlight-color:transparent;
 }
-[data-theme=riso] body{
-  background-color:var(--papier);
-  background-image:var(--grain);
+/* une colonne : bandeau, scène, dock. Bureau : la scène tient en hauteur dans
+   la fenêtre (--hors-scene = bandeau + dock), sa largeur en est déduite au
+   ratio 900:560 (= 45/28) du viewBox ; jamais moins de 480 px de haut. */
+.app{
+  --hors-scene:206px;
+  width:100%;
+  max-width:calc(max(480px, 100svh - var(--hors-scene)) * 45 / 28 + 2 * var(--ui-gouttiere));
+  margin:0 auto;
+  padding:0 max(var(--ui-gouttiere), env(safe-area-inset-right, 0px)) 0 max(var(--ui-gouttiere), env(safe-area-inset-left, 0px));
 }
 
-/* ===== 3. En-tête ===== */
-header{
-  padding:clamp(14px,3vw,30px) var(--pad) 0;
-  text-align:center;
+/* ===== 3. Bandeau : titre · vue · réglages ===== */
+.bandeau{
+  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-areas:"titre vue reglages";
+  align-items:center;gap:12px;
+  padding:16px 0 12px;
 }
-h1{
-  font-family:var(--font-display);
-  font-weight:700;
-  font-size:clamp(2rem,6.4vw,4rem);
-  line-height:1;
-  margin:.2em 0 .1em;
-  color:var(--fil-brun);
-  /* lettres de laine posées sur la toile : liseré de fil clair + ombre portée douce */
-  text-shadow:0 2px 0 var(--fil-blanc), 0 5px 8px rgba(var(--ombre),.28);
+.titre{grid-area:titre}
+#vue{grid-area:vue}
+.titre{
+  margin:0;min-width:0;
+  font-family:var(--font-display);font-weight:700;font-size:1.5rem;line-height:1.1;
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:.1em .45em;
 }
-.tagline{
-  margin:.2em auto 0;max-width:46ch;
-  color:var(--encre-douce);font-size:clamp(.95rem,2.1vw,1.15rem);font-weight:600;
-}
-[data-theme=riso] h1{color:var(--ink-rose);text-shadow:2px 1.5px 0 var(--ink-bleu);mix-blend-mode:multiply}
-[data-theme=riso] .tagline{color:var(--ink-bleu)}
+.titre small{font-family:var(--font-texte);font-weight:600;font-size:.8rem;color:var(--ui-gris)}
+#reglages{grid-area:reglages;justify-self:end}
 
-/* ===== 4. Structure : .wrap en deux colonnes ===== */
-.wrap{
-  max-width:1240px;margin:0 auto;
-  padding:var(--pad);
-  display:grid;
-  grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);
-  gap:clamp(18px,2.6vw,32px);
-  align-items:start;
-}
-
-/* ===== 5. Cartes d'interface : pièces de feutrine à bord cousu =====
-   Le point de couture (bordure en tirets) est rentré dans la pièce : un anneau
-   de box-shadow de la couleur de la carte déborde AU-DELÀ de la bordure, donc
-   le fil sable court à quelques pixels du bord, comme une vraie couture.
-   Le bombé : reflet clair en haut à gauche, creux doux en bas à droite.
-   Pas de verre dépoli, pas de transparence : c'est de la laine. */
-.card{
+/* ===== 4. Sélecteur de vue segmenté (#vue) =====
+   Trois segments égaux ; le pouce indigo glisse sous le segment actif.
+   --c (posée par uiCut) est la vue continue 0..2 : à c = 0,5 le pouce est
+   entre Dehors et Dedans, comme la scène. */
+#vue{
+  --c:0;
   position:relative;
-  background-color:var(--p-carte);
-  background-image:
-    radial-gradient(130% 90% at 22% 8%, rgba(255,255,255,.55), transparent 55%),
-    radial-gradient(120% 90% at 85% 105%, rgba(var(--ombre),.10), transparent 60%),
-    var(--fibres);
-  border:2px dashed var(--fil-sable);
-  border-radius:var(--r-card);
-  padding:clamp(14px,2.2vw,22px);
-  margin:6px;                      /* place pour l'anneau extérieur */
-  box-shadow:
-    0 0 0 6px var(--p-carte),
-    0 12px 20px -8px rgba(var(--ombre),.42),
-    0 3px 5px rgba(var(--ombre),.18);
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  padding:5px;border-radius:999px;background:var(--ui-sable);
 }
-[data-theme=riso] .card{
-  background:var(--papier);
-  border:2px solid var(--ink-bleu);
-  box-shadow:4px 3px 0 var(--ink-rose);
-  margin:0 4px 4px 0;
+.seg-pouce{
+  position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 10px) / 3);
+  border-radius:999px;background:var(--ui-indigo);
+  box-shadow:0 4px 12px rgba(59,63,143,.35);
+  transform:translateX(calc(var(--c) * 100%));
+  transition:transform .32s var(--ui-ressort);
 }
+.seg{
+  position:relative;z-index:1;
+  min-height:var(--ui-cible);padding:0 1.1em;
+  display:flex;align-items:center;justify-content:center;gap:.4em;
+  border:0;border-radius:999px;background:none;cursor:pointer;
+  font-family:var(--font-display);font-weight:600;font-size:1.05rem;white-space:nowrap;
+  color:#5a5666;
+  transition:color .2s, transform .3s var(--ui-ressort);
+}
+.seg .ic{font-size:1.2em;line-height:1}
+.seg[aria-pressed="true"]{color:#fff}
+.seg:active{transform:translateY(2px);transition-duration:.06s}
 
-/* ===== 6. Scène (la tête, la toile) ===== */
-.scene{display:flex;flex-direction:column;gap:clamp(10px,2vw,16px)}
-/* --hauteur-svg : hauteur maximale du dessin ; la largeur en est déduite au
-   ratio 900:560 (= 45/28) du viewBox, pour éviter le letterboxing (leçon du volcan). */
-.svgbox{
-  --hauteur-svg:min(58vh,560px);
-  position:relative;
-  margin:0 auto;width:100%;
-  max-width:calc(var(--hauteur-svg) * 45 / 28);
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:inset 0 0 0 1px rgba(var(--ombre),.15);
+/* ===== 5. Boutons de l'habillage =====
+   Pilules plates ; --b = fond. Appui : le bouton s'enfonce de 2 px (l'ombre
+   portée raccourcit d'autant) en 60 ms, puis rebondit au relâcher (ressort). */
+.bouton{
+  --b:var(--ui-sable);
+  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  min-height:var(--ui-cible);padding:.7em 1.15em;
+  border:0;border-radius:999px;cursor:pointer;
+  font-family:var(--font-display);font-weight:600;font-size:1rem;line-height:1.1;
+  color:var(--ui-encre);background:var(--b);
+  box-shadow:0 6px 0 rgba(0,0,0,.14);
+  transition:transform .3s var(--ui-ressort), box-shadow .3s var(--ui-ressort), background-color .2s;
 }
+.bouton .ic{font-size:1.3em;line-height:1}
+.bouton:active{transform:translateY(2px);box-shadow:0 4px 0 rgba(0,0,0,.14);transition-duration:.06s}
+.bouton.sable{box-shadow:none}
+.bouton.sable:active{box-shadow:none}
+.bouton.corail{--b:var(--ui-corail);color:#fff}
+.bouton.indigo{--b:var(--ui-indigo);color:#fff}
+.bouton.vert{--b:var(--ui-vert);color:#fff}
+.bouton[aria-pressed="true"]{--b:var(--ui-indigo);color:#fff}
+/* le « ⋯ » : rond, il tourne d'un quart de tour quand la feuille est ouverte */
+.rond{width:var(--ui-cible);padding:0;font-size:1.6rem}
+.rond .ic{display:block;transition:transform .32s var(--ui-ressort)}
+#reglages[aria-expanded="true"] .ic{transform:rotate(90deg)}
+/* ✕ : cible de 56 px, pastille sable de 40 px dessinée au centre */
+.croix{
+  width:var(--ui-cible);height:var(--ui-cible);padding:0;border:0;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;
+  font-family:var(--font-display);font-weight:700;font-size:1.05rem;color:var(--ui-encre);
+  background:radial-gradient(circle, var(--ui-sable) 19.5px, transparent 20.5px);
+  transition:transform .3s var(--ui-ressort);
+}
+.croix:active{transform:translateY(2px) scale(.94);transition-duration:.06s}
+
+/* focus clavier : un seul anneau, seulement au clavier */
+:is(.seg,.bouton,.croix,.dot,summary):focus-visible{outline:3px solid var(--ui-indigo);outline-offset:3px}
+.seg:focus-visible{outline-offset:-2px}
+
+/* ===== 6. Scène : le cadre arrondi, le rail du temps ===== */
+.scene{position:relative}
+.cadre{position:relative;border-radius:24px;overflow:hidden}
 /* isolation : les multiply de la scène (toile, nuit, encres riso) restent DANS
-   le SVG ; sans elle, en riso, la toile se multipliait avec le fond de la carte
-   (papier × papier → beige). */
-svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);margin:0 auto;isolation:isolate}
+   le SVG et ne se mêlent pas au fond de la page. */
+svg#scene{display:block;width:100%;height:auto;isolation:isolate}
+
+/* Le rail : glissière de 52 px collée au bord droit de la scène (maquette,
+   right:-6px), dégradé soleil → coucher → nuit. Le vrai contrôle est
+   l'<input type=range id=time> posé dessus (piste transparente, pouce
+   transparent de 64 px) : clavier et lecteurs d'écran le voient. #railBtn,
+   le bouton blanc à icône, n'est qu'un dessin qui suit --k (= t/4, posée par
+   uiTime) : sa course est celle du pouce, la longueur du rail moins 64 px. */
+.rail{
+  --k:0;--bord:26px;
+  position:absolute;right:-6px;top:10%;bottom:10%;z-index:3;width:52px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:6px 0;border-radius:999px;
+  background:linear-gradient(180deg, var(--ui-soleil), var(--ui-coucher) 35%, var(--ui-crepuscule) 70%, var(--ui-nuit));
+  box-shadow:inset 0 0 0 4px #fff, 0 8px 20px rgba(0,0,0,.18);
+}
+.rail .lab{
+  font-family:var(--font-display);font-weight:600;font-size:.75rem;line-height:1;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.4);pointer-events:none;
+}
+/* cinq crans : un point par moment, aux positions exactes du pouce */
+.crans{
+  position:absolute;left:50%;top:calc(var(--bord) + 32px);bottom:calc(var(--bord) + 32px);
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+  transform:translate(-50%,-4px);pointer-events:none;
+}
+.crans i{display:block;width:8px;height:8px;margin:-4px 0;border-radius:50%;background:rgba(255,255,255,.75)}
+#time{
+  -webkit-appearance:none;appearance:none;
+  position:absolute;left:50%;top:var(--bord);bottom:var(--bord);
+  width:64px;height:auto;margin:0 0 0 -32px;
+  writing-mode:vertical-lr;            /* bas = la nuit ; min en haut */
+  background:transparent;cursor:grab;touch-action:none;
+}
+#time:active{cursor:grabbing}
+#time:focus{outline:none}
+#time::-webkit-slider-runnable-track{background:transparent;border:0}
+#time::-moz-range-track{background:transparent;border:0}
+#time::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:64px;height:64px;border:0;border-radius:50%;background:transparent}
+#time::-moz-range-thumb{width:64px;height:64px;border:0;border-radius:50%;background:transparent}
+.knob{
+  position:absolute;left:50%;top:calc(var(--bord) + var(--k) * (100% - 2 * var(--bord) - 64px));
+  width:64px;height:64px;margin-left:-32px;border-radius:50%;
+  display:grid;place-items:center;font-size:1.8rem;line-height:1;
+  background:#fff;box-shadow:0 8px 18px rgba(0,0,0,.22);
+  pointer-events:none;
+  transition:transform .3s var(--ui-ressort), box-shadow .3s;
+}
+.rail.tire .knob{transform:scale(1.1);box-shadow:0 12px 24px rgba(0,0,0,.26);transition-duration:.08s}
+#time:focus-visible ~ .knob{outline:3px solid var(--ui-indigo);outline-offset:3px}
 
 /* ===== 7. Pièces de laine et fils (règle de thème) =====
    Une pièce = un élément .w qui déclare sa laine et son encre :
@@ -330,166 +398,161 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
 [data-theme=riso] .toile-lin{fill:var(--papier)}
 [data-theme=riso] .toile-grain{filter:url(#paperGrain)}
 
-/* ===== 7 ter. Avatar : garçon / fille, peau, cheveux (au-dessus de la scène) =====
-   Mêmes boutons de laine que la page (.btn) ; les pastilles sont des pompons
-   de laine de 44 px (cible au pouce), la couleur occupant le centre. */
-.who{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 14px}
-.who .genres{display:flex;flex-wrap:wrap;justify-content:center}
-.who .btn .em{font-size:1.35em;line-height:1}
-.who .btn[aria-pressed="true"]{--b:var(--p-thalamus);color:var(--encre)}
-[data-theme=riso] .who .btn[aria-pressed="true"]{--b:var(--ink-jaune);color:var(--ink-bleu)}
-.dots{display:flex;flex-wrap:wrap;justify-content:center;gap:2px}
+/* ===== 7 ter. Avatar : garçon / fille, peau, cheveux (dans la feuille de réglages) =====
+   Les pastilles sont des ronds plats de 56 px ; la choisie porte un anneau
+   blanc puis indigo. */
+.who{display:flex;flex-direction:column;gap:14px}
+.who .genres{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dots{display:flex;flex-wrap:wrap;gap:8px}
 .dot{
   --c:#ccc;
-  width:44px;height:44px;padding:5px;border-radius:50%;cursor:pointer;
-  border:2px dashed transparent;
-  background:
-    radial-gradient(circle at 34% 30%, rgba(255,255,255,.5), transparent 52%) content-box,
-    radial-gradient(circle at 70% 78%, rgba(var(--ombre),.28), transparent 60%) content-box,
-    var(--fibres) content-box,
-    var(--c) content-box;
-  filter:drop-shadow(0 3px 2px rgba(var(--ombre),.35));
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s;
+  width:var(--ui-cible);height:var(--ui-cible);padding:0;border:0;border-radius:50%;cursor:pointer;
+  background:var(--c);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+  transition:transform .3s var(--ui-ressort), box-shadow .2s;
 }
-.dot:hover{transform:scale(1.1)}
-.dot:active{transform:scale(.92)}
-.dot[aria-pressed="true"]{border-color:var(--fil-brun);transform:scale(1.08)}
-.dot:focus-visible{outline:3px solid var(--fil-brun);outline-offset:2px}
-[data-theme=riso] .dot{background:var(--c) content-box;filter:none;mix-blend-mode:multiply}
-[data-theme=riso] .dot[aria-pressed="true"]{border:2px solid var(--ink-bleu)}
+.dot:active{transform:translateY(2px) scale(.94);transition-duration:.06s}
+.dot[aria-pressed="true"]{box-shadow:0 0 0 3px #fff, 0 0 0 6px var(--ui-indigo)}
 
-/* ===== 8. Curseur du temps et ses cinq moments ===== */
-.time-control{display:flex;flex-direction:column;gap:10px}
-#time{width:100%;height:48px}    /* la zone sensible d'un range EST sa boîte : 48 px au pouce */
-.moments{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+/* ===== 8. Volet d'information (#info) =====
+   Il monte par-dessus le bas de la scène ; caché tant qu'il n'a pas la classe
+   « open ». Entrée à ressort (320 ms), sortie rapide (140 ms). Bureau : il
+   s'arrête avant le rail (52 px − 6 px de débord + marge). */
+.volet{
+  position:absolute;left:18px;right:70px;bottom:18px;z-index:2;
+  max-height:calc(100% - 36px);overflow:auto;
+  padding:16px 64px 16px 80px;
+  border-radius:20px;
+  background:rgba(255,255,255,.92);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  color:var(--ui-encre);
+  transform:translateY(calc(100% + 24px));opacity:0;visibility:hidden;
+  transition:transform .14s ease-in, opacity .14s ease-in, visibility 0s .14s;
+}
+.volet.open{
+  transform:none;opacity:1;visibility:visible;
+  transition:transform .32s var(--ui-ressort), opacity .16s ease-out, visibility 0s;
+}
+.volet-ic{
+  position:absolute;left:18px;top:16px;width:48px;height:48px;border-radius:14px;
+  display:grid;place-items:center;font-size:1.6rem;line-height:1;
+  background:var(--ui-ciel);
+}
+.volet h2{margin:0 0 .2em;font-family:var(--font-display);font-weight:600;font-size:1.35rem;line-height:1.15}
+.volet p{margin:0;max-width:62ch;font-size:1.1rem;line-height:1.45;font-weight:500}
+.volet .croix{position:absolute;right:6px;top:4px}
 
-/* ===== 9. Boutons de laine : .moment, .pill, .btn =====
-   Petites pièces de feutrine bombées : reflet en haut à gauche, point de
-   couture rentré (même astuce d'anneau que .card), ombre portée courte.
-   --b = couleur de la laine du bouton. */
-.moment,.pill,.btn{
-  --b:var(--p-carte);
-  cursor:pointer;
-  font-family:var(--font-display);font-weight:600;
-  color:var(--encre);
-  background-color:var(--b);
-  background-image:
-    radial-gradient(120% 140% at 28% 12%, rgba(255,255,255,.6), transparent 50%),
-    radial-gradient(110% 120% at 75% 110%, rgba(var(--ombre),.16), transparent 60%),
-    var(--fibres);
-  border:1.5px dashed var(--fil-sable);
-  box-shadow:0 0 0 4px var(--b), 0 6px 10px -4px rgba(var(--ombre),.45);
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+/* ===== 9. Dock : trois gros boutons d'activité, trois outils sable ===== */
+.dock{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;
+  padding:18px 0 22px;
 }
-.moment{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15em;
-  padding:.5em .15em .45em;border-radius:18px;
-  min-height:58px;margin:4px;
-  font-size:clamp(.62rem,1.4vw,.84rem);line-height:1.05;text-align:center;
-}
-.moment .em{font-size:clamp(1.2rem,3vw,1.6rem);line-height:1}
-.pill{
-  display:flex;align-items:center;gap:.55em;
-  padding:.45em .9em;border-radius:999px;
-  min-height:46px;margin:4px;
-  font-size:clamp(.85rem,1.7vw,1rem);
-}
-.pill .em{font-size:1.3em;line-height:1}
-.btn{
-  display:inline-flex;align-items:center;gap:.4em;
-  padding:.5em 1.05em;border-radius:999px;
-  min-height:46px;margin:4px;
-  font-size:clamp(.85rem,1.8vw,1rem);
-}
-.moment:hover,.btn:hover{transform:translateY(-2px)}
-.pill:hover{transform:translateX(3px)}
-.moment:active,.pill:active,.btn:active{transform:translateY(1px) scale(.97);box-shadow:0 0 0 4px var(--b), 0 2px 4px -2px rgba(var(--ombre),.5)}
-/* couleurs de laine : jeux en rose cerveau, outils en crème, état actif en bleu thalamus */
-.btn.play{--b:var(--p-cerveau)}
-.btn.ghostbtn{--b:#f3e9d4}
-.moment.active,.pill.active{--b:var(--p-thalamus)}
-.btn[aria-pressed="false"]{color:var(--encre-douce)}
+.dock-jeux,.dock-outils{display:flex;flex-wrap:wrap;gap:12px}
+.dock-outils{gap:8px}
+.dock-jeux .bouton{font-size:1.08rem;padding:.85em 1.25em}
+.dock-outils .bouton{font-size:.95rem;padding:.6em 1em}
 
-/* riso : aplats d'encre jaune, trait bleu, pas de bombé */
-[data-theme=riso] .moment,[data-theme=riso] .pill,[data-theme=riso] .btn{
-  --b:var(--papier);
-  background-image:none;
-  border:2px solid var(--ink-bleu);
-  box-shadow:2px 2px 0 var(--ink-rose);
-  color:var(--ink-bleu);
+/* ===== 10. Feuille de réglages (dialog#feuille) =====
+   Bureau : une feuille posée à droite ; téléphone : elle monte du bas. */
+.feuille{
+  position:fixed;top:16px;right:16px;bottom:auto;left:auto;margin:0;
+  width:min(440px, calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;
+  padding:14px 22px 24px;border:0;border-radius:24px;
+  background:#fff;color:var(--ui-encre);
+  box-shadow:0 20px 50px rgba(30,20,60,.25);
 }
-[data-theme=riso] .btn.play{--b:var(--ink-jaune)}
-[data-theme=riso] .moment.active,[data-theme=riso] .pill.active{--b:var(--ink-jaune)}
-
-/* focus clavier : un seul anneau, seulement au clavier (:focus-visible) */
-.btn:focus-visible,.pill:focus-visible,.moment:focus-visible{
-  outline:3px solid var(--fil-brun);
-  outline-offset:6px;
+.feuille[open]{animation:feuille-entre .32s var(--ui-ressort)}
+.feuille.sort{animation:feuille-sort .14s ease-in forwards}
+.feuille::backdrop{background:rgba(43,42,51,.32)}
+@keyframes feuille-entre{from{transform:translateX(48px);opacity:0}}
+@keyframes feuille-sort{to{transform:translateX(48px);opacity:0}}
+.feuille-tete{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 -10px 4px 0}
+.feuille h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:1.4rem}
+.reglage{padding:14px 0;border-top:1px solid var(--ui-sable)}
+.reglage h3{margin:0 0 10px;font-family:var(--font-display);font-weight:600;font-size:1.05rem;color:var(--ui-gris)}
+.reglage .interrupteur{margin-top:10px}
+.reglage .aide{margin:6px 0 0;font-size:.9rem;line-height:1.4;color:var(--ui-gris)}
+/* interrupteur : la case est un vrai checkbox, dessiné en pilule */
+.interrupteur{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--ui-cible);cursor:pointer;
+  font-family:var(--font-display);font-weight:600;font-size:1rem;
+}
+.interrupteur input{
+  -webkit-appearance:none;appearance:none;flex:none;margin:0;cursor:pointer;
+  position:relative;width:64px;height:36px;border-radius:999px;background:var(--ui-sable);
+  transition:background-color .2s;
+}
+.interrupteur input::after{
+  content:"";position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;
+  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);
+  transition:transform .3s var(--ui-ressort);
+}
+.interrupteur input:checked{background:var(--ui-vert)}
+.interrupteur input:checked::after{transform:translateX(28px)}
+.interrupteur input:focus-visible{outline:3px solid var(--ui-indigo);outline-offset:3px}
+/* « Pour les parents » : repliée en bas, remplie par Task 17 */
+.parents{border-top:1px solid var(--ui-sable);padding-top:6px}
+.parents summary{
+  min-height:var(--ui-cible);display:flex;align-items:center;gap:.5em;cursor:pointer;border-radius:12px;
+  font-family:var(--font-display);font-weight:600;font-size:1rem;
 }
 
-/* ===== 10. Curseurs à gros pouce =====
-   Piste = bande de feutrine cousue ; pouce = pompon de laine de 42 px. */
-input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;margin:0}
-input[type=range]::-webkit-slider-runnable-track{
-  height:22px;border-radius:999px;
-  background:var(--piste);
-  border:1.5px dashed rgba(255,255,255,.75);
-  box-shadow:0 0 0 3px var(--fil-sable), inset 0 3px 5px rgba(var(--ombre),.25);
-}
-input[type=range]::-moz-range-track{
-  height:22px;border-radius:999px;
-  background:var(--piste);
-  border:1.5px dashed rgba(255,255,255,.75);
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;appearance:none;
-  width:42px;height:42px;margin-top:-11.5px;border-radius:50%;
-  background:radial-gradient(circle at 34% 30%, #fff, var(--p-carte) 45%, var(--fil-sable) 100%);
-  border:2px dashed var(--fil-brun);
-  box-shadow:0 0 0 3px var(--p-carte), 0 7px 12px -3px rgba(var(--ombre),.55);
-  transition:transform .15s;
-}
-input[type=range]::-moz-range-thumb{
-  width:42px;height:42px;border-radius:50%;
-  background:radial-gradient(circle at 34% 30%, #fff, var(--p-carte) 45%, var(--fil-sable) 100%);
-  border:2px dashed var(--fil-brun);
-  box-shadow:0 0 0 3px var(--p-carte), 0 7px 12px -3px rgba(var(--ombre),.55);
-}
-input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
-input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset:6px;border-radius:999px}
-/* temps : jour → soir → nuit profonde → nuit des rêves → matin */
-#time{--piste:linear-gradient(90deg, var(--p-soleil), #ee9a62 25%, var(--nuit-2) 50%, var(--nuit-3) 75%, #f6d98a)}
-/* vue : dehors (peau) → dedans (cerveau) → tout près (thalamus) */
-#cut{--piste:linear-gradient(90deg, var(--p-peau), var(--p-cerveau) 50%, var(--p-thalamus))}
-[data-theme=riso] input[type=range]::-webkit-slider-runnable-track{border:2px solid var(--ink-bleu);box-shadow:none}
-[data-theme=riso] input[type=range]::-webkit-slider-thumb{background:var(--ink-jaune);border:2px solid var(--ink-bleu);box-shadow:2px 2px 0 var(--ink-rose)}
-[data-theme=riso] input[type=range]::-moz-range-thumb{background:var(--ink-jaune);border:2px solid var(--ink-bleu);box-shadow:2px 2px 0 var(--ink-rose)}
+/* ===== 12. Téléphone (< 900 px) =====
+   Bandeau sur deux lignes, rail horizontal SOUS la scène (même dégradé, même
+   bouton), dock sur deux lignes, gouttière de 16 px, jamais de défilement
+   horizontal. */
+@media (max-width:899.98px){
+  .app{max-width:none}
+  .bandeau{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"titre reglages" "vue vue";padding:12px 0 10px}
+  .titre{font-size:1.3rem}
+  .seg{padding:0 .3em;font-size:.95rem;gap:.3em}
 
-/* ===== 11. Panneau : vues, carte info, barre de boutons ===== */
-.panel{display:flex;flex-direction:column;gap:clamp(14px,2vw,20px)}
-.cuts{display:flex;align-items:center;gap:16px}
-.pills{display:flex;flex-direction:column;gap:4px;flex:1}
-.cut-wrap{width:48px;height:200px;margin:4px auto 0;display:flex;align-items:center;justify-content:center}
-#cut{flex:none;width:200px;height:48px;transform:rotate(90deg)}   /* une fois tourné, 48 px = largeur de la cible */
+  .rail{
+    position:relative;right:auto;top:auto;bottom:auto;
+    width:auto;height:52px;margin:14px 0 4px;
+    --bord:44px;
+    flex-direction:row;padding:0 10px;
+    background:linear-gradient(90deg, var(--ui-soleil), var(--ui-coucher) 35%, var(--ui-crepuscule) 70%, var(--ui-nuit));
+  }
+  .crans{
+    left:calc(var(--bord) + 32px);right:calc(var(--bord) + 32px);top:50%;bottom:auto;
+    flex-direction:row;transform:translateY(-50%);
+  }
+  .crans i{margin:0 -4px}
+  #time{
+    writing-mode:horizontal-tb;
+    left:var(--bord);right:var(--bord);top:50%;bottom:auto;
+    width:auto;height:64px;margin:-32px 0 0;
+  }
+  .knob{
+    left:calc(var(--bord) + var(--k) * (100% - 2 * var(--bord) - 64px));top:50%;
+    margin:-32px 0 0;
+  }
 
-.info{min-height:170px;display:flex;flex-direction:column}
-.info .big{font-size:clamp(2.4rem,6.4vw,3.2rem);line-height:1}
-.info h2{
-  font-family:var(--font-display);font-weight:700;
-  font-size:clamp(1.3rem,3.6vw,1.85rem);line-height:1.05;margin:.28em 0 .12em;
-  color:var(--fil-brun);
+  .volet{left:8px;right:8px;bottom:8px;max-height:calc(100% - 16px);padding:10px 52px 12px 62px;border-radius:16px}
+  .volet-ic{left:10px;top:10px;width:42px;height:42px;font-size:1.35rem}
+  .volet h2{font-size:1.1rem}
+  .volet p{font-size:1rem;line-height:1.38}
+  .volet .croix{right:0;top:0}
+
+  .dock{flex-direction:column;align-items:stretch;padding:14px 0 18px}
+  .dock-jeux,.dock-outils{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dock .bouton{flex-direction:column;gap:.3em;text-align:center;white-space:normal;padding:.6em .4em}
+  .dock-jeux .bouton{min-height:88px;border-radius:22px;font-size:.95rem}
+  .dock-outils .bouton{min-height:var(--ui-cible);border-radius:18px;font-size:.85rem}
+
+  .feuille{
+    top:auto;right:0;bottom:0;left:0;width:100%;max-width:none;max-height:88dvh;
+    border-radius:24px 24px 0 0;padding:10px 16px max(20px, env(safe-area-inset-bottom, 0px));
+  }
+  @keyframes feuille-entre{from{transform:translateY(60px);opacity:0}}
+  @keyframes feuille-sort{to{transform:translateY(60px);opacity:0}}
 }
-.info p{margin:.4em 0 0;font-size:clamp(.98rem,2vw,1.08rem);line-height:1.5;font-weight:500}
-[data-theme=riso] .info h2{color:var(--ink-rose)}
-[data-theme=riso] .info p{color:var(--ink-bleu)}
 
-.tools .btnbar{display:flex;flex-wrap:wrap;gap:6px}
-
-/* ===== 12. Petits écrans : une seule colonne ===== */
-@media (max-width:900px){
-  .wrap{grid-template-columns:1fr}
-  .svgbox{--hauteur-svg:52vh}
-}
+/* Avant le premier rendu, rien ne glisse : l'état initial (vue, moment) est
+   posé sans transition ; data-pret arrive deux images plus tard (section 7). */
+html:not([data-pret]) *{transition:none!important}
 
 /* ===== 13. Mouvement réduit : tout est coupé =====
    (la version allégée est en plus activée par le script, section 4) */
@@ -500,24 +563,25 @@ input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset
 </head>
 <body>
 
-<header>
-  <h1>Dans les rêves <span aria-hidden="true">🌙</span></h1>
-  <p class="tagline">Mets ta journée dans ta tête, et regarde ce que ton cerveau en fait la nuit&nbsp;!</p>
-</header>
+<div class="app">
 
-<div class="wrap">
+  <!-- ======================= BANDEAU ======================= -->
+  <header class="bandeau">
+    <h1 class="titre"><span><span aria-hidden="true">🌙</span> Dans les rêves</span> <small>Mets ta journée dans ta tête</small></h1>
+    <!-- #cut reste l'état de la vue (0..200 = vue × 100) ; les segments le règlent. -->
+    <div id="vue" role="group" aria-label="Choisir la vue">
+      <span class="seg-pouce" aria-hidden="true"></span>
+      <button type="button" class="seg" data-cut="0" aria-pressed="true"><span class="ic" aria-hidden="true">🏞️</span>Dehors</button>
+      <button type="button" class="seg" data-cut="1" aria-pressed="false"><span class="ic" aria-hidden="true">🧠</span>Dedans</button>
+      <button type="button" class="seg" data-cut="2" aria-pressed="false"><span class="ic" aria-hidden="true">🔬</span>Tout près</button>
+    </div>
+    <input type="range" id="cut" min="0" max="200" value="0" hidden>
+    <button type="button" id="reglages" class="bouton sable rond" aria-haspopup="dialog" aria-expanded="false" aria-controls="feuille" aria-label="Réglages"><span class="ic" aria-hidden="true">⋯</span></button>
+  </header>
 
   <!-- ======================= SCÈNE ======================= -->
-  <main class="scene card" aria-label="La tête et les rêves">
-    <div class="who" role="group" aria-label="Choisir ton personnage">
-      <div class="genres">
-        <button type="button" class="btn" data-genre="garcon" aria-pressed="true"><span class="em" aria-hidden="true">👦</span> Un garçon</button>
-        <button type="button" class="btn" data-genre="fille" aria-pressed="false"><span class="em" aria-hidden="true">👧</span> Une fille</button>
-      </div>
-      <div class="dots" id="skins" role="group" aria-label="Choisir la couleur de la peau"></div>
-      <div class="dots" id="hairs" role="group" aria-label="Choisir la couleur des cheveux"></div>
-    </div>
-    <div class="svgbox">
+  <main class="scene" aria-label="La tête et les rêves">
+    <div class="cadre">
       <svg id="scene" viewBox="0 0 900 560" role="group" aria-label="La tête d'un enfant, son cerveau et ses rêves">
         <defs>
           <!-- ===== Laine feutrée à l'aiguille (maquette v10, NOTES.md « v6 → v7 » et « v8 ») =====
@@ -940,59 +1004,72 @@ input[type=range]:focus-visible{outline:3px solid var(--fil-brun);outline-offset
           <g id="g-ui"></g>
         </g>
       </svg>
+
+      <!-- Volet d'information : caché tant qu'il n'a pas la classe « open ».
+           L'émoji double le titre : décoratif. Seule l'explication est une région live. -->
+      <section class="volet" id="info" aria-labelledby="infoTitle">
+        <div class="volet-ic" id="infoEmoji" aria-hidden="true">🧠</div>
+        <h2 id="infoTitle">Touche la tête&nbsp;!</h2>
+        <p id="infoText" aria-live="polite">Appuie sur ce que tu veux découvrir, puis fais glisser le soleil vers la nuit.</p>
+        <button type="button" id="infoClose" class="croix" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
+      </section>
     </div>
 
-    <div class="time-control">
-      <input type="range" id="time" min="0" max="400" value="0" aria-label="Faire passer la journée et la nuit">
-      <div class="moments" role="group" aria-label="Les moments de la journée et de la nuit">
-        <button type="button" class="moment" data-time="0"><span class="em" aria-hidden="true">☀️</span><span class="lbl">La journée</span></button>
-        <button type="button" class="moment" data-time="1"><span class="em" aria-hidden="true">🌇</span><span class="lbl">Le soir</span></button>
-        <button type="button" class="moment" data-time="2"><span class="em" aria-hidden="true">💤</span><span class="lbl">La nuit profonde</span></button>
-        <button type="button" class="moment" data-time="3"><span class="em" aria-hidden="true">🌙</span><span class="lbl">La nuit des rêves</span></button>
-        <button type="button" class="moment" data-time="4"><span class="em" aria-hidden="true">🐓</span><span class="lbl">Le matin</span></button>
-      </div>
+    <!-- Rail du temps : #time est le vrai curseur (0..400 = moment × 100),
+         #railBtn le bouton blanc qui le suit (uiTime). -->
+    <div id="rail" class="rail">
+      <span class="lab" aria-hidden="true">jour</span>
+      <span class="crans" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <input type="range" id="time" min="0" max="400" value="0" aria-label="Faire passer la journée et la nuit" aria-valuetext="La journée">
+      <span id="railBtn" class="knob" aria-hidden="true">☀️</span>
+      <span class="lab" aria-hidden="true">nuit</span>
     </div>
   </main>
 
-  <!-- ======================= PANNEAU ======================= -->
-  <aside class="panel">
-
-    <div class="card cuts">
-      <div class="pills" role="group" aria-label="Choisir la vue">
-        <button type="button" class="pill" data-cut="0"><span class="em" aria-hidden="true">🏞️</span><span class="lbl">Dehors</span></button>
-        <button type="button" class="pill" data-cut="1"><span class="em" aria-hidden="true">🧠</span><span class="lbl">Dedans</span></button>
-        <button type="button" class="pill" data-cut="2"><span class="em" aria-hidden="true">🔬</span><span class="lbl">Tout près</span></button>
-      </div>
-      <div class="cut-wrap">
-        <input type="range" id="cut" min="0" max="200" value="0" aria-label="Choisir la vue">
-      </div>
+  <!-- ======================= DOCK ======================= -->
+  <nav class="dock" aria-label="Jeux et outils">
+    <div class="dock-jeux">
+      <button type="button" id="jeu1" class="bouton corail"><span class="ic" aria-hidden="true">🎯</span>Trouve la partie</button>
+      <button type="button" id="jeu2" class="bouton indigo"><span class="ic" aria-hidden="true">💭</span>Rêve ou pour de vrai&nbsp;?</button>
+      <button type="button" id="histoire" class="bouton vert"><span class="ic" aria-hidden="true">📖</span>L'histoire du pouce</button>
     </div>
-
-    <!-- L'émoji double le titre : décoratif. Seule l'explication est une région live. -->
-    <div class="card info" id="info">
-      <div class="big" id="infoEmoji" aria-hidden="true">🧠</div>
-      <h2 id="infoTitle">Touche la tête&nbsp;!</h2>
-      <p id="infoText" aria-live="polite">Appuie sur ce que tu veux découvrir, ou tourne les deux gros boutons.</p>
+    <div class="dock-outils">
+      <button type="button" id="zones" class="bouton sable"><span class="ic" aria-hidden="true">✨</span>Montrer les zones</button>
+      <button type="button" id="loupeBtn" class="bouton sable"><span class="ic" aria-hidden="true">🔍</span>La loupe</button>
+      <button type="button" id="journee" class="bouton sable"><span class="ic" aria-hidden="true">🌅</span>Nouvelle journée</button>
     </div>
-
-    <div class="card tools">
-      <div class="btnbar">
-        <button type="button" id="say" class="btn">🔊 Réécouter</button>
-        <button type="button" id="sound" class="btn ghostbtn" aria-pressed="false">🔇 Son coupé</button>
-        <button type="button" id="zones" class="btn ghostbtn">✨ Montrer les zones</button>
-        <button type="button" id="loupeBtn" class="btn ghostbtn">🔍 La loupe</button>
-        <button type="button" id="jeu1" class="btn play">🎯 Trouve la partie</button>
-        <button type="button" id="jeu2" class="btn play">💭 Rêve ou pour de vrai&nbsp;?</button>
-        <button type="button" id="histoire" class="btn play">📖 L'histoire du pouce</button>
-        <button type="button" id="journee" class="btn">🌅 Nouvelle journée</button>
-        <button type="button" id="theme" class="btn ghostbtn">🧶 Feutrine</button>
-        <button type="button" id="parents" class="btn ghostbtn">👪 Pour les parents</button>
-      </div>
-    </div>
-
-  </aside>
+  </nav>
 
 </div>
+
+<!-- ======================= FEUILLE DE RÉGLAGES ======================= -->
+<dialog id="feuille" class="feuille" aria-labelledby="feuilleTitre">
+  <div class="feuille-tete">
+    <h2 id="feuilleTitre">Réglages</h2>
+    <button type="button" id="feuilleClose" class="croix" aria-label="Fermer les réglages"><span aria-hidden="true">✕</span></button>
+  </div>
+  <section class="reglage">
+    <h3>Ton personnage</h3>
+    <div class="who" role="group" aria-label="Choisir ton personnage">
+      <div class="genres">
+        <button type="button" class="bouton sable" data-genre="garcon" aria-pressed="true"><span class="ic" aria-hidden="true">👦</span>Un garçon</button>
+        <button type="button" class="bouton sable" data-genre="fille" aria-pressed="false"><span class="ic" aria-hidden="true">👧</span>Une fille</button>
+      </div>
+      <div class="dots" id="skins" role="group" aria-label="Choisir la couleur de la peau"></div>
+      <div class="dots" id="hairs" role="group" aria-label="Choisir la couleur des cheveux"></div>
+    </div>
+  </section>
+  <section class="reglage">
+    <h3>Le dessin</h3>
+    <button type="button" id="theme" class="bouton sable">🧶 Feutrine</button>
+    <label class="interrupteur"><span>🪶 Version allégée</span><input type="checkbox" id="lite"></label>
+    <p class="aide">Moins de laine à dessiner : pour les tablettes et téléphones qui peinent.</p>
+  </section>
+  <!-- La carte « Pour les parents » (spec §8), repliée : Task 17 la remplit. -->
+  <details id="parents" class="parents">
+    <summary><span aria-hidden="true">👪</span> Pour les parents</summary>
+  </details>
+</dialog>
 
 <script>
 /* PURE-BEGIN */
@@ -1331,13 +1408,16 @@ const PHRASES = {
      2. Thème (feutrine / riso)
      3. Version allégée
      4. Détection automatique de la version allégée
-     5. Curseurs : état initial et pastilles
+     5. Vue et temps : l'habillage suit les deux états (uiCut, uiTime)
      6. Avatar : garçon / fille, peau, cheveux
+     7. Volet d'information, feuille de réglages, clavier
    ========================================================================== */
 
 /* ===== 1. Paramètres d'URL et préférences =====
    Paramètres de test lus au chargement :
      ?vue=0..2&temps=0..4&theme=feutrine|riso&lite=1|0&cartes=pouce,ogre,copains
+     ?info=1      ouvre le volet d'information (captures d'écran)
+     ?reglages=1  ouvre la feuille de réglages (captures d'écran)
    Préférences : localStorage, valeurs en JSON, clés préfixées « reves. ».
    Tout accès est protégé : stockage bloqué ou valeur illisible → valeur par défaut. */
 const Q = new URLSearchParams(location.search);
@@ -1363,7 +1443,8 @@ function urlNombre(k, max){
 const URL_ETAT = {
   vue: urlNombre('vue', 2),
   temps: urlNombre('temps', 4),
-  cartes: Q.has('cartes') ? Q.get('cartes').split(',').map(s => s.trim()).filter(Boolean) : null
+  cartes: Q.has('cartes') ? Q.get('cartes').split(',').map(s => s.trim()).filter(Boolean) : null,
+  info: Q.get('info') === '1'
 };
 
 const root = document.documentElement;
@@ -1386,11 +1467,18 @@ setTheme(Q.get('theme') || prefs.get('theme', 'feutrine'));
    data-lite="1" sur <html> : toutes les pièces passent de #wool à #woolLite.
    setLite ne mémorise rien : un choix EXPLICITE de l'utilisateur s'enregistre
    à part avec prefs.set('lite', true|false) (la détection automatique, elle,
-   ne doit pas se figer dans le stockage). */
+   ne doit pas se figer dans le stockage). La case #lite de la feuille de
+   réglages suit l'état ; la cocher est un choix explicite (mémorisé). */
+const liteBox = document.getElementById('lite');
 function setLite(on){
   if(on) root.dataset.lite = '1';
   else delete root.dataset.lite;
+  liteBox.checked = !!on;
 }
+liteBox.addEventListener('change', () => {
+  setLite(liteBox.checked);
+  prefs.set('lite', liteBox.checked);
+});
 
 /* ===== 4. Détection automatique de la version allégée =====
    Ordre de priorité : ?lite=1|0 dans l'URL, puis reves.lite enregistré
@@ -1439,37 +1527,96 @@ function mesurerRendu(){
   }));
 }
 
-/* ===== 5. Curseurs : état initial et pastilles =====
-   Squelette : les pastilles placent les curseurs, les curseurs allument la
-   pastille la plus proche. setCut / setTime (qui animent la scène) viendront
-   s'abonner aux événements « input » de #cut et #time. */
+/* ===== 5. Vue et temps : l'habillage suit les deux états =====
+   #cut (0..200 = vue × 100) et #time (0..400 = moment × 100) restent les
+   états. setCut / setTime (Tasks 6–7, qui animent la scène) s'abonneront à
+   leurs événements « input » et appelleront aussi uiCut / uiTime, qui ne
+   touchent qu'à l'habillage (pas aux valeurs des curseurs, pas à la scène) :
+     uiCut(c)  c ∈ [0,2] : segment actif (aria-pressed), pouce indigo à c ;
+     uiTime(t) t ∈ [0,4] : position du bouton du rail (--k = t/4), son icône
+               ☀️ 🌇 💤 🌙 🐓 et le texte lu par les lecteurs d'écran. */
 const cutRange = document.getElementById('cut');
 const timeRange = document.getElementById('time');
-const pills = [...document.querySelectorAll('.pill')];
-const moments = [...document.querySelectorAll('.moment')];
+const vueBox = document.getElementById('vue');
+const segs = [...vueBox.querySelectorAll('.seg')];
+const rail = document.getElementById('rail');
+const railBtn = document.getElementById('railBtn');
+const MOMENTS = [['☀️', 'La journée'], ['🌇', 'Le soir'], ['💤', 'La nuit profonde'], ['🌙', 'La nuit des rêves'], ['🐓', 'Le matin']];
+const borne = (v, max) => Math.min(max, Math.max(0, Number(v) || 0));
 
-function allumer(boutons, attr, valeur){
-  const proche = Math.round(valeur / 100);
-  boutons.forEach(b => {
-    const on = Number(b.dataset[attr]) === proche;
-    b.classList.toggle('active', on);
-    b.setAttribute('aria-pressed', String(on));
-  });
+function uiCut(c){
+  c = borne(c, 2);
+  const n = Math.round(c);
+  vueBox.style.setProperty('--c', c);
+  segs.forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.cut) === n)));
 }
-function brancher(range, boutons, attr){
-  range.addEventListener('input', () => allumer(boutons, attr, Number(range.value)));
-  boutons.forEach(b => b.addEventListener('click', () => {
-    range.value = Number(b.dataset[attr]) * 100;
-    range.dispatchEvent(new Event('input'));
-  }));
+
+let momentAffiche = -1;
+function uiTime(t){
+  t = borne(t, 4);
+  const n = Math.round(t);
+  rail.style.setProperty('--k', t / 4);
+  if(n === momentAffiche) return;
+  railBtn.textContent = MOMENTS[n][0];
+  timeRange.setAttribute('aria-valuetext', MOMENTS[n][1]);
+  /* le soleil devient lune en glissant : l'icône change avec un petit rebond */
+  if(momentAffiche >= 0 && !REDUIT.matches){
+    railBtn.animate([{ transform: 'scale(.55)' }, { transform: 'scale(1)' }],
+      { duration: 320, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+  }
+  momentAffiche = n;
 }
-brancher(cutRange, pills, 'cut');
-brancher(timeRange, moments, 'time');
+
+function poserCurseur(range, v){
+  range.value = v;
+  range.dispatchEvent(new Event('input'));
+}
+cutRange.addEventListener('input', () => uiCut(Number(cutRange.value) / 100));
+timeRange.addEventListener('input', () => uiTime(Number(timeRange.value) / 100));
+segs.forEach(b => b.addEventListener('click', () => poserCurseur(cutRange, Number(b.dataset.cut) * 100)));
+
+/* Aimantation douce : continu pendant qu'on glisse ; au lâcher, le bouton
+   « tombe » dans le cran le plus proche (280 ms, léger dépassement). */
+const AIMANT_MS = 280;
+let aimant = 0;
+const ressort = x => 1 + 2.2 * (x - 1) ** 3 + 1.2 * (x - 1) ** 2;   /* easeOutBack doux */
+function aimanter(){
+  const v0 = Number(timeRange.value);
+  const cible = Math.round(v0 / 100) * 100;
+  cancelAnimationFrame(aimant);
+  if(v0 === cible) return;
+  if(REDUIT.matches){ poserCurseur(timeRange, cible); return; }
+  const t0 = performance.now();
+  const pas = now => {
+    const x = Math.min(1, (now - t0) / AIMANT_MS);
+    poserCurseur(timeRange, Math.round(v0 + (cible - v0) * ressort(x)));
+    if(x < 1) aimant = requestAnimationFrame(pas);
+  };
+  aimant = requestAnimationFrame(pas);
+}
+let tire = false;
+timeRange.addEventListener('pointerdown', () => {
+  cancelAnimationFrame(aimant);
+  tire = true;
+  rail.classList.add('tire');
+});
+/* sur window : le doigt peut quitter le rail avant d'être levé. L'aimant part
+   à la tâche suivante : le curseur natif traite son propre mouseup APRÈS
+   pointerup et y repose la valeur sous le doigt (vu en mouvement réduit, où
+   l'aimant est immédiat : 289 au lieu de 300). */
+function lacher(){
+  if(!tire) return;
+  tire = false;
+  rail.classList.remove('tire');
+  setTimeout(aimanter, 0);
+}
+addEventListener('pointerup', lacher);
+addEventListener('pointercancel', lacher);
 
 if(URL_ETAT.vue !== null) cutRange.value = URL_ETAT.vue * 100;
 if(URL_ETAT.temps !== null) timeRange.value = URL_ETAT.temps * 100;
-allumer(pills, 'cut', Number(cutRange.value));
-allumer(moments, 'time', Number(timeRange.value));
+uiCut(Number(cutRange.value) / 100);
+uiTime(Number(timeRange.value) / 100);
 
 /* ===== 6. Avatar : garçon / fille, peau, cheveux =====
    Valeurs reprises de « Dans mon corps » (carnation : [peau, ombre, fil du
@@ -1533,6 +1680,67 @@ SKINS.forEach((c, i) => pastille(skinsBox, c[0], `Couleur de peau ${i + 1}`, { s
 HAIRS.forEach((c, i) => pastille(hairsBox, c[0], `Cheveux ${c[1]}`, { hair: i }));
 genreBtns.forEach(b => b.addEventListener('click', () => setAvatar({ genre: b.dataset.genre })));
 setAvatar(prefs.get('avatar', null));
+
+/* ===== 7. Volet d'information, feuille de réglages, clavier ===== */
+/* Le volet (#info) monte sur la scène avec la classe « open ». Les zones
+   (Task 12), le récit et les jeux appelleront ouvrirInfo() après avoir écrit
+   #infoEmoji / #infoTitle / #infoText. ✕ et Échap le referment. */
+const infoBox = document.getElementById('info');
+function ouvrirInfo(){ infoBox.classList.add('open'); }
+function fermerInfo(){ infoBox.classList.remove('open'); }
+document.getElementById('infoClose').addEventListener('click', fermerInfo);
+if(URL_ETAT.info) ouvrirInfo();
+
+/* La feuille de réglages : un <dialog> modal (piège du focus, Échap natif).
+   Sortie rapide : la classe « sort » joue 140 ms d'animation, puis close(). */
+const feuille = document.getElementById('feuille');
+const reglagesBtn = document.getElementById('reglages');
+function ouvrirFeuille(){
+  if(feuille.open) return;
+  feuille.classList.remove('sort');
+  feuille.showModal();
+  reglagesBtn.setAttribute('aria-expanded', 'true');
+}
+function fermerFeuille(){
+  if(!feuille.open || feuille.classList.contains('sort')) return;
+  reglagesBtn.setAttribute('aria-expanded', 'false');
+  feuille.classList.add('sort');
+  setTimeout(() => { feuille.classList.remove('sort'); feuille.close(); }, REDUIT.matches ? 0 : 140);
+}
+reglagesBtn.addEventListener('click', ouvrirFeuille);
+document.getElementById('feuilleClose').addEventListener('click', fermerFeuille);
+/* Échap : on joue la sortie au lieu de la fermeture sèche (si le navigateur
+   refuse d'annuler, le dialog se ferme seul et « close » remet le « ⋯ ») */
+feuille.addEventListener('cancel', e => { e.preventDefault(); fermerFeuille(); });
+feuille.addEventListener('close', () => { feuille.classList.remove('sort'); reglagesBtn.setAttribute('aria-expanded', 'false'); });
+/* un appui sur le fond assombri (hors de la feuille) la referme */
+feuille.addEventListener('click', e => {
+  const r = feuille.getBoundingClientRect();
+  if(e.target === feuille && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) fermerFeuille();
+});
+if(Q.get('reglages') === '1') ouvrirFeuille();
+requestAnimationFrame(() => requestAnimationFrame(() => { root.dataset.pret = '1'; }));
+
+/* Clavier : ←→ le temps (pas 0,25), ↑↓ la vue (pas 0,5 ; ↓ = on entre plus
+   profond), Échap ferme le volet. Partout sauf dans un champ de saisie et
+   quand la feuille de réglages est ouverte. Sur le rail lui-même, ces touches
+   remplacent celles du navigateur (un pas de 1/400 ne se verrait pas).
+   Tasks 6–7 reprendront ce gestionnaire (pastilles, setCut / setTime). */
+const SAISIE = 'input:not([type=range]):not([type=checkbox]), textarea, select, [contenteditable]';
+document.addEventListener('keydown', e => {
+  if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || feuille.open) return;
+  if(e.target.closest && e.target.closest(SAISIE)) return;
+  if(e.key === 'Escape'){
+    if(infoBox.classList.contains('open')){ fermerInfo(); e.preventDefault(); }
+    return;
+  }
+  const PAS = { ArrowLeft: [timeRange, -25, 400], ArrowRight: [timeRange, 25, 400], ArrowUp: [cutRange, -50, 200], ArrowDown: [cutRange, 50, 200] }[e.key];
+  if(!PAS) return;
+  e.preventDefault();
+  const [range, pas, max] = PAS;
+  cancelAnimationFrame(aimant);
+  poserCurseur(range, Math.min(max, Math.max(0, Number(range.value) + pas)));
+});
 </script>
 </body>
 </html>

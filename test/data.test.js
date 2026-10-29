@@ -257,3 +257,11 @@ test('lerpArr : interpolation par morceaux', () => {
   assert.equal(lerpArr([0,1,0,0,4], 4), 4);
   assert.equal(lerpArr([0,1,0,0,4], 3.5), 2);
 });
+
+/* Décision du propriétaire (29/10, spec §6 bis) : aucun son produit par la page. */
+test('aucun son : ni synthèse vocale, ni bouton son, ni préférence son', () => {
+  const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
+  for(const interdit of ['speechSynthesis', 'id="sound"', 'id="say"', 'soundOn', 'reves.son']){
+    assert.ok(!html.includes(interdit), 'index.html contient encore « ' + interdit + ' »');
+  }
+});

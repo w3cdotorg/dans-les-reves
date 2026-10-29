@@ -745,3 +745,27 @@ Ce que montrent les photos et que le dessin reprend : un front qui bombe au-dess
 - Pose couchée à −90° : la tête repose sur l'oreiller, le col dépasse de la couverture, le pyjama passe dessous.
 - Fille, peau 5, riso (Dedans et Dehors), allégé : captures `shots/t3b-apres-*`.
 - Données `d` de `#g-dedans` : 29 169 octets (27 140 à la passe 3 : col et bourrelet en plus).
+
+## Task 1b — Interface « Plein ciel », retrait du son (29/10)
+
+**Ce qui est construit** (spec §6 bis, maquette « direction 1 ») : `.app` en une colonne : `header.bandeau` (titre + tagline courte, `#vue` segmenté à trois `button.seg[data-cut]` + pouce indigo glissant, `#reglages` « ⋯ ») ; `main.scene` (`.cadre` arrondi 24 px avec le SVG et le volet `#info`, puis `#rail`) ; `nav.dock` (`#jeu1` corail, `#jeu2` indigo, `#histoire` vert ; `#zones`, `#loupeBtn`, `#journee` sable à droite) ; `dialog#feuille` (avatar `.who` déplacé tel quel, `#theme`, `checkbox#lite`, `<details id="parents">` vide pour Task 17). Le SVG n'a pas bougé d'un octet (diff vérifié).
+
+**Décisions.**
+- Jetons `--ui-*` dans `:root`, indépendants des thèmes de scène ; les couleurs du rail sont figées (`--ui-soleil`, `--ui-nuit`… = valeurs de `--p-soleil`, `--nuit-2`) pour que le riso n'y touche pas. `--ui-ciel` (#9fc9ff, fond de l'icône du volet) vient de la maquette, hors liste de la spec.
+- Polices : Fredoka + Nunito ; Baloo 2 retirée du lien (plus aucun usage : aucun texte dans le SVG pour l'instant ; le rêve écrit pourra la rajouter).
+- Jetons retirés (plus lus par personne) : `--fibres`, `--grain`, `--pad`, `--r-card`, `--font-ui`, `--encre-douce`, `--ombre`. `--encre` reste : les pièces riso le redéfinissent localement et `.w.pale/.teinte` le lisent.
+- `#cut` reste un `range 0..200` (vue × 100), désormais `hidden` : les segments le règlent ; `#time` reste `0..400` et devient le vrai contrôle du rail (`writing-mode:vertical-lr`, min en haut ; horizontal sur téléphone), piste et pouce transparents (pouce de 64 px). `#railBtn` est un dessin qui suit `--k = t/4` ; sa course = longueur moins 64 px, mesurée identique à celle du pouce (centre 491 px attendu, 491 px mesuré).
+- `uiCut(c)` (c ∈ [0,2] : `aria-pressed`, pouce à `--c`, donc continu) et `uiTime(t)` (t ∈ [0,4] : `--k`, icône ☀️🌇💤🌙🐓 avec petit rebond, `aria-valuetext`) ne touchent qu'à l'habillage ; appelées par les gestionnaires `input` de `#cut`/`#time`. `setCut`/`setTime` (Tasks 6–7) les appelleront aussi.
+- Aimantation : continu pendant le glissé ; au lâcher (pointerup sur window), 280 ms d'easeOutBack doux vers le cran le plus proche ; immédiat en mouvement réduit.
+- Clavier (provisoire, à reprendre par Tasks 6–7) : ←→ temps ± 25 (0,25), ↑↓ vue ± 50 (0,5 ; ↓ = plus profond), partout sauf champ de saisie et feuille ouverte ; sur le rail focalisé, ces touches remplacent celles du navigateur. Échap ferme le volet ; la feuille se ferme par Échap (`cancel` → sortie animée), ✕ ou un appui sur le fond.
+- Volet : `ouvrirInfo()` / `fermerInfo()` (classe `open`), à appeler par Task 12 après avoir écrit `#infoEmoji/#infoTitle/#infoText`.
+- Paramètres de test ajoutés : `?info=1` (volet ouvert) et `?reglages=1` (feuille ouverte), pour les captures.
+- `html:not([data-pret]) *{transition:none}` : sans cela, le pouce de `#vue` glissait depuis « Dehors » au chargement (vu sur la capture `vue=1`). `data-pret` arrive deux images après le script.
+
+**Ce qui a raté.**
+1. Téléphone : la grille du bandeau en `1fr auto` débordait (min-content des segments `nowrap`) et le « ⋯ » tombait sur une 3e ligne : `minmax(0,1fr)` + `grid-template-areas`.
+2. **Les captures « téléphone » de Chrome headless mentent** : `--window-size=420,900` donne une fenêtre de **500 px** (largeur minimale de Chrome, en `--headless=new` comme `old`) et le PNG est rogné à 420 : tout semblait déborder à droite. Mesuré (`innerWidth` = 500). Les captures téléphone sont faites avec Playwright (`setViewportSize 420×900`, viewport réel 420).
+3. Mouvement réduit : l'aimant immédiat posait 300 puis le curseur natif reposait la valeur sous le doigt (289) à son propre mouseup, qui suit pointerup. L'aimant part donc à la tâche suivante (`setTimeout 0`).
+4. Le « knob » cachait l'étiquette « jour » du rail horizontal : `--bord` 44 px sur téléphone.
+
+**Contrôles.** `node --test test/` 16/16 (nouveau test : ni `speechSynthesis`, ni `id="sound"`, ni `id="say"`, ni `soundOn`, ni `reves.son`). Playwright (http://127.0.0.1:8794, `lite=0`) : console 0 erreur / 0 avertissement ; aucun élément au-delà de 420 px, `scrollWidth` 420 ; toutes les cibles ≥ 56 px ; segment, ↑, →, glissé (261 → 300 au lâcher), volet (Échap, ✕), feuille (Échap, ✕, `aria-expanded`), thème, genre, allégé (mémorisé) ; mouvement réduit : transitions à 0 s, pas d'animation de la feuille, aimant immédiat. Captures : `shots/t1b-bureau*.png`, `shots/t1b-tel*.png`.
