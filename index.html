@@ -43,7 +43,7 @@
   --p-occipital:color-mix(in srgb, var(--p-cerveau) 84%, #b65aa0);
   --p-crane:#f4ead6; --p-liquide:#cfe2ee; --p-calleux:#fbeef0; --p-nerf:#f4d58d;
   --p-hypothalamus:#93cdb3; --p-hypophyse:#f5a47e; --p-joue:#f3a39a; --p-oeil:#4b3a2e; --p-blanc-oeil:#fbf6ec;
-  --p-ecran:#fbf3e0; --p-carte:#fbf3e0; --p-pouce:#b9b2a0; --p-soleil:#f3c74a; --p-lune:#fff1c9;
+  --p-ecran:#fbf3e0; --p-carte:#fbf3e0; --p-pouce:#a8713a; --p-soleil:#f3c74a; --p-lune:#fff1c9;
   /* vue Dehors : le monde de l'enfant (Task 4), feutres doux, rien de vif */
   --p-sol:#a9c48a; --p-expo:#a8a6a1; --p-expo-toit:#87857f; --p-graffiti-1:#ef93b4; --p-graffiti-2:#79c4b5;
   --p-ciel-nuit:#4a4d86; --p-soleil-rayons:#f3a34c; --p-fenetre:#c99463; --p-rideau:#eaa2a8;
@@ -55,6 +55,25 @@
   --p-pres-fond:#f5d5da; --p-neurone:#e07e9b; --p-neurone-2:#b98bd0;
   --p-etincelle:#f5c843; --p-etincelle-ombre:#c99a1c; --p-vague:#9cc1ea; --p-rincage:#b3e0ec;
   --p-cellule:#9ccf8e; --p-cellule-noyau:#5f9f6a;
+  /* cartes-souvenirs (Task 8) : la boîte, les vignettes et les décors Dehors.
+     Le pouce de César est en bronze (--p-pouce) ; les gens ont leurs propres
+     carnations et cheveux, indépendants de l'avatar de l'enfant. */
+  --p-boite:#c39a6b; --p-boite-fond:#a97e52; --p-bulle:#d8e9f7;
+  --p-bronze:var(--p-pouce); --p-bronze-clair:#d09a5a; --p-ongle:#f0cf9c; --p-bronze-ombre:#6f4524; --p-socle:#a29d94;
+  --p-cornet:#dba05a; --p-glace-rose:#f4a6bd; --p-cerise:#e2574a;
+  --p-chien:#c98f5a; --p-chien-clair:#f0d2a8; --p-chien-oreille:#8a5a35;
+  --p-velo:#e2574a; --p-roue:#4b3a2e; --p-moyeu:#f3c74a; --p-or:#e3b04a;
+  --p-eau:#7cc6e8; --p-bord-piscine:#e6ddca; --p-assiette:#cfe2ee;
+  --p-gateau:#f3d29b; --p-glacage:#ef93b4; --p-bougie:#8fb8ec; --p-flamme:#f5c843;
+  --p-tracteur:#5f9f5a; --p-vitre:#cfe2ee;
+  --p-nuage:#9097ac; --p-eclair:#f5c843;
+  --p-manege:#ef7f9f; --p-cheval:#fff6f1;
+  --p-ogre:#8fb86a; --p-bouche:#93392f; --p-pirate:#3b3a44; --p-dragon:#5fae7a; --p-piquant:#f39a4c;
+  --p-peau-a:#d79a6a; --p-peau-b:#fbd8b6; --p-peau-c:#a9714a; --p-peau-d:#f1c19c;
+  --p-cheveux-a:#2b1a10; --p-cheveux-b:#c9973f; --p-cheveux-c:#8a4a22; --p-gris:#dcd8d0;
+  --p-copain-1:#f2b45e; --p-copain-2:#79c4b5; --p-papa:#5f8fd0; --p-maman:#ef93b4;
+  --p-mamie:#b98bd0; --p-maitresse:#f3a34c; --p-jean:#5a6f9a; --p-livre:#e2574a; --p-tableau:#3f6b55;
+  --p-visage:#f6d36b; --p-visage-peur:#cfe2ee; --p-fache:#f28c6a; --p-coeur:#e2574a; --p-notes:#3f3f74;
 
   /* fils de broderie */
   --fil-blanc:#fff6f1; --fil-brun:#7a4b3a; --fil-sable:#c9b58d; --fil-rouge:#e0493f;
@@ -650,6 +669,69 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
 .dot:active{transform:translateY(2px) scale(.94);transition-duration:.06s}
 .dot[aria-pressed="true"]{box-shadow:0 0 0 3px #fff, 0 0 0 6px var(--ui-indigo)}
 
+/* ===== 7 septies. Cartes-souvenirs : vignettes, décors, boîte (Task 8) =====
+   #v-<slug> (vignettes) et #d-<slug> (décors Dehors) sont des <symbol> repris par
+   <use> : RÈGLE DU <use> (section 7), tout se règle sur l'élément lui-même ou par
+   une variable, jamais par un sélecteur d'ancêtre. Pièces .w.lite seulement. */
+symbol{overflow:visible}
+:root{--w-mini-filter:url(#woolMini);--w-vig-filter:url(#woolVignette)}
+[data-theme=riso]{--w-mini-filter:url(#riso);--w-vig-filter:url(#riso)}
+.w.lite.mini{filter:var(--w-mini-filter)}
+.w.lite.vig{filter:var(--w-vig-filter)}
+/* cordon de laine : un trait épais feutré (pied, bras, cadre du vélo…) ; --tw = épaisseur */
+.w.trait,.w.trait[data-ink]{fill:none;stroke:var(--encre, var(--p));stroke-width:var(--tw,3);stroke-linecap:round;stroke-linejoin:round}
+/* riso : mélanges d'encres et demi-teintes lisibles DANS un clone (variables) ;
+   en feutrine --encre-* n'existe pas, --encre est invalide et la pièce garde sa laine */
+[data-theme=riso]{
+  --encre-orange:color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-rose));
+  --encre-brun:color-mix(in oklab, color-mix(in oklab, var(--ink-rose) 40%, var(--ink-jaune)) 78%, var(--ink-bleu));
+}
+.w.orange[data-ink]{--encre:var(--encre-orange)}
+.w.brun[data-ink]{--encre:var(--encre-brun)}
+.w.pastel[data-ink=jaune]{--encre:color-mix(in srgb, var(--encre-jaune) 50%, var(--papier))}
+.w.pastel[data-ink=rose]{--encre:color-mix(in srgb, var(--encre-rose) 40%, var(--papier))}
+.w.pastel[data-ink=bleu]{--encre:color-mix(in srgb, var(--encre-bleu) 35%, var(--papier))}
+.noeud-brun{fill:var(--fil-encre, var(--fil-brun))}
+.fil.gros{stroke-width:2.1}
+.fil.epais{stroke-width:2}
+.fil.gros.epais{stroke-width:3.2}
+.fil.lunettes{stroke-width:1}
+
+/* La boîte : riso, le groupe ne se multiplie pas avec la vue dessous (le bac est
+   opaque) ; sa sous-couche de papier bouche les trous du grain #riso. */
+[data-theme=riso] #scene-inner>#g-boite{mix-blend-mode:normal}
+.sous-boite{fill:var(--riso-papier, none)}
+[data-theme=riso]{--boite-encre:color-mix(in srgb, var(--ink-rose) 45%, var(--papier))}
+#p-boite{--encre:var(--boite-encre)}
+/* la nuit (classe « dort » sur #g-boite) : la boîte se grise, on ne choisit plus */
+#g-boite.dort{--boite-op:.45;--boite-filtre:saturate(.2)}
+.boite-grise{opacity:var(--boite-op,1);filter:var(--boite-filtre,none);transition:opacity .4s, filter .4s}
+#g-boite{touch-action:pan-y pinch-zoom}
+#boite-rail{transform-box:view-box}
+.carte{cursor:pointer;outline:none;touch-action:pan-y pinch-zoom}
+.carte[aria-disabled=true]{cursor:default}
+.carte-corps{transform-box:fill-box;transform-origin:50% 50%;transition:transform .22s var(--ui-ressort)}
+.carte-corps.levee{transform:translateY(-2px)}
+.carte-corps.appui{transform:translateY(1px) scale(.96);transition-duration:.06s}
+@media (hover:hover){.carte-corps:hover:not(.appui){transform:translateY(-3px)}}
+.carte-focus{fill:none;stroke:var(--ui-indigo);stroke-width:3;opacity:0}
+.carte:focus-visible .carte-focus{opacity:1}
+/* l'épingle d'une carte choisie ; plantée avec un rebond (script) */
+.epingle{opacity:0;visibility:hidden}
+.epingle.plantee{opacity:1;visibility:visible}
+/* les vignettes qui voyagent et les décors qui sortent de terre */
+#g-vols,#g-hippo-cartes{pointer-events:none}
+.decor{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
+[data-theme=riso]{--decor-iso:isolate}   /* riso : un décor ne se multiplie pas avec l'expo derrière lui */
+.decor-pop{transform-box:fill-box;transform-origin:50% 100%}
+.hippo-carte{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
+/* la bulle de la boîte : cachée tant qu'elle ne parle pas */
+#bulle-boite{opacity:0;visibility:hidden;pointer-events:none;transform-box:fill-box;transform-origin:50% 100%;
+  transition:opacity .25s, visibility 0s .25s}
+#bulle-boite.visible{opacity:1;visibility:visible;pointer-events:auto;cursor:pointer;transition:opacity .12s}
+.bulle-texte{font-family:var(--font-display);font-weight:600;font-size:19px;fill:var(--fil-encre, var(--ui-encre));text-anchor:middle}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
 /* ===== 8. Volet d'information (#info) =====
    Il monte par-dessus le bas de la scène ; caché tant qu'il n'a pas la classe
    « open ». Entrée à ressort (320 ms), sortie rapide (140 ms). Bureau : il
@@ -889,6 +971,40 @@ html:not([data-pret]) *{transition:none!important}
             <feDropShadow in="piece" dx="1.4" dy="3" stdDeviation="2" flood-color="#3b2a1c" flood-opacity=".4"/>
           </filter>
 
+          <!-- Laine allégée des cartes-souvenirs (Task 8) : #woolLite à l'identique, avec
+               une région de filtre plus large. À −16 % de la boîte englobante, le halo,
+               la découpe et l'ombre portée (en unités absolues) des petites pièces étaient
+               coupés net, en carré. #woolMini (décors Dehors) : −60 % / 220 % ;
+               #woolVignette (vignettes 40 × 40 centrées sur 0,0) : une région FIXE de
+               56 × 56 dans l'espace de la vignette, assez pour l'ombre de la plus petite
+               pièce, et bornée quelle que soit la pièce. -->
+          <filter id="woolVignette" filterUnits="userSpaceOnUse" x="-28" y="-28" width="56" height="56" color-interpolation-filters="sRGB">
+            <feMorphology in="SourceGraphic" operator="dilate" radius="1.3" result="dil"/>
+            <feTurbulence type="turbulence" baseFrequency="1.5" numOctaves="2" seed="3" result="hair"/>
+            <feDisplacementMap in="dil" in2="hair" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="halo0"/>
+            <feGaussianBlur in="halo0" stdDeviation=".35" result="halo1"/>
+            <feComponentTransfer in="halo1" result="halo"><feFuncA type="linear" slope=".5"/></feComponentTransfer>
+            <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="7" result="cut"/>
+            <feDisplacementMap in="SourceGraphic" in2="cut" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="body0"/>
+            <feTurbulence type="turbulence" baseFrequency=".8" numOctaves="1" seed="4" result="fz"/>
+            <feDisplacementMap in="body0" in2="fz" scale="1.4" xChannelSelector="R" yChannelSelector="B" result="body"/>
+            <feMerge result="piece"><feMergeNode in="halo"/><feMergeNode in="body"/></feMerge>
+            <feDropShadow in="piece" dx="1.4" dy="3" stdDeviation="2" flood-color="#3b2a1c" flood-opacity=".4"/>
+          </filter>
+          <filter id="woolMini" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+            <feMorphology in="SourceGraphic" operator="dilate" radius="1.3" result="dil"/>
+            <feTurbulence type="turbulence" baseFrequency="1.5" numOctaves="2" seed="3" result="hair"/>
+            <feDisplacementMap in="dil" in2="hair" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="halo0"/>
+            <feGaussianBlur in="halo0" stdDeviation=".35" result="halo1"/>
+            <feComponentTransfer in="halo1" result="halo"><feFuncA type="linear" slope=".5"/></feComponentTransfer>
+            <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="7" result="cut"/>
+            <feDisplacementMap in="SourceGraphic" in2="cut" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="body0"/>
+            <feTurbulence type="turbulence" baseFrequency=".8" numOctaves="1" seed="4" result="fz"/>
+            <feDisplacementMap in="body0" in2="fz" scale="1.4" xChannelSelector="R" yChannelSelector="B" result="body"/>
+            <feMerge result="piece"><feMergeNode in="halo"/><feMergeNode in="body"/></feMerge>
+            <feDropShadow in="piece" dx="1.4" dy="3" stdDeviation="2" flood-color="#3b2a1c" flood-opacity=".4"/>
+          </filter>
+
           <!-- fil de broderie : un peu irrégulier, avec son relief -->
           <filter id="thread" x="-6%" y="-6%" width="112%" height="112%">
             <feTurbulence type="fractalNoise" baseFrequency=".5" numOctaves="1" seed="19" result="t"/>
@@ -956,6 +1072,455 @@ html:not([data-pret]) *{transition:none!important}
             <feComposite in2="SourceGraphic" operator="in"/>
             <feBlend in="SourceGraphic" mode="multiply"/>
           </filter>
+          <!-- CARTES-BEGIN -->
+          <!-- ===== Cartes-souvenirs (Task 8) : généré par tools/gen-cartes.py, ne pas retoucher à la main =====
+               #v-<slug> : vignette 40 × 40 centrée sur (0,0) ; #d-<slug> : décor Dehors centré sur son emplacement ;
+               #ic-oeil / #ic-oreille : la porte d'entrée brodée au bas de la carte. Pièces .w.lite seulement. -->
+          <g id="g-cartes-assets">
+          <symbol id="ic-oeil" overflow="visible"><path class="fil" style="--f:var(--fil-brun)" d="M-6 0Q0-5 6 0Q0 5-6 0Z"/><circle class="noeud-brun" cx="0" cy="0" r="1.8"/></symbol>
+          <symbol id="ic-oreille" overflow="visible"><path class="fil" style="--f:var(--fil-brun)" d="M-3 4.5C-5 2-5.5-5 0-5.5C4-6 5.5-2 3.5 1C2.5 2.5 1 2.5 1 4.5C1 6-1.5 6.5-3 4.5ZM-1-1.5C-1-3 2-3 1.5-.5"/></symbol>
+          <symbol id="v-pouce" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-socle)" data-ink="bleu" d="M-11 14H11C12.1 14 13 14.9 13 16V18C13 19.1 12.1 20 11 20H-11C-12.1 20-13 19.1-13 18V16C-13 14.9-12.1 14-11 14Z"/>
+            <path class="w lite vig brun" style="--p:var(--p-bronze)" data-ink="jaune" d="M-9 15C-9.5 8-10 2-9.5-5C-9-13-6-19 0-19C6-19 9-13 9.5-5C10 2 9.5 8 9 15Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-bronze-ombre)" data-ink="rose" d="M4.5-17.5C8-14.5 9.5-9.5 9.5-5C10 2 9.5 8 9 15H5.5C6.5 8 7 2 6.8-5C6.6-10 6-14 4.5-17.5Z"/>
+            <path class="w lite vig" style="--p:var(--p-bronze-clair)" data-ink="jaune" d="M-5.6-13.5C-5.6-18.4 5.6-18.4 5.6-13.5L5.2-8.5C5-6 3.5-5 0-5C-3.5-5-5-6-5.2-8.5Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-ongle)" data-ink="jaune" d="M-5.2-14.6C-4.6-18 4.6-18 5.2-14.6C2.6-15.8-2.6-15.8-5.2-14.6Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-7.5 2Q0 4.5 7.5 2M-7 5.6Q0 7.6 7 5.6"/>
+          </symbol>
+          <symbol id="v-glace" overflow="visible">
+            <path class="w lite vig orange" style="--p:var(--p-cornet)" data-ink="jaune" d="M-7.5-3H7.5L.8 18.5Q0 19.6-.8 18.5Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-5.5 0L2.5 10M0-2.5L5 4M5.5 0L-2.5 10M0-2.5L-5 4"/>
+            <path class="w lite vig pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-9-4C-11-8-9-14-4-15.5C-1-17.5 3-17.5 5-15.5C9.5-14 11-8 9-4C7.5-1.5 6-3.5 4.5-2C3-.5 1.5-3 0-1.5C-1.5 0-3-3-4.5-1.5C-6 0-7.5-1.5-9-4Z"/>
+            <path class="w lite vig" style="--p:var(--p-cerise)" data-ink="rose" d="M-1.6-17.6C-1.6-19-.4-20.2 1-20.2C2.4-20.2 3.6-19 3.6-17.6C3.6-16.2 2.4-15 1-15C-.4-15-1.6-16.2-1.6-17.6Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-5.5-10.5Q-4.5-13.5-1.5-14"/>
+          </symbol>
+          <symbol id="v-chien" overflow="visible">
+            <path class="w lite vig trait orange" style="--p:var(--p-chien);--tw:3" data-ink="jaune" d="M-12 10Q-19 6-17-1"/>
+            <path class="w lite vig orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-14 17C-16 9-13 0-6-1C1-2 6 4 7 10C7.5 13 7 16 6 17Z"/>
+            <path class="w lite vig orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-1-9C-1-15 3-18 7-18C11-18 14-15 14-11C17-11 19-9 19-6.5C19-4 17-2.5 14-2.5C12-.5 9 .5 6 0C2-.5-1-4-1-9Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M11-5.6C11-7.1 12.8-8.4 15-8.4C17.2-8.4 19-7.1 19-5.6C19-4.1 17.2-2.8 15-2.8C12.8-2.8 11-4.1 11-5.6Z"/>
+            <path class="w lite vig brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M3-16C-1-16-3-11-2-6C-1.5-3.5 1-3 2-5C3-8 5-12 3-16Z"/>
+            <path class="w lite vig trait" style="--p:var(--p-cerise);--tw:2.2" data-ink="rose" d="M.5-1.5Q4 1 8-.5"/>
+            <circle class="noeud-brun" cx="18.4" cy="-7" r="1.7"/>
+            <circle class="noeud-brun" cx="9" cy="-11" r="1.3"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M14.5-3.6Q16-2.6 17.5-3.6"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-1 17V12M3 17V10"/>
+          </symbol>
+          <symbol id="v-velo" overflow="visible">
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M-18.5 8C-18.5 3.3-14.7-.5-10-.5C-5.3-.5-1.5 3.3-1.5 8C-1.5 12.7-5.3 16.5-10 16.5C-14.7 16.5-18.5 12.7-18.5 8ZM-16.3 8C-16.3 4.5-13.5 1.7-10 1.7C-6.5 1.7-3.7 4.5-3.7 8C-3.7 11.5-6.5 14.3-10 14.3C-13.5 14.3-16.3 11.5-16.3 8Z"/>
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M1.5 8C1.5 3.3 5.3-.5 10-.5C14.7-.5 18.5 3.3 18.5 8C18.5 12.7 14.7 16.5 10 16.5C5.3 16.5 1.5 12.7 1.5 8ZM3.7 8C3.7 4.5 6.5 1.7 10 1.7C13.5 1.7 16.3 4.5 16.3 8C16.3 11.5 13.5 14.3 10 14.3C6.5 14.3 3.7 11.5 3.7 8Z"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M-10 2V14M-16 8H-4M10 2V14M4 8H16"/>
+            <path class="w lite vig trait" style="--p:var(--p-velo);--tw:2.6" data-ink="rose" d="M-10 8L-3-4H8L10 8M-3-4L1 8H-10M1 8L8-4"/>
+            <path class="w lite vig trait" style="--p:var(--p-roue);--tw:2" data-ink="bleu" d="M-3-4L-4-7.5M8-4L7-10H11"/>
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" d="M-7.5-9H-1C0-9 .5-7.5-.5-7H-7.5C-8.5-7.5-8.5-9-7.5-9Z"/>
+            <circle cx="-10" cy="8" r="1.4" fill="url(#knot)"/>
+            <circle cx="10" cy="8" r="1.4" fill="url(#knot)"/>
+            <circle cx="1" cy="8" r="1.6" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="v-piscine" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-bord-piscine)" data-ink="bleu" d="M-17-1H17C18.1-1 19-.1 19 1V3C19 4.1 18.1 5 17 5H-17C-18.1 5-19 4.1-19 3V1C-19-.1-18.1-1-17-1Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-eau)" data-ink="bleu" d="M-17 4H17V15C17 17 16 18 14 18H-14C-16 18-17 17-17 15Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-14 9Q-11.5 6.5-9 9T-4 9T1 9T6 9M-12 14Q-9.5 11.5-7 14T-2 14T3 14T8 14"/>
+            <path class="w lite vig trait" style="--p:var(--p-socle);--tw:1.8" data-ink="bleu" d="M11-13V6M16-13V6"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M11-9H16M11-4H16M11 1H16"/>
+            <path class="w lite vig" style="--p:var(--p-cerise)" data-ink="rose" fill-rule="evenodd" d="M-13-7.5C-13-10.8-10.3-13.5-7-13.5C-3.7-13.5-1-10.8-1-7.5C-1-4.2-3.7-1.5-7-1.5C-10.3-1.5-13-4.2-13-7.5ZM-10-7.5C-10-9.2-8.7-10.5-7-10.5C-5.3-10.5-4-9.2-4-7.5C-4-5.8-5.3-4.5-7-4.5C-8.7-4.5-10-5.8-10-7.5Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-12.5-7.5H-10.5M-3.5-7.5H-1.5M-7-13V-11M-7-4V-2"/>
+          </symbol>
+          <symbol id="v-gateau" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-assiette)" data-ink="bleu" d="M-16 14H16C17.1 14 18 14.9 18 16V16C18 17.1 17.1 18 16 18H-16C-17.1 18-18 17.1-18 16V16C-18 14.9-17.1 14-16 14Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-gateau)" data-ink="jaune" d="M-11-1H11C12.7-1 14 .3 14 2V12C14 13.7 12.7 15 11 15H-11C-12.7 15-14 13.7-14 12V2C-14 .3-12.7-1-11-1Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-glacage)" data-ink="rose" d="M-15-1C-15-5 15-5 15-1V3C13 6 11 2 9 4C7 8 4 3 1.5 5C-1 8-4 3-6.5 5C-9 8-12 3-15 5Z"/>
+            <path class="fil" style="--f:var(--fil-rouge)" d="M-13 10.5H13"/>
+            <path class="w lite vig" style="--p:var(--p-bougie)" data-ink="bleu" d="M-7-13H-6C-5.4-13-5-12.6-5-12V-4C-5-3.4-5.4-3-6-3H-7C-7.6-3-8-3.4-8-4V-12C-8-12.6-7.6-13-7-13Z"/>
+            <path class="w lite vig" style="--p:var(--p-bougie)" data-ink="bleu" d="M-.5-14.5H.5C1.1-14.5 1.5-14.1 1.5-13.5V-4.5C1.5-3.9 1.1-3.5 .5-3.5H-.5C-1.1-3.5-1.5-3.9-1.5-4.5V-13.5C-1.5-14.1-1.1-14.5-.5-14.5Z"/>
+            <path class="w lite vig" style="--p:var(--p-bougie)" data-ink="bleu" d="M6-13H7C7.6-13 8-12.6 8-12V-4C8-3.4 7.6-3 7-3H6C5.4-3 5-3.4 5-4V-12C5-12.6 5.4-13 6-13Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M-6.5-18.7C-4.7-16.4-4.7-14.1-6.5-14.1C-8.3-14.1-8.3-16.4-6.5-18.7Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M0-20.2C1.8-17.9 1.8-15.6 0-15.6C-1.8-15.6-1.8-17.9 0-20.2Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M6.5-18.7C8.3-16.4 8.3-14.1 6.5-14.1C4.7-14.1 4.7-16.4 6.5-18.7Z"/>
+          </symbol>
+          <symbol id="v-tracteur" overflow="visible">
+            <path class="w lite vig vert" style="--p:var(--p-tracteur)" data-ink="bleu" d="M-15-1V-16C-15-17-14-18-13-18H-1C0-18 1-17 1-16V-1Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-vitre)" data-ink="bleu" d="M-11.3-15.5H-3.2C-2.5-15.5-2-15-2-14.3V-9.7C-2-9-2.5-8.5-3.2-8.5H-11.3C-12-8.5-12.5-9-12.5-9.7V-14.3C-12.5-15-12-15.5-11.3-15.5Z"/>
+            <path class="w lite vig vert" style="--p:var(--p-tracteur)" data-ink="bleu" d="M0-7H14C16-7 17-6 17-4V5H0Z"/>
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" d="M10.4-14.5H10.8C11.4-14.5 11.8-14.1 11.8-13.5V-7.5C11.8-6.9 11.4-6.5 10.8-6.5H10.4C9.8-6.5 9.4-6.9 9.4-7.5V-13.5C9.4-14.1 9.8-14.5 10.4-14.5Z"/>
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" d="M-18 8C-18 2.5-13.5-2-8-2C-2.5-2 2 2.5 2 8C2 13.5-2.5 18-8 18C-13.5 18-18 13.5-18 8Z"/>
+            <path class="w lite vig" style="--p:var(--p-moyeu)" data-ink="jaune" d="M-12.6 8C-12.6 5.5-10.5 3.4-8 3.4C-5.5 3.4-3.4 5.5-3.4 8C-3.4 10.5-5.5 12.6-8 12.6C-10.5 12.6-12.6 10.5-12.6 8Z"/>
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" d="M5.5 11.5C5.5 7.9 8.4 5 12 5C15.6 5 18.5 7.9 18.5 11.5C18.5 15.1 15.6 18 12 18C8.4 18 5.5 15.1 5.5 11.5Z"/>
+            <path class="w lite vig" style="--p:var(--p-moyeu)" data-ink="jaune" d="M9.2 11.5C9.2 10 10.5 8.7 12 8.7C13.5 8.7 14.8 10 14.8 11.5C14.8 13 13.5 14.3 12 14.3C10.5 14.3 9.2 13 9.2 11.5Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M3-3H14"/>
+            <circle cx="-8" cy="8" r="1.4" fill="url(#knot)"/>
+            <circle cx="12" cy="11.5" r="1.1" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="v-orage" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-15 2C-19 2-20-4-16-6C-17-12-10-15-6-11C-4-17 5-18 7-12C11-15 17-11 15-6C19-5 19 2 15 2Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M1 0L-5 9H-1L-4 18L5 6H1L4 0Z"/>
+            <path class="fil" style="--f:var(--fil-vague)" d="M-12 6L-14 11M-8 9L-10 14M10 6L8 11M14 9L12 14"/>
+          </symbol>
+          <symbol id="v-manege" overflow="visible">
+            <path class="w lite vig trait" style="--p:var(--p-or);--tw:1.6" data-ink="jaune" d="M-12-4V13M12-4V13M0-3V13"/>
+            <path class="w lite vig pastel" style="--p:var(--p-assiette)" data-ink="bleu" d="M-15 13H15C16.1 13 17 13.9 17 15V16C17 17.1 16.1 18 15 18H-15C-16.1 18-17 17.1-17 16V15C-17 13.9-16.1 13-15 13Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-cheval)" data-ink="jaune" d="M-6 8C-6 4-3 2 1 2H3L5-1C6-2 8-2 8.5-.5L9 2C9.5 3.5 8.5 4.5 7 4L5.5 3.5L5 7C5 9 3.5 9.5 2 9.5H-4C-5 9.5-6 9-6 8Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-4 9.5L-5 12.5M2 9.5L3 12.5M3.5 .5Q2 2.5 1.5 4"/>
+            <circle class="noeud-brun" cx="6.6" cy=".6" r=".9"/>
+            <path class="w lite vig pastel" style="--p:var(--p-manege)" data-ink="rose" d="M-17-6L0-18L17-6C14-3 11-6 8.5-3.5C6-1 3-4 0-2C-3-4-6-1-8.5-3.5C-11-6-14-3-17-6Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M0-17V-3M-8-11.5L-8.5-4.5M8-11.5L8.5-4.5"/>
+            <circle cx="0" cy="-19" r="2.2" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="v-ogre" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-bulle)" data-ink="bleu" d="M-17-15C-17-18-15-19-12-19H12C15-19 17-18 17-15V7C17 10 15 11 12 11H-3L-9 17.5L-8 11H-12C-15 11-17 10-17 7Z"/>
+            <path class="w lite vig vert" style="--p:var(--p-ogre)" data-ink="jaune" d="M-9-5C-12-6-12-1-9-1ZM10-5C13-6 13-1 10-1Z"/>
+            <path class="w lite vig vert" style="--p:var(--p-ogre)" data-ink="jaune" d="M-9-2C-10-8-8-14-3-15C-1-17 2-17 4-15C9-14 11-8 10-2C10 4 6 7 .5 7C-5 7-9 4-9-2Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-6-10L-1-8.5M2-8.5L7-10"/>
+            <circle class="noeud-brun" cx="-3.5" cy="-6.5" r="1.4"/>
+            <circle class="noeud-brun" cx="4" cy="-6.5" r="1.4"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M0-5.5C-1-2.5 2-2.5 1.5-4.5"/>
+            <path class="w lite vig brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-5 0C-2 3.6 3 3.6 6 0C4 5-3 5-5 0Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-3 .8L-2 3.2L-1 1.4ZM3 1.4L4 3.2L5 .8Z"/>
+          </symbol>
+          <symbol id="v-pirate" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-bulle)" data-ink="bleu" d="M-17-15C-17-18-15-19-12-19H12C15-19 17-18 17-15V7C17 10 15 11 12 11H-3L-9 17.5L-8 11H-12C-15 11-17 10-17 7Z"/>
+            <path class="w lite vig" style="--p:var(--p-pirate)" data-ink="bleu" d="M-14 3C-12-3-9-11 0-12C9-11 12-3 14 3C9 1 4 0 0 0C-4 0-9 1-14 3Z"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M-13 1.6Q0-3 13 1.6"/>
+            <path class="w lite vig reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-3.2-6C-3.2-7.8-1.8-9.2 0-9.2C1.8-9.2 3.2-7.8 3.2-6C3.2-4.2 1.8-2.8 0-2.8C-1.8-2.8-3.2-4.2-3.2-6Z"/>
+            <circle class="noeud-brun" cx="-1.1" cy="-6.4" r=".8"/>
+            <circle class="noeud-brun" cx="1.1" cy="-6.4" r=".8"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-4.5-.6L4.5-3.4M-4.5-3.4L4.5-.6"/>
+            <circle cx="-11.5" cy="-14.5" r="1.2" fill="url(#knot)"/>
+            <circle cx="11" cy="-15" r="1.2" fill="url(#knot)"/>
+            <circle cx="13" cy="-5" r="1" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="v-dragon" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-bulle)" data-ink="bleu" d="M-17-15C-17-18-15-19-12-19H12C15-19 17-18 17-15V7C17 10 15 11 12 11H-3L-9 17.5L-8 11H-12C-15 11-17 10-17 7Z"/>
+            <path class="w lite vig orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M-12-8L-14-14L-8-10.5ZM-7-11L-7-17L-3-11.5ZM-2-11.5L0-16.5L2-10.5Z"/>
+            <path class="w lite vig vert" style="--p:var(--p-dragon)" data-ink="bleu" d="M-15 4C-16-3-13-10-6-11C-2-12 2-10 4-7C7-7 11-6 12-3C13 0 11 2 8 2H1C-1 5-4 7-8 7C-12 7-15 6-15 4Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-6.4-5C-6.4-6.3-5.3-7.4-4-7.4C-2.7-7.4-1.6-6.3-1.6-5C-1.6-3.7-2.7-2.6-4-2.6C-5.3-2.6-6.4-3.7-6.4-5Z"/>
+            <circle class="noeud-brun" cx="-3.4" cy="-5" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M9-3.5V-2.5M-11 2Q-6 4-1 2"/>
+            <path class="w lite vig reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M12.5-3C15-5.5 16.5-3 15.5-1.5C17.5-1.5 17.5 1.5 15.5 2C16.5 4 13.5 4.5 12.5 2Z"/>
+          </symbol>
+          <symbol id="v-anniversaire" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-bulle)" data-ink="bleu" d="M-17-15C-17-18-15-19-12-19H12C15-19 17-18 17-15V7C17 10 15 11 12 11H-3L-9 17.5L-8 11H-12C-15 11-17 10-17 7Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-6-2Q-5 3-1 8M5-3Q4 2-1 8"/>
+            <path class="w lite vig" style="--p:var(--p-cerise)" data-ink="rose" d="M-11-8.5C-11-11.8-8.8-14.5-6-14.5C-3.2-14.5-1-11.8-1-8.5C-1-5.2-3.2-2.5-6-2.5C-8.8-2.5-11-5.2-11-8.5Z"/>
+            <path class="w lite vig" style="--p:var(--p-bougie)" data-ink="bleu" d="M.9-10C.9-13.1 3-15.6 5.5-15.6C8-15.6 10.1-13.1 10.1-10C10.1-6.9 8-4.4 5.5-4.4C3-4.4 .9-6.9 .9-10Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-8-11Q-7.5-13-6-13.5M3.8-12.5Q4-14 5.2-14.5"/>
+            <circle cx="-12.5" cy="4" r="1.1" fill="url(#knot)"/>
+            <circle cx="11" cy="3" r="1.1" fill="url(#knot)"/>
+            <circle cx="13" cy="-16" r="1" fill="url(#knot)"/>
+            <circle cx="-13" cy="-15" r="1" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="v-copains" overflow="visible">
+            <path class="w lite vig orange" style="--p:var(--p-copain-1)" data-ink="jaune" d="M-16.5 20C-16.5 8.3-13.3 3.3-8.5 3.3C-3.7 3.3-.5 8.3-.5 20Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-14.8-2.7C-14.8-6.2-12-9-8.5-9C-5-9-2.2-6.2-2.2-2.7C-2.2 .8-5 3.6-8.5 3.6C-12 3.6-14.8 .8-14.8-2.7Z"/>
+            <path class="w lite vig" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-14.9-3.3C-15.4-9.6-12.3-9.8-8.5-9.8C-4.7-9.8-1.6-9.6-2.1-3.3C-4.7-6.8-12.3-6.8-14.9-3.3Z"/>
+            <circle class="noeud-brun" cx="-10.9" cy="-2.4" r="1.1"/>
+            <circle class="noeud-brun" cx="-6.1" cy="-2.4" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-10.5-.1Q-8.5 1.6-6.5-.1"/>
+            <path class="w lite vig vert" style="--p:var(--p-copain-2)" data-ink="bleu" d="M1 20C1 7.3 4.2 2.3 9 2.3C13.8 2.3 17 7.3 17 20Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-b)" data-ink="jaune" d="M2.7-3.7C2.7-7.2 5.5-10 9-10C12.5-10 15.3-7.2 15.3-3.7C15.3-.2 12.5 2.6 9 2.6C5.5 2.6 2.7-.2 2.7-3.7Z"/>
+            <path class="w lite vig orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M2.6-4.3C2.1-10.6 5.2-10.8 9-10.8C12.8-10.8 15.9-10.6 15.4-4.3C12.8-7.8 5.2-7.8 2.6-4.3Z"/>
+            <path class="w lite vig orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M.4-2.4C.4-3.6 1.3-4.5 2.4-4.5C3.5-4.5 4.4-3.6 4.4-2.4C4.4-1.3 3.5-.4 2.4-.4C1.3-.4 .4-1.3 .4-2.4Z"/>
+            <path class="w lite vig orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M13.6-2.4C13.6-3.6 14.5-4.5 15.6-4.5C16.7-4.5 17.6-3.6 17.6-2.4C17.6-1.3 16.7-.4 15.6-.4C14.5-.4 13.6-1.3 13.6-2.4Z"/>
+            <circle class="noeud-brun" cx="6.6" cy="-3.4" r="1.1"/>
+            <circle class="noeud-brun" cx="11.4" cy="-3.4" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M7-1.1Q9 .6 11-1.1"/>
+          </symbol>
+          <symbol id="v-parents" overflow="visible">
+            <path class="w lite vig" style="--p:var(--p-papa)" data-ink="bleu" d="M-17.5 20C-17.5 3.9-13.9-1.1-8.5-1.1C-3.1-1.1 .5 3.9 .5 20Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-15.1-7.4C-15.1-11-12.1-14-8.5-14C-4.9-14-1.9-11-1.9-7.4C-1.9-3.8-4.9-.8-8.5-.8C-12.1-.8-15.1-3.8-15.1-7.4Z"/>
+            <path class="w lite vig" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-15.2-8.1C-15.8-14.7-12.5-14.8-8.5-14.8C-4.5-14.8-1.2-14.7-1.8-8.1C-4.5-11.7-12.5-11.7-15.2-8.1Z"/>
+            <circle class="noeud-brun" cx="-11" cy="-7.1" r="1.1"/>
+            <circle class="noeud-brun" cx="-6" cy="-7.1" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-10.6-4.6Q-8.5-2.9-6.4-4.6"/>
+            <path class="w lite vig brun" style="--p:var(--p-cheveux-c)" data-ink="rose" d="M2.1 2.4C.8-10.2 2.1-14.6 9-14.6C15.9-14.6 17.2-10.2 15.9 2.4Z"/>
+            <path class="w lite vig" style="--p:var(--p-maman)" data-ink="rose" d="M0 20C0 3.3 3.6-1.7 9-1.7C14.4-1.7 18 3.3 18 20Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-c)" data-ink="jaune" d="M2.7-7.7C2.7-11.2 5.5-14 9-14C12.5-14 15.3-11.2 15.3-7.7C15.3-4.2 12.5-1.4 9-1.4C5.5-1.4 2.7-4.2 2.7-7.7Z"/>
+            <path class="w lite vig brun" style="--p:var(--p-cheveux-c)" data-ink="rose" d="M2.6-8.3C2.1-14.6 5.2-14.8 9-14.8C12.8-14.8 15.9-14.6 15.4-8.3C12.8-11.8 5.2-11.8 2.6-8.3Z"/>
+            <circle class="noeud-brun" cx="6.6" cy="-7.4" r="1.1"/>
+            <circle class="noeud-brun" cx="11.4" cy="-7.4" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M7-5.1Q9-3.4 11-5.1"/>
+          </symbol>
+          <symbol id="v-mamie" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-mamie)" data-ink="rose" d="M-13 20C-13 6.6-7.8 1.6 0 1.6C7.8 1.6 13 6.6 13 20Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-b)" data-ink="jaune" d="M-8-6C-8-10.4-4.4-14 0-14C4.4-14 8-10.4 8-6C8-1.6 4.4 2 0 2C-4.4 2-8-1.6-8-6Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-8.2-6.8C-8.8-14.8-4.8-15 0-15C4.8-15 8.8-14.8 8.2-6.8C4.8-11.2-4.8-11.2-8.2-6.8Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-3.6-16C-3.6-18-2-19.6 0-19.6C2-19.6 3.6-18 3.6-16C3.6-14 2-12.4 0-12.4C-2-12.4-3.6-14-3.6-16Z"/>
+            <circle class="noeud-brun" cx="-3" cy="-5.6" r="1.4"/>
+            <circle class="noeud-brun" cx="3" cy="-5.6" r="1.4"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-2.6-2.6Q0-.6 2.6-2.6"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-1.4-5.5H1.4"/>
+            <path class="fil lunettes" style="--f:var(--fil-brun)" d="M-6.2-5.5C-6.2-7.3-1.6-7.3-1.6-5.5C-1.6-3.7-6.2-3.7-6.2-5.5ZM1.6-5.5C1.6-7.3 6.2-7.3 6.2-5.5C6.2-3.7 1.6-3.7 1.6-5.5Z"/>
+            <circle cx="-5" cy="7.5" r="1.2" fill="url(#knot)"/>
+            <circle cx="-2.5" cy="8.6" r="1.2" fill="url(#knot)"/>
+            <circle cx="0" cy="9" r="1.2" fill="url(#knot)"/>
+            <circle cx="2.5" cy="8.6" r="1.2" fill="url(#knot)"/>
+            <circle cx="5" cy="7.5" r="1.2" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="v-maitresse" overflow="visible">
+            <path class="w lite vig vert-fonce" style="--p:var(--p-tableau)" data-ink="bleu" d="M-17.5-18H1.5C2.3-18 3-17.3 3-16.5V-3.5C3-2.7 2.3-2 1.5-2H-17.5C-18.3-2-19-2.7-19-3.5V-16.5C-19-17.3-18.3-18-17.5-18Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-15.5-6L-12.5-14L-9.5-6M-14.3-9H-10.7M-6.5-14V-6M-6.5-14C-2.5-14-2.5-10-6.5-10C-2-10-2-6-6.5-6"/>
+            <path class="w lite vig orange" style="--p:var(--p-maitresse)" data-ink="jaune" d="M-1 20C-1 7.3 2.6 2.3 8 2.3C13.4 2.3 17 7.3 17 20Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-c)" data-ink="jaune" d="M1.7-3.7C1.7-7.2 4.5-10 8-10C11.5-10 14.3-7.2 14.3-3.7C14.3-.2 11.5 2.6 8 2.6C4.5 2.6 1.7-.2 1.7-3.7Z"/>
+            <path class="w lite vig" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M1.6-4.3C1.1-10.6 4.2-10.8 8-10.8C11.8-10.8 14.9-10.6 14.4-4.3C11.8-7.8 4.2-7.8 1.6-4.3Z"/>
+            <path class="w lite vig" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M5.2-11.6C5.2-13.1 6.4-14.4 8-14.4C9.6-14.4 10.8-13.1 10.8-11.6C10.8-10 9.6-8.7 8-8.7C6.4-8.7 5.2-10 5.2-11.6Z"/>
+            <circle class="noeud-brun" cx="5.6" cy="-3.4" r="1.1"/>
+            <circle class="noeud-brun" cx="10.4" cy="-3.4" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M6-1.1Q8 .6 10-1.1"/>
+            <path class="w lite vig trait" style="--p:var(--p-bois);--tw:1.6" data-ink="rose" d="M2 13L-5-1"/>
+          </symbol>
+          <symbol id="v-ri" overflow="visible">
+            <path class="w lite vig" style="--p:var(--p-visage)" data-ink="jaune" d="M-16 0C-16-8.8-8.8-16 0-16C8.8-16 16-8.8 16 0C16 8.8 8.8 16 0 16C-8.8 16-16 8.8-16 0Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-13 4C-13 2.7-11.4 1.6-9.5 1.6C-7.6 1.6-6 2.7-6 4C-6 5.3-7.6 6.4-9.5 6.4C-11.4 6.4-13 5.3-13 4Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-joue)" data-ink="rose" d="M6 4C6 2.7 7.6 1.6 9.5 1.6C11.4 1.6 13 2.7 13 4C13 5.3 11.4 6.4 9.5 6.4C7.6 6.4 6 5.3 6 4Z"/>
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-9.5-4Q-6.5-8.5-3.5-4M3.5-4Q6.5-8.5 9.5-4"/>
+            <path class="w lite vig brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-8 1.5C-7 13 7 13 8 1.5Z"/>
+            <path class="w lite vig" style="--p:var(--p-joue)" data-ink="rose" d="M-4 7.8C-3 10.8 3 10.8 4 7.8C2 6.4-2 6.4-4 7.8Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M-14.5-3.9C-12.9-1.8-12.9 .3-14.5 .3C-16.1 .3-16.1-1.8-14.5-3.9Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M14.5-3.9C16.1-1.8 16.1 .3 14.5 .3C12.9 .3 12.9-1.8 14.5-3.9Z"/>
+          </symbol>
+          <symbol id="v-peur" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-visage-peur)" data-ink="bleu" d="M-16 0C-16-8.8-8.8-16 0-16C8.8-16 16-8.8 16 0C16 8.8 8.8 16 0 16C-8.8 16-16 8.8-16 0Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-10.6-3C-10.6-5.5-8.5-7.6-6-7.6C-3.5-7.6-1.4-5.5-1.4-3C-1.4-.5-3.5 1.6-6 1.6C-8.5 1.6-10.6-.5-10.6-3Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M1.4-3C1.4-5.5 3.5-7.6 6-7.6C8.5-7.6 10.6-5.5 10.6-3C10.6-.5 8.5 1.6 6 1.6C3.5 1.6 1.4-.5 1.4-3Z"/>
+            <circle class="noeud-brun" cx="-6" cy="-2.4" r="1.9"/>
+            <circle class="noeud-brun" cx="6" cy="-2.4" r="1.9"/>
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-10.5-10Q-6.5-13-2.5-10.5M2.5-10.5Q6.5-13 10.5-10"/>
+            <path class="w lite vig" style="--p:var(--p-roue)" data-ink="bleu" d="M-3.2 8.5C-3.2 6.2-1.8 4.3 0 4.3C1.8 4.3 3.2 6.2 3.2 8.5C3.2 10.8 1.8 12.7 0 12.7C-1.8 12.7-3.2 10.8-3.2 8.5Z"/>
+            <path class="w lite vig reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M12.5-13.7C14.3-11.4 14.3-9.1 12.5-9.1C10.7-9.1 10.7-11.4 12.5-13.7Z"/>
+          </symbol>
+          <symbol id="v-fache" overflow="visible">
+            <path class="w lite vig orange" style="--p:var(--p-fache)" data-ink="rose" d="M-16 0C-16-8.8-8.8-16 0-16C8.8-16 16-8.8 16 0C16 8.8 8.8 16 0 16C-8.8 16-16 8.8-16 0Z"/>
+            <path class="w lite vig trait" style="--p:var(--p-roue);--tw:2.4" data-ink="bleu" d="M-11-8.5L-3-5.5M11-8.5L3-5.5"/>
+            <circle class="noeud-brun" cx="-6" cy="-1.5" r="1.9"/>
+            <circle class="noeud-brun" cx="6" cy="-1.5" r="1.9"/>
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-6.5 9.5Q0 4 6.5 9.5"/>
+            <path class="w lite vig pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-16-15C-16-16.7-14.7-18-13-18C-11.3-18-10-16.7-10-15C-10-13.3-11.3-12-13-12C-14.7-12-16-13.3-16-15ZM-18.7-12.5C-18.7-13.7-17.7-14.7-16.5-14.7C-15.3-14.7-14.3-13.7-14.3-12.5C-14.3-11.3-15.3-10.3-16.5-10.3C-17.7-10.3-18.7-11.3-18.7-12.5Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M10-15C10-16.7 11.3-18 13-18C14.7-18 16-16.7 16-15C16-13.3 14.7-12 13-12C11.3-12 10-13.3 10-15ZM14.3-12.5C14.3-13.7 15.3-14.7 16.5-14.7C17.7-14.7 18.7-13.7 18.7-12.5C18.7-11.3 17.7-10.3 16.5-10.3C15.3-10.3 14.3-11.3 14.3-12.5Z"/>
+          </symbol>
+          <symbol id="v-calin" overflow="visible">
+            <path class="w lite vig" style="--p:var(--p-coeur)" data-ink="rose" d="M0 15C-6 10-15 5-15-3C-15-9-10-12-6-12C-3-12-1-10 0-8C1-10 3-12 6-12C10-12 15-9 15-3C15 5 6 10 0 15Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-9-6Q-8.5-8.5-6-9"/>
+            <path class="w lite vig trait" style="--p:var(--p-peau-d);--tw:3.6" data-ink="jaune" d="M-18.5-3C-15 8-5 10 1.5 6"/>
+            <path class="w lite vig trait" style="--p:var(--p-peau-a);--tw:3.6" data-ink="jaune" d="M18.5-3C15 8 5 10-1.5 6"/>
+            <path class="w lite vig" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-.8 5.8C-.8 4.4 .4 3.2 1.8 3.2C3.2 3.2 4.4 4.4 4.4 5.8C4.4 7.2 3.2 8.4 1.8 8.4C.4 8.4-.8 7.2-.8 5.8Z"/>
+            <path class="w lite vig" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-4.4 5.8C-4.4 4.4-3.2 3.2-1.8 3.2C-.4 3.2 .8 4.4 .8 5.8C.8 7.2-.4 8.4-1.8 8.4C-3.2 8.4-4.4 7.2-4.4 5.8Z"/>
+          </symbol>
+          <symbol id="v-chanson" overflow="visible">
+            <path class="fil" style="--f:var(--fil-sable)" d="M-18-7Q0-11 18-7M-18-2Q0-6 18-2M-18 3Q0-1 18 3"/>
+            <path class="w lite vig" style="--p:var(--p-notes)" data-ink="bleu" d="M-12 9.5C-12 7.8-10.2 6.5-8 6.5C-5.8 6.5-4 7.8-4 9.5C-4 11.2-5.8 12.5-8 12.5C-10.2 12.5-12 11.2-12 9.5Z"/>
+            <path class="w lite vig trait" style="--p:var(--p-notes);--tw:1.9" data-ink="bleu" d="M-4.3 9V-11Q1-9 1.5-3.5"/>
+            <path class="w lite vig" style="--p:var(--p-notes)" data-ink="bleu" d="M2.4 7C2.4 5.5 4 4.2 6 4.2C8 4.2 9.6 5.5 9.6 7C9.6 8.5 8 9.8 6 9.8C4 9.8 2.4 8.5 2.4 7Z"/>
+            <path class="w lite vig" style="--p:var(--p-notes)" data-ink="bleu" d="M10.4 4C10.4 2.5 12 1.2 14 1.2C16 1.2 17.6 2.5 17.6 4C17.6 5.5 16 6.8 14 6.8C12 6.8 10.4 5.5 10.4 4Z"/>
+            <path class="w lite vig trait" style="--p:var(--p-notes);--tw:1.8" data-ink="bleu" d="M9.3 7V-11.5M17.3 4V-14.5"/>
+            <path class="w lite vig trait" style="--p:var(--p-notes);--tw:3.2" data-ink="bleu" d="M9.3-11.5L17.3-14.5"/>
+          </symbol>
+          <symbol id="v-doudou" overflow="visible">
+            <path class="w lite vig pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-5-6C-8-12-9-19-6-20C-3-20-2-13-2-6ZM3-6C3-13 4-20 7-19.5C10-19 8-12 5-6Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-5-8C-6.5-12-7-17-6-17.5C-4.5-17.5-3.6-13-3.5-8ZM4-8C4-13 5-17.5 6.5-17C7.5-16 6.5-12 5-8Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-9 18C-11 12-8 5 0 5C8 5 11 12 9 18Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-7.2-1.5C-7.2-5.5-4-8.7 0-8.7C4-8.7 7.2-5.5 7.2-1.5C7.2 2.5 4 5.7 0 5.7C-4 5.7-7.2 2.5-7.2-1.5Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-10 17C-10 15.9-8.7 15-7 15C-5.3 15-4 15.9-4 17C-4 18.1-5.3 19-7 19C-8.7 19-10 18.1-10 17Z"/>
+            <path class="w lite vig pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M4 17C4 15.9 5.3 15 7 15C8.7 15 10 15.9 10 17C10 18.1 8.7 19 7 19C5.3 19 4 18.1 4 17Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-4.2-2.6Q-2.7-1.1-1.2-2.6M1.2-2.6Q2.7-1.1 4.2-2.6"/>
+            <circle class="noeud-brun" cx="0" cy="1" r="1.2"/>
+            <path class="w lite vig" style="--p:var(--p-cerise)" data-ink="rose" d="M0 5.5L-5 3V8ZM0 5.5L5 3V8Z"/>
+          </symbol>
+          <symbol id="d-glace" overflow="visible">
+            <path class="w lite mini orange" style="--p:var(--p-cornet)" data-ink="jaune" d="M-16.5-6.6H16.5L1.8 40.7Q0 43.1-1.8 40.7Z"/>
+            <path class="fil  gros" style="--f:var(--fil-brun)" d="M-12.1 0L5.5 22M0-5.5L11 8.8M12.1 0L-5.5 22M0-5.5L-11 8.8"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-19.8-8.8C-24.2-17.6-19.8-30.8-8.8-34.1C-2.2-38.5 6.6-38.5 11-34.1C20.9-30.8 24.2-17.6 19.8-8.8C16.5-3.3 13.2-7.7 9.9-4.4C6.6-1.1 3.3-6.6 0-3.3C-3.3 0-6.6-6.6-9.9-3.3C-13.2 0-16.5-3.3-19.8-8.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M-3.5-38.7C-3.5-41.9-1-44.4 2.2-44.4C5.4-44.4 7.9-41.9 7.9-38.7C7.9-35.6 5.4-33 2.2-33C-1-33-3.5-35.6-3.5-38.7Z"/>
+            <path class="fil  gros" style="--f:var(--fil-blanc)" d="M-12.1-23.1Q-9.9-29.7-3.3-30.8"/>
+          </symbol>
+          <symbol id="d-chien" overflow="visible">
+            <path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:6.3" data-ink="jaune" d="M-25.2 24Q-39.9 15.6-35.7 .9"/>
+            <path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-29.4 38.7C-33.6 21.9-27.3 3-12.6 .9C2.1-1.2 12.6 11.4 14.7 24C15.8 30.3 14.7 36.6 12.6 38.7Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-2.1-15.9C-2.1-28.5 6.3-34.8 14.7-34.8C23.1-34.8 29.4-28.5 29.4-20.1C35.7-20.1 39.9-15.9 39.9-10.7C39.9-5.4 35.7-2.2 29.4-2.2C25.2 1.9 18.9 4 12.6 3C4.2 1.9-2.1-5.4-2.1-15.9Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M23.1-8.8C23.1-12 26.9-14.6 31.5-14.6C36.1-14.6 39.9-12 39.9-8.8C39.9-5.5 36.1-2.9 31.5-2.9C26.9-2.9 23.1-5.5 23.1-8.8Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M6.3-30.6C-2.1-30.6-6.3-20.1-4.2-9.6C-3.2-4.4 2.1-3.3 4.2-7.5C6.3-13.8 10.5-22.2 6.3-30.6Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-cerise);--tw:4.6" data-ink="rose" d="M1.1-.2Q8.4 5.1 16.8 1.9"/>
+            <circle class="noeud-brun" cx="38.6" cy="-11.7" r="3.1"/>
+            <circle class="noeud-brun" cx="18.9" cy="-20.1" r="2.3"/>
+            <path class="fil  gros" style="--f:var(--fil-brun)" d="M30.5-4.6Q33.6-2.5 36.8-4.6"/>
+            <path class="fil  gros" style="--f:var(--fil-brun)" d="M-2.1 38.7V28.2M6.3 38.7V24"/>
+          </symbol>
+          <symbol id="d-velo" overflow="visible">
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M-40.7 17.6C-40.7 7.3-32.3-1.1-22-1.1C-11.7-1.1-3.3 7.3-3.3 17.6C-3.3 27.9-11.7 36.3-22 36.3C-32.3 36.3-40.7 27.9-40.7 17.6ZM-35.9 17.6C-35.9 9.9-29.7 3.7-22 3.7C-14.3 3.7-8.1 9.9-8.1 17.6C-8.1 25.3-14.3 31.5-22 31.5C-29.7 31.5-35.9 25.3-35.9 17.6Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M3.3 17.6C3.3 7.3 11.7-1.1 22-1.1C32.3-1.1 40.7 7.3 40.7 17.6C40.7 27.9 32.3 36.3 22 36.3C11.7 36.3 3.3 27.9 3.3 17.6ZM8.1 17.6C8.1 9.9 14.3 3.7 22 3.7C29.7 3.7 35.9 9.9 35.9 17.6C35.9 25.3 29.7 31.5 22 31.5C14.3 31.5 8.1 25.3 8.1 17.6Z"/>
+            <path class="fil  gros" style="--f:var(--fil-sable)" d="M-22 4.4V30.8M-35.2 17.6H-8.8M22 4.4V30.8M8.8 17.6H35.2"/>
+            <path class="w lite mini trait" style="--p:var(--p-velo);--tw:5.7" data-ink="rose" d="M-22 17.6L-6.6-8.8H17.6L22 17.6M-6.6-8.8L2.2 17.6H-22M2.2 17.6L17.6-8.8"/>
+            <path class="w lite mini trait" style="--p:var(--p-roue);--tw:4.4" data-ink="bleu" d="M-6.6-8.8L-8.8-16.5M17.6-8.8L15.4-22H24.2"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-16.5-19.8H-2.2C0-19.8 1.1-16.5-1.1-15.4H-16.5C-18.7-16.5-18.7-19.8-16.5-19.8Z"/>
+            <circle cx="-22" cy="17.6" r="2.5" fill="url(#knot)"/>
+            <circle cx="22" cy="17.6" r="2.5" fill="url(#knot)"/>
+            <circle cx="2.2" cy="17.6" r="2.9" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="d-piscine" overflow="visible">
+            <path class="w lite mini pastel" style="--p:var(--p-bord-piscine)" data-ink="bleu" d="M-40.8-2.4H40.8C43.5-2.4 45.6-.3 45.6 2.4V7.2C45.6 9.9 43.5 12 40.8 12H-40.8C-43.5 12-45.6 9.9-45.6 7.2V2.4C-45.6-.3-43.5-2.4-40.8-2.4Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-eau)" data-ink="bleu" d="M-40.8 9.6H40.8V36C40.8 40.8 38.4 43.2 33.6 43.2H-33.6C-38.4 43.2-40.8 40.8-40.8 36Z"/>
+            <path class="fil  gros" style="--f:var(--fil-blanc)" d="M-33.6 21.6Q-27.6 15.6-21.6 21.6T-9.6 21.6T2.4 21.6T14.4 21.6M-28.8 33.6Q-22.8 27.6-16.8 33.6T-4.8 33.6T7.2 33.6T19.2 33.6"/>
+            <path class="w lite mini trait" style="--p:var(--p-socle);--tw:4.3" data-ink="bleu" d="M26.4-31.2V14.4M38.4-31.2V14.4"/>
+            <path class="fil  gros" style="--f:var(--fil-sable)" d="M26.4-21.6H38.4M26.4-9.6H38.4M26.4 2.4H38.4"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" fill-rule="evenodd" d="M-31.2-18C-31.2-26-24.8-32.4-16.8-32.4C-8.8-32.4-2.4-26-2.4-18C-2.4-10-8.8-3.6-16.8-3.6C-24.8-3.6-31.2-10-31.2-18ZM-24-18C-24-22-20.8-25.2-16.8-25.2C-12.8-25.2-9.6-22-9.6-18C-9.6-14-12.8-10.8-16.8-10.8C-20.8-10.8-24-14-24-18Z"/>
+            <path class="fil  gros" style="--f:var(--fil-blanc)" d="M-30-18H-25.2M-8.4-18H-3.6M-16.8-31.2V-26.4M-16.8-9.6V-4.8"/>
+          </symbol>
+          <symbol id="d-gateau" overflow="visible">
+            <path class="w lite mini pastel" style="--p:var(--p-assiette)" data-ink="bleu" d="M-33.6 29.4H33.6C35.9 29.4 37.8 31.3 37.8 33.6V33.6C37.8 35.9 35.9 37.8 33.6 37.8H-33.6C-35.9 37.8-37.8 35.9-37.8 33.6V33.6C-37.8 31.3-35.9 29.4-33.6 29.4Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-gateau)" data-ink="jaune" d="M-23.1-2.1H23.1C26.6-2.1 29.4 .7 29.4 4.2V25.2C29.4 28.7 26.6 31.5 23.1 31.5H-23.1C-26.6 31.5-29.4 28.7-29.4 25.2V4.2C-29.4 .7-26.6-2.1-23.1-2.1Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glacage)" data-ink="rose" d="M-31.5-2.1C-31.5-10.5 31.5-10.5 31.5-2.1V6.3C27.3 12.6 23.1 4.2 18.9 8.4C14.7 16.8 8.4 6.3 3.2 10.5C-2.1 16.8-8.4 6.3-13.7 10.5C-18.9 16.8-25.2 6.3-31.5 10.5Z"/>
+            <path class="fil  gros" style="--f:var(--fil-rouge)" d="M-27.3 22.1H27.3"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-14.7-27.3H-12.6C-11.4-27.3-10.5-26.4-10.5-25.2V-8.4C-10.5-7.2-11.4-6.3-12.6-6.3H-14.7C-15.9-6.3-16.8-7.2-16.8-8.4V-25.2C-16.8-26.4-15.9-27.3-14.7-27.3Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-1.1-30.5H1.1C2.2-30.5 3.2-29.5 3.2-28.4V-9.5C3.2-8.3 2.2-7.4 1.1-7.4H-1.1C-2.2-7.4-3.2-8.3-3.2-9.5V-28.4C-3.2-29.5-2.2-30.5-1.1-30.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M12.6-27.3H14.7C15.9-27.3 16.8-26.4 16.8-25.2V-8.4C16.8-7.2 15.9-6.3 14.7-6.3H12.6C11.4-6.3 10.5-7.2 10.5-8.4V-25.2C10.5-26.4 11.4-27.3 12.6-27.3Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M-13.7-39.4C-9.9-34.4-9.9-29.5-13.7-29.5C-17.4-29.5-17.4-34.4-13.7-39.4Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M0-42.5C3.8-37.6 3.8-32.7 0-32.7C-3.8-32.7-3.8-37.6 0-42.5Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M13.7-39.4C17.4-34.4 17.4-29.5 13.7-29.5C9.9-29.5 9.9-34.4 13.7-39.4Z"/>
+          </symbol>
+          <symbol id="d-tracteur" overflow="visible">
+            <path class="w lite mini vert" style="--p:var(--p-tracteur)" data-ink="bleu" d="M-34.5-2.3V-36.8C-34.5-39.1-32.2-41.4-29.9-41.4H-2.3C0-41.4 2.3-39.1 2.3-36.8V-2.3Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-vitre)" data-ink="bleu" d="M-26-35.6H-7.4C-5.8-35.6-4.6-34.4-4.6-32.9V-22.3C-4.6-20.8-5.8-19.5-7.4-19.5H-26C-27.5-19.5-28.7-20.8-28.7-22.3V-32.9C-28.7-34.4-27.5-35.6-26-35.6Z"/>
+            <path class="w lite mini vert" style="--p:var(--p-tracteur)" data-ink="bleu" d="M0-16.1H32.2C36.8-16.1 39.1-13.8 39.1-9.2V11.5H0Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M23.9-33.3H24.8C26.1-33.3 27.1-32.3 27.1-31V-17.2C27.1-16 26.1-14.9 24.8-14.9H23.9C22.6-14.9 21.6-16 21.6-17.2V-31C21.6-32.3 22.6-33.3 23.9-33.3Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-41.4 18.4C-41.4 5.7-31.1-4.6-18.4-4.6C-5.7-4.6 4.6 5.7 4.6 18.4C4.6 31.1-5.7 41.4-18.4 41.4C-31.1 41.4-41.4 31.1-41.4 18.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-moyeu)" data-ink="jaune" d="M-29 18.4C-29 12.6-24.2 7.8-18.4 7.8C-12.6 7.8-7.8 12.6-7.8 18.4C-7.8 24.2-12.6 29-18.4 29C-24.2 29-29 24.2-29 18.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M12.6 26.4C12.6 18.2 19.3 11.5 27.6 11.5C35.9 11.5 42.5 18.2 42.5 26.4C42.5 34.7 35.9 41.4 27.6 41.4C19.3 41.4 12.6 34.7 12.6 26.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-moyeu)" data-ink="jaune" d="M21.2 26.4C21.2 22.9 24 20 27.6 20C31.2 20 34 22.9 34 26.4C34 30 31.2 32.9 27.6 32.9C24 32.9 21.2 30 21.2 26.4Z"/>
+            <path class="fil  gros" style="--f:var(--fil-blanc)" d="M6.9-6.9H32.2"/>
+            <circle cx="-18.4" cy="18.4" r="2.5" fill="url(#knot)"/>
+            <circle cx="27.6" cy="26.4" r="2" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="d-manege" overflow="visible">
+            <path class="w lite mini trait" style="--p:var(--p-or);--tw:3.7" data-ink="jaune" d="M-27.6-9.2V29.9M27.6-9.2V29.9M0-6.9V29.9"/>
+            <path class="w lite mini pastel" style="--p:var(--p-assiette)" data-ink="bleu" d="M-34.5 29.9H34.5C37 29.9 39.1 32 39.1 34.5V36.8C39.1 39.3 37 41.4 34.5 41.4H-34.5C-37 41.4-39.1 39.3-39.1 36.8V34.5C-39.1 32-37 29.9-34.5 29.9Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-cheval)" data-ink="jaune" d="M-13.8 18.4C-13.8 9.2-6.9 4.6 2.3 4.6H6.9L11.5-2.3C13.8-4.6 18.4-4.6 19.5-1.1L20.7 4.6C21.8 8 19.5 10.3 16.1 9.2L12.6 8L11.5 16.1C11.5 20.7 8 21.8 4.6 21.8H-9.2C-11.5 21.8-13.8 20.7-13.8 18.4Z"/>
+            <path class="fil  gros" style="--f:var(--fil-brun)" d="M-9.2 21.8L-11.5 28.7M4.6 21.8L6.9 28.7M8 1.1Q4.6 5.8 3.4 9.2"/>
+            <circle class="noeud-brun" cx="15.2" cy="1.4" r="1.6"/>
+            <path class="w lite mini pastel" style="--p:var(--p-manege)" data-ink="rose" d="M-39.1-13.8L0-41.4L39.1-13.8C32.2-6.9 25.3-13.8 19.5-8C13.8-2.3 6.9-9.2 0-4.6C-6.9-9.2-13.8-2.3-19.5-8C-25.3-13.8-32.2-6.9-39.1-13.8Z"/>
+            <path class="fil  gros" style="--f:var(--fil-blanc)" d="M0-39.1V-6.9M-18.4-26.4L-19.5-10.3M18.4-26.4L19.5-10.3"/>
+            <circle cx="0" cy="-43.7" r="4" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="d-doudou" overflow="visible">
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-9.5-5.4C-15.2-16.8-17.1-30.1-11.4-32C-5.7-32-3.8-18.7-3.8-5.4ZM5.7-5.4C5.7-18.7 7.6-32 13.3-31C19-30.1 15.2-16.8 9.5-5.4Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-9.5-9.2C-12.3-16.8-13.3-26.3-11.4-27.2C-8.5-27.2-6.8-18.7-6.6-9.2ZM7.6-9.2C7.6-18.7 9.5-27.2 12.3-26.3C14.2-24.4 12.3-16.8 9.5-9.2Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-17.1 40.2C-20.9 28.8-15.2 15.5 0 15.5C15.2 15.5 20.9 28.8 17.1 40.2Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-13.7 3.2C-13.7-4.4-7.6-10.5 0-10.5C7.6-10.5 13.7-4.4 13.7 3.2C13.7 10.7 7.6 16.8 0 16.8C-7.6 16.8-13.7 10.7-13.7 3.2Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-19 38.3C-19 36.2-16.4 34.5-13.3 34.5C-10.2 34.5-7.6 36.2-7.6 38.3C-7.6 40.4-10.2 42.1-13.3 42.1C-16.4 42.1-19 40.4-19 38.3Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M7.6 38.3C7.6 36.2 10.2 34.5 13.3 34.5C16.4 34.5 19 36.2 19 38.3C19 40.4 16.4 42.1 13.3 42.1C10.2 42.1 7.6 40.4 7.6 38.3Z"/>
+            <path class="fil  gros" style="--f:var(--fil-brun)" d="M-8 1.1Q-5.1 3.9-2.3 1.1M2.3 1.1Q5.1 3.9 8 1.1"/>
+            <circle class="noeud-brun" cx="0" cy="7.9" r="2.2"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M0 16.4L-9.5 11.7V21.2ZM0 16.4L9.5 11.7V21.2Z"/>
+          </symbol>
+          <symbol id="d-orage" overflow="visible">
+            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-34.5-90.4C-43.7-90.4-46-104.2-36.8-108.8C-39.1-122.6-23-129.5-13.8-120.3C-9.2-134.1 11.5-136.4 16.1-122.6C25.3-129.5 39.1-120.3 34.5-108.8C43.7-106.5 43.7-90.4 34.5-90.4Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M2.3-95L-11.5-74.3H-2.3L-9.2-53.6L11.5-81.2H2.3L9.2-95Z"/>
+            <path class="fil  gros" style="--f:var(--fil-vague)" d="M-27.6-81.2L-32.2-69.7M-18.4-74.3L-23-62.8M23-81.2L18.4-69.7M32.2-74.3L27.6-62.8"/>
+          </symbol>
+          <symbol id="d-copains" overflow="visible">
+            <path class="w lite mini trait" style="--p:var(--p-jean);--tw:6" data-ink="bleu" d="M-20.9 15V43M-9.1 15V43"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-25.7 43.8C-25.7 42.7-24 41.8-21.9 41.8C-19.8 41.8-18 42.7-18 43.8C-18 44.9-19.8 45.8-21.9 45.8C-24 45.8-25.7 44.9-25.7 43.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-12 43.8C-12 42.7-10.2 41.8-8.1 41.8C-6 41.8-4.3 42.7-4.3 43.8C-4.3 44.9-6 45.8-8.1 45.8C-10.2 45.8-12 44.9-12 43.8Z"/>
+            <path class="w lite mini trait orange" style="--p:var(--p-copain-1);--tw:5.2" data-ink="jaune" d="M-28-1Q-32 8.6-30.5 18M-2-1Q2 8.6 .5 18"/>
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-33 19C-33 17.6-31.9 16.6-30.5 16.6C-29.1 16.6-28.1 17.6-28.1 19C-28.1 20.4-29.1 21.4-30.5 21.4C-31.9 21.4-33 20.4-33 19Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-2 19C-2 17.6-.9 16.6 .5 16.6C1.9 16.6 3 17.6 3 19C3 20.4 1.9 21.4 .5 21.4C-.9 21.4-2 20.4-2 19Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-copain-1)" data-ink="jaune" d="M-29 19L-29 1.2C-29-4-22-5-15-5C-8-5-1-4-1 1.2L-1 19Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-25.5-14.5C-25.5-20.3-20.8-25-15-25C-9.2-25-4.5-20.3-4.5-14.5C-4.5-8.7-9.2-4-15-4C-20.8-4-25.5-8.7-25.5-14.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-25.8-15C-26.6-26.1-21.3-26.4-15-26.4C-8.7-26.4-3.4-26.1-4.2-15C-8.7-21-21.3-21-25.8-15Z"/>
+            <circle class="noeud-brun" cx="-18.9" cy="-14" r="1.5"/>
+            <circle class="noeud-brun" cx="-11.1" cy="-14" r="1.5"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-18.4-10.1Q-15-7.4-11.6-10.1"/>
+            <path class="w lite mini trait" style="--p:var(--p-jean);--tw:6.3" data-ink="bleu" d="M7.8 13.4V43M20.2 13.4V43"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M2.7 43.8C2.7 42.7 4.5 41.7 6.8 41.7C9 41.7 10.9 42.7 10.9 43.8C10.9 44.9 9 45.9 6.8 45.9C4.5 45.9 2.7 44.9 2.7 43.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M17.1 43.8C17.1 42.7 19 41.7 21.2 41.7C23.5 41.7 25.3 42.7 25.3 43.8C25.3 44.9 23.5 45.9 21.2 45.9C19 45.9 17.1 44.9 17.1 43.8Z"/>
+            <path class="w lite mini trait vert" style="--p:var(--p-copain-2);--tw:5.5" data-ink="bleu" d="M.2-3.8Q-3.8 6.5-2.3 16.4M27.8-3.8Q31.8 6.5 30.3 16.4"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M-4.9 17.4C-4.9 16-3.7 14.8-2.3 14.8C-.9 14.8 .3 16 .3 17.4C.3 18.8-.9 20-2.3 20C-3.7 20-4.9 18.8-4.9 17.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M27.7 17.4C27.7 16 28.9 14.8 30.3 14.8C31.7 14.8 32.9 16 32.9 17.4C32.9 18.8 31.7 20 30.3 20C28.9 20 27.7 18.8 27.7 17.4Z"/>
+            <path class="w lite mini vert" style="--p:var(--p-copain-2)" data-ink="bleu" d="M-4.5 30.2L-.8-1.2C-.8-6.8 6.6-7.8 14-7.8C21.4-7.8 28.8-6.8 28.8-1.2L32.5 30.2Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M2.9-17.9C2.9-24 7.9-29 14-29C20.1-29 25.1-24 25.1-17.9C25.1-11.8 20.1-6.8 14-6.8C7.9-6.8 2.9-11.8 2.9-17.9Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M2.6-18.5C1.8-30.1 7.3-30.4 14-30.4C20.7-30.4 26.2-30.1 25.4-18.5C20.7-24.8 7.3-24.8 2.6-18.5Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M-2-14.6C-2-16.7-.3-18.3 1.8-18.3C3.9-18.3 5.6-16.7 5.6-14.6C5.6-12.5 3.9-10.8 1.8-10.8C-.3-10.8-2-12.5-2-14.6Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M22.4-14.6C22.4-16.7 24.1-18.3 26.2-18.3C28.3-18.3 30-16.7 30-14.6C30-12.5 28.3-10.8 26.2-10.8C24.1-10.8 22.4-12.5 22.4-14.6Z"/>
+            <circle class="noeud-brun" cx="9.9" cy="-17.3" r="1.6"/>
+            <circle class="noeud-brun" cx="18.1" cy="-17.3" r="1.6"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M10.4-13.2Q14-10.4 17.6-13.2"/>
+          </symbol>
+          <symbol id="d-parents" overflow="visible">
+            <path class="w lite mini trait" style="--p:var(--p-jean);--tw:8.3" data-ink="bleu" d="M-21.8 1.8V43M-6.2 1.8V43"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-28.2 43.8C-28.2 42.3-25.8 41.1-22.8 41.1C-19.8 41.1-17.4 42.3-17.4 43.8C-17.4 45.3-19.8 46.5-22.8 46.5C-25.8 46.5-28.2 45.3-28.2 43.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-10.6 43.8C-10.6 42.3-8.2 41.1-5.2 41.1C-2.2 41.1 .2 42.3 .2 43.8C.2 45.3-2.2 46.5-5.2 46.5C-8.2 46.5-10.6 45.3-10.6 43.8Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-papa);--tw:7.3" data-ink="bleu" d="M-31.6-26.5Q-35.6-11.8-34.1 4.8M3.6-26.5Q7.6-11.8 6.1 4.8"/>
+            <path class="w lite mini" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-37.6 5.8C-37.6 3.9-36 2.4-34.1 2.4C-32.2 2.4-30.7 3.9-30.7 5.8C-30.7 7.7-32.2 9.3-34.1 9.3C-36 9.3-37.6 7.7-37.6 5.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-d)" data-ink="jaune" d="M2.7 5.8C2.7 3.9 4.2 2.4 6.1 2.4C8 2.4 9.6 3.9 9.6 5.8C9.6 7.7 8 9.3 6.1 9.3C4.2 9.3 2.7 7.7 2.7 5.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-papa)" data-ink="bleu" d="M-32.6 5.8L-32.6-23.6C-32.6-29.5-23.3-30.5-14-30.5C-4.7-30.5 4.6-29.5 4.6-23.6L4.6 5.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-25.8-41.2C-25.8-47.7-20.5-53-14-53C-7.5-53-2.2-47.7-2.2-41.2C-2.2-34.7-7.5-29.5-14-29.5C-20.5-29.5-25.8-34.7-25.8-41.2Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-26.1-41.8C-26.9-54.2-21.1-54.5-14-54.5C-6.9-54.5-1.1-54.2-1.9-41.8C-6.9-48.5-21.1-48.5-26.1-41.8Z"/>
+            <circle class="noeud-brun" cx="-18.4" cy="-40.7" r="1.6"/>
+            <circle class="noeud-brun" cx="-9.6" cy="-40.7" r="1.6"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-17.8-36.3Q-14-33.3-10.2-36.3"/>
+            <path class="w lite mini brun" style="--p:var(--p-cheveux-c)" data-ink="rose" d="M2.3-12.8C.1-40.4 2.9-48.1 15-48.1C27.1-48.1 29.9-40.4 27.7-12.8Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-jean);--tw:7.8" data-ink="bleu" d="M7.7 4.4V43M22.3 4.4V43"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M1.6 43.8C1.6 42.4 3.9 41.2 6.7 41.2C9.5 41.2 11.7 42.4 11.7 43.8C11.7 45.2 9.5 46.4 6.7 46.4C3.9 46.4 1.6 45.2 1.6 43.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M18.3 43.8C18.3 42.4 20.5 41.2 23.3 41.2C26.1 41.2 28.4 42.4 28.4 43.8C28.4 45.2 26.1 46.4 23.3 46.4C20.5 46.4 18.3 45.2 18.3 43.8Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-maman);--tw:6.9" data-ink="rose" d="M-1.5-21.9Q-5.5-8.4-4 7.4M31.5-21.9Q35.5-8.4 34 7.4"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M-7.2 8.4C-7.2 6.6-5.8 5.1-4 5.1C-2.2 5.1-.8 6.6-.8 8.4C-.8 10.1-2.2 11.6-4 11.6C-5.8 11.6-7.2 10.1-7.2 8.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M30.8 8.4C30.8 6.6 32.2 5.1 34 5.1C35.8 5.1 37.2 6.6 37.2 8.4C37.2 10.1 35.8 11.6 34 11.6C32.2 11.6 30.8 10.1 30.8 8.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-maman)" data-ink="rose" d="M-6.9 24.8L-2.5-19.4C-2.5-24.9 6.3-25.9 15-25.9C23.7-25.9 32.5-24.9 32.5-19.4L36.9 24.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M4-36C4-42.1 8.9-47 15-47C21.1-47 26-42.1 26-36C26-29.9 21.1-24.9 15-24.9C8.9-24.9 4-29.9 4-36Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-cheveux-c)" data-ink="rose" d="M3.6-36.5C2.9-48.1 8.4-48.4 15-48.4C21.6-48.4 27.1-48.1 26.4-36.5C21.6-42.8 8.4-42.8 3.6-36.5Z"/>
+            <circle class="noeud-brun" cx="10.9" cy="-35.4" r="1.5"/>
+            <circle class="noeud-brun" cx="19.1" cy="-35.4" r="1.5"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M11.5-31.3Q15-28.5 18.5-31.3"/>
+          </symbol>
+          <symbol id="d-mamie" overflow="visible">
+            <path class="w lite mini trait" style="--p:var(--p-jean);--tw:7.3" data-ink="bleu" d="M-6.9 6.9V43M6.9 6.9V43"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-12.6 43.8C-12.6 42.5-10.5 41.4-7.9 41.4C-5.3 41.4-3.1 42.5-3.1 43.8C-3.1 45.1-5.3 46.2-7.9 46.2C-10.5 46.2-12.6 45.1-12.6 43.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M3.1 43.8C3.1 42.5 5.3 41.4 7.9 41.4C10.5 41.4 12.6 42.5 12.6 43.8C12.6 45.1 10.5 46.2 7.9 46.2C5.3 46.2 3.1 45.1 3.1 43.8Z"/>
+            <path class="w lite mini trait pastel" style="--p:var(--p-mamie);--tw:6.5" data-ink="rose" d="M-15.3-17.4Q-19.3-4.9-17.8 9.9M15.3-17.4Q19.3-4.9 17.8 9.9"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M-20.9 10.9C-20.9 9.2-19.5 7.9-17.8 7.9C-16.2 7.9-14.8 9.2-14.8 10.9C-14.8 12.5-16.2 13.9-17.8 13.9C-19.5 13.9-20.9 12.5-20.9 10.9Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M14.8 10.9C14.8 9.2 16.2 7.9 17.8 7.9C19.5 7.9 20.9 9.2 20.9 10.9C20.9 12.5 19.5 13.9 17.8 13.9C16.2 13.9 14.8 12.5 14.8 10.9Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-mamie)" data-ink="rose" d="M-20.4 26.1L-16.3-15.2C-16.3-20.4-8.2-21.4 0-21.4C8.2-21.4 16.3-20.4 16.3-15.2L20.4 26.1Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M-10.3-30.7C-10.3-36.4-5.7-41 0-41C5.7-41 10.3-36.4 10.3-30.7C10.3-25 5.7-20.4 0-20.4C-5.7-20.4-10.3-25-10.3-30.7Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-10.6-31.2C-11.4-42-6.2-42.3 0-42.3C6.2-42.3 11.4-42 10.6-31.2C6.2-37.1-6.2-37.1-10.6-31.2Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-4.6-43.1C-4.6-45.6-2.6-47.7 0-47.7C2.6-47.7 4.6-45.6 4.6-43.1C4.6-40.5 2.6-38.4 0-38.4C-2.6-38.4-4.6-40.5-4.6-43.1Z"/>
+            <circle class="noeud-brun" cx="-3.8" cy="-30.2" r="1.4"/>
+            <circle class="noeud-brun" cx="3.8" cy="-30.2" r="1.4"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-3.3-26.3Q0-23.7 3.3-26.3"/>
+            <path class="fil lunettes" style="--f:var(--fil-brun)" d="M-6.4-30.7C-6.4-34.4-1.2-34.4-1.2-30.7C-1.2-27-6.4-27-6.4-30.7ZM1.2-30.7C1.2-34.4 6.4-34.4 6.4-30.7C6.4-27 1.2-27 1.2-30.7ZM-1.2-31.2H1.2"/>
+            <path class="w lite mini trait" style="--p:var(--p-bois);--tw:2.6" data-ink="rose" d="M19 44L21 0Q21-5 16-5"/>
+          </symbol>
+          <symbol id="d-maitresse" overflow="visible">
+            <path class="w lite mini trait" style="--p:var(--p-jean);--tw:8" data-ink="bleu" d="M-7.5 3.5V43M7.5 3.5V43"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-13.7 43.8C-13.7 42.3-11.4 41.2-8.5 41.2C-5.6 41.2-3.3 42.3-3.3 43.8C-3.3 45.3-5.6 46.4-8.5 46.4C-11.4 46.4-13.7 45.3-13.7 43.8Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M3.3 43.8C3.3 42.3 5.6 41.2 8.5 41.2C11.4 41.2 13.7 42.3 13.7 43.8C13.7 45.3 11.4 46.4 8.5 46.4C5.6 46.4 3.3 45.3 3.3 43.8Z"/>
+            <path class="w lite mini trait orange" style="--p:var(--p-maitresse);--tw:7" data-ink="jaune" d="M-16.9-23.4Q-20.9-9.5-19.4 6.5M16.9-23.4Q20.9-9.5 19.4 6.5"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M-22.6 7.5C-22.6 5.7-21.2 4.2-19.4 4.2C-17.5 4.2-16.1 5.7-16.1 7.5C-16.1 9.3-17.5 10.8-19.4 10.8C-21.2 10.8-22.6 9.3-22.6 7.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M16.1 7.5C16.1 5.7 17.5 4.2 19.4 4.2C21.2 4.2 22.6 5.7 22.6 7.5C22.6 9.3 21.2 10.8 19.4 10.8C17.5 10.8 16.1 9.3 16.1 7.5Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-maitresse)" data-ink="jaune" d="M-22.3 24.3L-17.9-20.8C-17.9-26.4-8.9-27.4 0-27.4C8.9-27.4 17.9-26.4 17.9-20.8L22.3 24.3Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M-11.3-37.7C-11.3-43.9-6.2-49 0-49C6.2-49 11.3-43.9 11.3-37.7C11.3-31.5 6.2-26.4 0-26.4C-6.2-26.4-11.3-31.5-11.3-37.7Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-11.6-38.3C-12.4-50.1-6.8-50.5 0-50.5C6.8-50.5 12.4-50.1 11.6-38.3C6.8-44.7-6.8-44.7-11.6-38.3Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-5.1-51.3C-5.1-54.1-2.8-56.3 0-56.3C2.8-56.3 5.1-54.1 5.1-51.3C5.1-48.5 2.8-46.2 0-46.2C-2.8-46.2-5.1-48.5-5.1-51.3Z"/>
+            <circle class="noeud-brun" cx="-4.2" cy="-37.2" r="1.6"/>
+            <circle class="noeud-brun" cx="4.2" cy="-37.2" r="1.6"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-3.6-33Q0-30.1 3.6-33"/>
+            <path class="w lite mini" style="--p:var(--p-livre)" data-ink="rose" d="M-28.5-6H-18.5C-17.7-6-17-5.3-17-4.5V9.5C-17 10.3-17.7 11-18.5 11H-28.5C-29.3 11-30 10.3-30 9.5V-4.5C-30-5.3-29.3-6-28.5-6Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-23.5-4V9"/>
+          </symbol>
+          <symbol id="d-pouce" overflow="visible">
+            <path class="w lite mini pastel" style="--p:var(--p-socle)" data-ink="bleu" d="M-62 136H62C64.2 136 66 137.8 66 140V148C66 150.2 64.2 152 62 152H-62C-64.2 152-66 150.2-66 148V140C-66 137.8-64.2 136-62 136Z"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M-60 144H60"/>
+            <path class="papier-pres" d="M-54 140C-52 100-48 70-49 40C-50 15-44 0-45-20C-46-50-42-75-30-90C-18-104 18-106 30-92C42-78 46-52 45-25C44 0 50 15 49 40C48 70 52 100 56 140Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-bronze)" data-ink="jaune" d="M-54 140C-52 100-48 70-49 40C-50 15-44 0-45-20C-46-50-42-75-30-90C-18-104 18-106 30-92C42-78 46-52 45-25C44 0 50 15 49 40C48 70 52 100 56 140Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-bronze-ombre)" data-ink="rose" d="M24-96C40-84 46-56 45-25C44 0 50 15 49 40C48 70 52 100 56 140H36C38 100 35 70 36 40C37 15 32 0 33-25C34-55 32-80 24-96Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-bronze-clair)" data-ink="jaune" d="M-30-70C-36-46-33-20-34 4C-35 40-30 90-34 132H-24C-22 90-26 40-24 4C-23-20-26-46-22-74Z"/>
+            <path class="w lite mini" style="--p:var(--p-bronze-clair)" data-ink="jaune" d="M-25-78C-25-99 25-99 25-78L24-50C23-40 16-35 0-35C-16-35-23-40-24-50Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-ongle)" data-ink="jaune" d="M-24-82C-21-98 21-98 24-82C12-87-12-87-24-82Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-29-52C-27-34 27-34 29-52"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-18-74Q-17-60-16-48"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-42-6Q-12 4 38-6M-38 6Q-6 16 40 4M-36 18Q-4 26 34 16"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-44 92Q0 104 46 92M-40 104Q-4 112 40 104"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-30 34Q-26 38-20 36M18 50Q24 54 30 52"/>
+          </symbol>
+          </g>
+          <!-- CARTES-END -->
         </defs>
 
         <!-- Tous les groupes de la scène vivent dans #scene-inner : la loupe
@@ -1199,6 +1764,9 @@ html:not([data-pret]) *{transition:none!important}
             <!-- le nerf de l'œil, de l'arrière de l'œil vers l'arrière et le milieu, jusqu'au croisement (chiasma) -->
             <path id="p-nerf-optique" class="w profond" style="--p:var(--p-nerf)" data-ink="jaune" d="M384.3 225.3c-.6-.1-1-.7-1.5-1-.6-.3-1.3-.5-1.9-.5-1.4 0-2.8.2-4.2.5-.7.2-1.3.6-1.8 1-.6.3-1 .8-1.4 1.3-.3.4-.7 1-.6 1.5.3 1.2.9 2.5 1.8 3.4.8.6 2 .7 3 .8 1.1 0 2.2-.1 3.2-.5 1-.3 1.7-1.5 2.7-1.5 6.2.2 12.2 1.8 18.3 2.1 8 .4 16.1.2 24.1.2 6.8 0 13.7.2 20.5-.2.8-.1 1.5-.6 2-1.1.5-.6.9-1.4.9-2.1 0-.9-.3-1.8-.9-2.5-.6-.6-1.5-1.1-2.3-1.1-6.8-.1-13.5.6-20.3.8-7.9.2-15.9.4-23.8.2-6-.2-11.9-.6-17.8-1.3Z"/>
             <path class="fil" style="--f:var(--fil-brun)" d="M376,225.6 L382,230.4 M382,225.6 L376,230.4"/>
+            <!-- les cartes du jour épinglées dans l'hippocampe (Task 8) : 4 places au plus,
+                 une petite vignette par carte de la journée (Task 9 les range la nuit) -->
+            <g id="g-hippo-cartes"></g>
 
             <!-- les cheveux courts : une calotte bouclée, et un épi sur le dessus -->
             <!-- les cheveux courts et leurs fils -->
@@ -1409,13 +1977,34 @@ html:not([data-pret]) *{transition:none!important}
           <!-- ===== Écran du rêve (nuage-écran) ===== -->
           <g id="g-ecran"></g>
           <!-- ===== Boîte à souvenirs (cartes de la journée) ===== -->
-          <g id="g-boite"></g>
+          <!-- ===== La boîte à souvenirs (Task 8) : bac de feutre en bas de la scène,
+               23 cartes sur un rail qu'on fait défiler au doigt (#boite-rail, translation
+               CSS posée par le script), épinglées quand elles sont dans la journée.
+               #g-vols : les vignettes qui s'envolent ; #bulle-boite : « Oups… », « Le
+               cerveau dort… ». L'opacité de #g-boite suit la vue (setCut) ; la nuit,
+               la classe « dort » grise .boite-grise par des variables. -->
+          <g id="g-boite">
+            <g class="boite-grise">
+              <path class="sous-boite" d="M-14 466C150 462 300 468 450 465C600 462 750 468 914 464V574H-14Z"/>
+              <path id="p-boite" class="w lite" style="--p:var(--p-boite)" data-ink="rose" d="M-14 466C150 462 300 468 450 465C600 462 750 468 914 464V574H-14Z"/>
+              <path class="fil couture" style="--f:var(--fil-sable)" d="M-10 472C150 468 300 474 450 471C600 468 750 474 910 470"/>
+              <g id="boite-rail"></g>
+            </g>
+            <g id="g-vols" aria-hidden="true"></g>
+            <g id="bulle-boite" aria-hidden="true">
+              <path class="bulle-fond w lite reserve" style="--p:var(--riso-papier, var(--p-carte))" d=""/>
+              <path class="bulle-bord fil couture" d=""/>
+              <text class="bulle-texte" x="0" y="0"></text>
+            </g>
+          </g>
           <!-- ===== Zones cliquables ===== -->
           <g id="g-hs"></g>
           <!-- ===== Interface dans la scène ===== -->
           <g id="g-ui"></g>
         </g>
       </svg>
+      <!-- ce que disent les bulles de la boîte (« Oups, trop de choses ! »…), pour les lecteurs d'écran -->
+      <p id="boite-annonce" class="sr-only" aria-live="polite"></p>
 
       <!-- Volet d'information : caché tant qu'il n'a pas la classe « open ».
            L'émoji double le titre : décoratif. Seule l'explication est une région live. -->
@@ -1616,6 +2205,16 @@ const CARTES = [
     greffe:{ nom:'un doudou', forme:'doudou', g:'m' }, ton:'ton doudou',
     texte:"Ton doudou tout doux sent bon la maison. Avec lui dans tes bras, ton cerveau sait que tu es en sécurité." }
 ];
+
+/* Les bulles de la boîte à souvenirs (Task 8) : affichées au-dessus de la boîte
+   (pas de son), lues par l'adulte. trop : une 5e carte chasse la plus ancienne
+   (« le cerveau ne garde pas tout ») ; dort : la nuit, on ne choisit plus ;
+   matin : la journée d'hier est finie, on en recommence une. */
+const BULLES = {
+  trop:  { emoji:'😮', texte:'Oups, trop de choses !' },
+  dort:  { emoji:'😴', texte:'Le cerveau dort, on choisira demain !' },
+  matin: { emoji:'🌅', texte:'Pour choisir, touche « Nouvelle journée » !' }
+};
 
 /* ===== D. Modificateurs du rêve (spec §4.5-3) =====
    nom = masculin singulier ; f, mp, fp = formes accordées à la greffe. */
@@ -1828,6 +2427,7 @@ const PHRASES = {
      5. Vue et temps : l'habillage suit les deux états (uiCut, uiTime)
      6. Avatar : garçon / fille, peau, cheveux
      7. Volet d'information, feuille de réglages, clavier
+     8. Cartes-souvenirs : la boîte, les épingles, la journée
    ========================================================================== */
 
 /* ===== 1. Paramètres d'URL et préférences =====
@@ -1852,7 +2452,7 @@ const prefs = {
 };
 
 /* État demandé par l'URL, nombres bornés ; null = paramètre absent ou illisible.
-   `cartes` est consommé par la tâche des cartes-souvenirs. */
+   `cartes` est consommé par les cartes-souvenirs (section 8). */
 function urlNombre(k, max){
   const v = parseFloat(Q.get(k));
   return Number.isFinite(v) ? Math.min(max, Math.max(0, v)) : null;
@@ -2375,6 +2975,414 @@ document.addEventListener('keydown', e => {
   if(e.key === 'ArrowUp' || e.key === 'ArrowDown'){ e.preventDefault(); pasCut(e.key === 'ArrowDown' ? 0.5 : -0.5); return; }
   if(e.key === 'ArrowLeft' || e.key === 'ArrowRight'){ e.preventDefault(); pasTemps(e.key === 'ArrowRight' ? 0.25 : -0.25); }
 });
+/* ===== 8. Cartes-souvenirs : la boîte, les épingles, la journée (Task 8) =====
+   journee : les slugs choisis, 4 au plus, du plus ancien au plus récent.
+   pickCard(slug, { anim, forcer }) : met une carte dans la journée.
+     - refuse une carte déjà choisie (la carte tremble) ;
+     - refuse la nuit et le matin (moment arrondi ≥ 2) : la boîte est grise et une
+       bulle le dit, sauf avec forcer:true (?cartes= au chargement, récit guidé) ;
+     - une 5e carte : la plus ancienne retourne dans la boîte, bulle « Oups » ;
+     - l'épingle se plante sur la carte (rebond), le décor Dehors sort de terre
+       (#decor-<slug>, data-decor="1" : Task 7 l'éteint la nuit ; les gens à gauche,
+       dans #slot-gens), la petite vignette s'épingle dans l'hippocampe
+       (#g-hippo-cartes, une place par carte) et l'hippocampe gonfle.
+     - anim:false (ou mouvement réduit) : tout est posé sans animation.
+     L'état (DOM compris) est posé tout de suite ; seules les animations attendent :
+     une vignette qui voyage encore est déjà dans l'hippocampe, invisible.
+   resetDay() : vide la journée (boîte, décors, hippocampe). Le bouton « Nouvelle
+   journée » l'appelle et ramène le temps à la journée.
+   Événement « journee » (detail : copie de journee) à chaque changement. */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs, parent){
+  const el = document.createElementNS(SVGNS, tag);
+  for(const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+  if(parent) parent.appendChild(el);
+  return el;
+}
+function rrD(x, y, w, h, r){
+  const k = r * .448;
+  return `M${x + r} ${y}H${x + w - r}C${x + w - k} ${y} ${x + w} ${y + k} ${x + w} ${y + r}V${y + h - r}`
+    + `C${x + w} ${y + h - k} ${x + w - k} ${y + h} ${x + w - r} ${y + h}H${x + r}`
+    + `C${x + k} ${y + h} ${x} ${y + h - k} ${x} ${y + h - r}V${y + r}C${x} ${y + k} ${x + k} ${y} ${x + r} ${y}Z`;
+}
+const RESSORT = 'cubic-bezier(.34,1.56,.64,1)';
+const MAX_CARTES = 4;
+/* la boîte : cartes de 58 × 70 tous les 66, la 1re centrée à x 89 ; le rail défile
+   entre 0 et DEFIL_MIN (la dernière carte s'arrête avant le rail du temps, x 848) */
+const CARTE = { x0: 89, pas: 66, y: 511 };
+const DEFIL_MIN = Math.min(0, 848 - (CARTE.x0 + (CARTES.length - 1) * CARTE.pas + 29));
+const EPINGLES = ['--glass-red', '--glass-blue', '--glass-yellow'];
+/* repères de la tête (partagée par Dehors et Dedans) et emplacements du décor */
+const ENTREE = { oeil: [458, 228], oreille: [300, 280] };
+const THALAMUS = [335, 200];
+const SLOTS = [[600, 330], [700, 300], [780, 350], [640, 420]];
+const SLOT_GENS = [120, 380];
+const GENS_PAS = 62;
+const ORDRE_SLOTS = [0, 2, 3, 1];   /* #slot-1 (devant l'expo) est gardé pour le pouce géant */
+/* 4 places le long de l'hippocampe, de sa queue (en haut, en arrière) à sa tête
+   (près de l'amygdale) : de petites cartes crème en éventail, juste sous la courbe,
+   l'épingle plantée dans son bord (l'hippocampe reste visible : il gonfle) ;
+   x, y et inclinaison */
+const HIPPO = [[297, 222, -14], [310, 235, -5], [325, 245, 4], [341, 254, 13]];
+const HIPPO_ECHELLE = .5;
+
+const PAR_SLUG = Object.fromEntries(CARTES.map((c, i) => [c.slug, { ...c, i }]));
+let journee = [];
+const boite = document.getElementById('g-boite');
+const boiteRail = document.getElementById('boite-rail');
+const vols = document.getElementById('g-vols');
+const hippoCartes = document.getElementById('g-hippo-cartes');
+const hippocampe = document.getElementById('g-hippocampe');
+const slotsEls = SLOTS.map((_, i) => document.getElementById('slot-' + i));
+const slotGens = document.getElementById('slot-gens');
+const bulle = document.getElementById('bulle-boite');
+const annonce = document.getElementById('boite-annonce');
+const cartesEls = {};      /* slug → { g, corps, epingle } */
+const placeDecor = {};     /* slug → n° de #slot-n (décors qui ne sont pas des gens) */
+
+/* --- les 23 cartes de la boîte --- */
+CARTES.forEach((c, i) => {
+  const g = svgEl('g', { class: 'carte', 'data-slug': c.slug, role: 'button', tabindex: '0', 'aria-pressed': 'false',
+    transform: `translate(${CARTE.x0 + i * CARTE.pas} ${CARTE.y})` }, boiteRail);
+  const corps = svgEl('g', { class: 'carte-corps' }, g);
+  svgEl('path', { class: 'carte-focus', d: rrD(-32.5, -38.5, 65, 77, 10) }, corps);
+  svgEl('path', { class: 'w lite reserve carte-fond', style: '--p:var(--riso-papier, var(--p-carte))', d: rrD(-29, -35, 58, 70, 7) }, corps);
+  svgEl('path', { class: 'fil couture', style: '--f:var(--fil-sable)', d: rrD(-25.5, -31.5, 51, 63, 5) }, corps);
+  svgEl('use', { href: '#v-' + c.slug, transform: 'translate(0 -5)' }, corps);
+  svgEl('use', { href: '#ic-' + c.entree, transform: 'translate(0 25)' }, corps);
+  const epingle = svgEl('g', { class: 'epingle' }, corps);
+  svgEl('use', { href: '#pin', style: `color:var(${EPINGLES[i % 3]})`, transform: 'translate(0 -28)' }, epingle);
+  cartesEls[c.slug] = { g, corps, epingle };
+});
+const nomCarte = slug => inflect(PAR_SLUG[slug].nom, root.dataset.genre);
+function etiqueter(slug){ cartesEls[slug].g.setAttribute('aria-label', nomCarte(slug)); }
+CARTES.forEach(c => etiqueter(c.slug));
+
+/* --- défilement : glisser au doigt (avec un peu d'élan), molette, focus clavier --- */
+let defil = 0;
+let elan = 0;
+function poserDefil(x){
+  defil = Math.max(DEFIL_MIN, Math.min(0, x));
+  boiteRail.style.transform = `translate(${defil}px,0)`;
+}
+const pxVersScene = () => 900 / (document.getElementById('scene').getBoundingClientRect().width || 900);
+let tenu = null;          /* le doigt posé : { id, x0, d0, bouge, pts, carte } */
+let finGlisse = 0;        /* fin du dernier glissé : le « click » qui suit n'est pas un choix */
+function appuyer(carte){ carte.querySelector('.carte-corps').classList.add('appui'); }
+function relacherAppui(){ boiteRail.querySelectorAll('.appui').forEach(el => el.classList.remove('appui')); }
+boite.addEventListener('pointerdown', e => {
+  if(e.pointerType === 'mouse' && e.button !== 0) return;
+  cancelAnimationFrame(elan);
+  const carte = e.target.closest('.carte');
+  tenu = { id: e.pointerId, x0: e.clientX, d0: defil, bouge: false, pts: [[e.timeStamp, e.clientX]], carte };
+  if(carte && !boiteDort()) appuyer(carte);
+});
+boite.addEventListener('pointermove', e => {
+  if(!tenu || e.pointerId !== tenu.id) return;
+  const dx = (e.clientX - tenu.x0) * pxVersScene();
+  if(!tenu.bouge && Math.abs(dx) > 8){
+    tenu.bouge = true;
+    relacherAppui();
+    try{ boite.setPointerCapture(e.pointerId); }catch(err){ /* pointeur déjà relâché */ }
+  }
+  if(tenu.bouge){
+    poserDefil(tenu.d0 + dx);
+    tenu.pts.push([e.timeStamp, e.clientX]);
+    if(tenu.pts.length > 6) tenu.pts.shift();
+  }
+});
+function lacherBoite(e){
+  if(!tenu || e.pointerId !== tenu.id) return;
+  relacherAppui();
+  if(tenu.bouge){
+    finGlisse = performance.now();
+    const [[t0, x0], [t1, x1]] = [tenu.pts[0], tenu.pts[tenu.pts.length - 1]];
+    let v = t1 > t0 ? (x1 - x0) / (t1 - t0) * pxVersScene() : 0;   /* unités de scène par ms */
+    if(!REDUIT.matches && Math.abs(v) > .05 && e.type === 'pointerup'){
+      let t = performance.now();
+      const glisser = now => {
+        const dt = Math.min(40, now - t); t = now;
+        poserDefil(defil + v * dt);
+        v *= Math.pow(.94, dt / 16);
+        if(Math.abs(v) > .02 && defil > DEFIL_MIN && defil < 0) elan = requestAnimationFrame(glisser);
+      };
+      elan = requestAnimationFrame(glisser);
+    }
+  }
+  tenu = null;
+}
+boite.addEventListener('pointerup', lacherBoite);
+boite.addEventListener('pointercancel', lacherBoite);
+boite.addEventListener('lostpointercapture', lacherBoite);
+boite.addEventListener('wheel', e => {
+  const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  if(!d) return;
+  e.preventDefault();
+  cancelAnimationFrame(elan);
+  poserDefil(defil - d * (e.deltaMode === 1 ? 16 : 1) * pxVersScene());
+}, { passive: false });
+function montrerCarte(slug){
+  const x = CARTE.x0 + PAR_SLUG[slug].i * CARTE.pas + defil;
+  if(x < 50) poserDefil(defil + 50 - x);
+  else if(x > 818) poserDefil(defil - (x - 818));
+}
+boite.addEventListener('focusin', e => {
+  const carte = e.target.closest && e.target.closest('.carte');
+  if(!carte) return;
+  etiqueter(carte.dataset.slug);   /* l'accord suit l'avatar (« je me suis fâchée ») */
+  montrerCarte(carte.dataset.slug);
+});
+boite.addEventListener('click', e => {
+  if(e.target.closest('#bulle-boite')){ cacherBulle(); return; }
+  const carte = e.target.closest('.carte');
+  if(!carte || performance.now() - finGlisse < 80) return;
+  pickCard(carte.dataset.slug);
+});
+boite.addEventListener('keydown', e => {
+  const carte = e.target.closest && e.target.closest('.carte');
+  if(!carte || (e.key !== 'Enter' && e.key !== ' ')) return;
+  e.preventDefault();
+  if(e.repeat) return;
+  if(!boiteDort()){ appuyer(carte); setTimeout(relacherAppui, 110); }
+  pickCard(carte.dataset.slug);
+});
+
+/* --- la nuit : la boîte se grise (moment arrondi ≥ 2 : nuits et matin) --- */
+const boiteDort = () => (phaseCourante ?? 0) >= 2;
+function griserBoite(){
+  const dort = boiteDort();
+  boite.classList.toggle('dort', dort);
+  Object.values(cartesEls).forEach(({ g }) => g.setAttribute('aria-disabled', String(dort)));
+}
+document.addEventListener('temps', griserBoite);
+griserBoite();
+
+/* --- la bulle au-dessus de la boîte (pas le volet : il cacherait la boîte) --- */
+let bulleMinuteur = 0;
+function direBulle(cle, slug){
+  const b = BULLES[cle];
+  const texte = bulle.querySelector('.bulle-texte');
+  texte.textContent = `${b.emoji} ${b.texte}`;
+  bulle.classList.add('visible');   /* visible avant la mesure du texte */
+  const w = Math.ceil(texte.getComputedTextLength()) + 40, h = 40, y = 410;
+  const cx = slug ? CARTE.x0 + PAR_SLUG[slug].i * CARTE.pas + defil : 450;
+  const x = Math.max(16, Math.min(852 - w, cx - w / 2));
+  const qx = Math.max(x + 22, Math.min(x + w - 22, cx));   /* la queue montre la carte */
+  bulle.querySelector('.bulle-fond').setAttribute('d', rrD(x, y, w, h, 18) + `M${qx - 9} ${y + h - 2}L${qx} ${y + h + 14}L${qx + 9} ${y + h - 2}Z`);
+  bulle.querySelector('.bulle-bord').setAttribute('d', rrD(x + 4, y + 4, w - 8, h - 8, 14));
+  texte.setAttribute('x', x + w / 2);
+  texte.setAttribute('y', y + 27);
+  if(!REDUIT.matches){
+    bulle.animate([{ transform: 'scale(.6)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
+      { duration: 320, easing: RESSORT });
+  }
+  annonce.textContent = '';
+  requestAnimationFrame(() => { annonce.textContent = b.texte; });
+  clearTimeout(bulleMinuteur);
+  bulleMinuteur = setTimeout(cacherBulle, 3000);
+}
+function cacherBulle(){
+  clearTimeout(bulleMinuteur);
+  bulle.classList.remove('visible');
+}
+
+/* --- petits gestes --- */
+const animer = (el, images, options) => (REDUIT.matches ? null : el.animate(images, options));
+function trembler(slug){
+  const { corps } = cartesEls[slug];
+  const y = corps.classList.contains('levee') ? -2 : 0;
+  animer(corps, [0, -5, 5, -3, 0].map(a => ({ transform: `translateY(${y}px) rotate(${a}deg)` })),
+    { duration: 360, easing: 'ease-in-out' });
+}
+function planter(slug, anim){
+  const { corps, epingle } = cartesEls[slug];
+  corps.classList.add('levee');
+  epingle.classList.add('plantee');
+  cartesEls[slug].g.setAttribute('aria-pressed', 'true');
+  if(anim) animer(epingle, [{ transform: 'translateY(-30px)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }],
+    { duration: 420, easing: RESSORT });
+}
+function deplanter(slug, anim){
+  const { corps, epingle, g } = cartesEls[slug];
+  corps.classList.remove('levee');
+  g.setAttribute('aria-pressed', 'false');
+  const a = anim && animer(epingle, [{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-22px)', opacity: 0 }],
+    { duration: 220, easing: 'ease-in' });
+  if(!a){ epingle.classList.remove('plantee'); return; }
+  a.onfinish = () => { if(!journee.includes(slug)) epingle.classList.remove('plantee'); };
+}
+
+/* --- le décor Dehors --- */
+function rangerGens(){
+  const gens = [...slotGens.querySelectorAll('.decor[data-decor]')];
+  gens.forEach((el, k) => { el.style.transform = `translate(${(k - (gens.length - 1) / 2) * GENS_PAS}px,0)`; });
+}
+function slotLibre(sauf){
+  const pris = Object.values(placeDecor);
+  return ORDRE_SLOTS.find(n => n !== sauf && !pris.includes(n));
+}
+function poserDecor(c){
+  const el = svgEl('g', { id: 'decor-' + c.slug, class: 'decor', 'data-decor': '1', 'data-slug': c.slug });
+  svgEl('use', { href: '#d-' + c.slug }, svgEl('g', { class: 'decor-pop' }, el));
+  montrer(el, lerpArr(TEMPS.decor, tempsCourant));   /* Task 7 : éteint la nuit, pâle le soir */
+  if(c.cat === 'gens'){
+    slotGens.appendChild(el);
+    rangerGens();
+    return el;
+  }
+  if(c.slug === 'pouce'){
+    const occupant = Object.keys(placeDecor).find(s => placeDecor[s] === 1);
+    if(occupant){   /* le pouce géant reprend sa place devant l'expo */
+      placeDecor[occupant] = slotLibre(1);
+      slotsEls[placeDecor[occupant]].appendChild(document.getElementById('decor-' + occupant));
+    }
+    placeDecor.pouce = 1;
+  }else{
+    placeDecor[c.slug] = slotLibre();
+  }
+  slotsEls[placeDecor[c.slug]].appendChild(el);
+  return el;
+}
+function cibleDecor(c){
+  if(c.cat === 'gens'){
+    const gens = [...slotGens.querySelectorAll('.decor[data-decor]')];
+    const k = gens.findIndex(el => el.dataset.slug === c.slug);
+    return [SLOT_GENS[0] + (k - (gens.length - 1) / 2) * GENS_PAS, SLOT_GENS[1]];
+  }
+  const [x, y] = SLOTS[placeDecor[c.slug]];
+  return c.slug === 'pouce' ? [x, y + 40] : c.slug === 'orage' ? [x, y - 120] : [x, y];
+}
+function retirerDecor(slug, anim){
+  const el = document.getElementById('decor-' + slug);
+  delete placeDecor[slug];
+  if(!el) return;
+  /* l'état change tout de suite ; le dessin s'efface ensuite */
+  el.removeAttribute('id');
+  el.removeAttribute('data-decor');
+  const a = anim && animer(el.firstElementChild, [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.3)', opacity: 0 }],
+    { duration: 220, easing: 'ease-in' });
+  if(a) a.onfinish = () => { el.remove(); rangerGens(); };
+  else el.remove();
+  rangerGens();
+}
+
+/* --- l'hippocampe : une petite vignette épinglée par carte --- */
+function placerHippo(el, k){ el.style.transform = `translate(${HIPPO[k][0]}px,${HIPPO[k][1]}px) rotate(${HIPPO[k][2]}deg)`; }
+function poserHippo(slug){
+  const el = svgEl('g', { class: 'hippo-carte', 'data-slug': slug }, hippoCartes);
+  svgEl('path', { class: 'w lite reserve carte-fond', style: '--p:var(--riso-papier, var(--p-carte))', d: rrD(-12, -12, 24, 26, 4) }, el);
+  svgEl('use', { href: '#v-' + slug, transform: `translate(0 1) scale(${HIPPO_ECHELLE})` }, el);
+  svgEl('use', { href: '#pin', style: `color:var(${EPINGLES[PAR_SLUG[slug].i % 3]})`, transform: 'translate(0 -10) scale(.6)' }, el);
+  placerHippo(el, journee.indexOf(slug));
+  return el;
+}
+function rangerHippo(){
+  [...hippoCartes.children].forEach(el => placerHippo(el, journee.indexOf(el.dataset.slug)));
+}
+
+/* --- les voyages (décoratifs : l'état est déjà posé) --- */
+function vignetteVolante(slug){
+  const el = svgEl('g', { class: 'vol' }, vols);
+  svgEl('use', { href: '#v-' + slug }, el);
+  return el;
+}
+const tr = (x, y, s = 1) => `translate(${x}px,${y}px) scale(${s})`;
+function voler(slug, images, ms){
+  const el = vignetteVolante(slug);
+  const a = el.animate(images, { duration: ms, easing: 'ease-in-out', fill: 'forwards' });
+  a.onfinish = () => el.remove();
+  return a;
+}
+/* Dehors : de la boîte au décor (qui sort de terre en rebondissant), ou dans la
+   tête de l'enfant par l'œil ou l'oreille quand la carte n'a pas de décor */
+function volDehors(c, x0, y0, decor){
+  if(decor){
+    const [x1, y1] = cibleDecor(c);
+    voler(c.slug, [
+      { transform: tr(x0, y0), opacity: 1 },
+      { transform: tr((x0 + x1) / 2, Math.min(y0, y1) - 70, 1.25), opacity: 1, offset: .55 },
+      { transform: tr(x1, y1, 1.5), opacity: 0 }], 650);
+    decor.firstElementChild.animate([
+      { transform: 'scale(.15)', opacity: 0 }, { transform: 'scale(1.08)', opacity: 1, offset: .65 }, { transform: 'scale(1)', opacity: 1 }],
+      { duration: 480, delay: 520, easing: 'ease-out', fill: 'backwards' });
+  }else{
+    const [x1, y1] = ENTREE[c.entree];
+    voler(c.slug, [
+      { transform: tr(x0, y0), opacity: 1 },
+      { transform: tr((x0 + x1) / 2 + 40, Math.min(y0, y1) - 40, 1.1), opacity: 1, offset: .5 },
+      { transform: tr(x1, y1, .15), opacity: .2 }], 700);
+  }
+}
+/* Dedans : de la boîte à l'œil (ou l'oreille), au thalamus, puis à l'hippocampe (≈ 1,2 s) ;
+   la vignette s'y épingle et l'hippocampe gonfle (« miam ») */
+function volDedans(c, x0, y0, mini){
+  const [xe, ye] = ENTREE[c.entree];
+  const [xh, yh] = HIPPO[journee.indexOf(c.slug)];
+  voler(c.slug, [
+    { transform: tr(x0, y0), opacity: 1 },
+    { transform: tr(xe, ye, .8), opacity: 1, offset: .4 },
+    { transform: tr(THALAMUS[0], THALAMUS[1], .6), opacity: 1, offset: .7 },
+    { transform: tr(xh, yh, HIPPO_ECHELLE), opacity: 1 }], 1200);
+  mini.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: 1180, fill: 'backwards' });
+  mini.lastElementChild.animate([{ transform: 'translate(0,-20px) scale(.6)', opacity: 0 }, { transform: 'translate(0,-10px) scale(.6)', opacity: 1 }],
+    { duration: 360, delay: 1200, easing: RESSORT, fill: 'backwards' });
+  hippocampe.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
+    { duration: 400, delay: 1250, easing: 'ease-in-out' });
+}
+
+/* --- la journée --- */
+function emettreJournee(){ document.dispatchEvent(new CustomEvent('journee', { detail: [...journee] })); }
+function retirerCarte(slug, anim){
+  journee = journee.filter(s => s !== slug);
+  deplanter(slug, anim);
+  retirerDecor(slug, anim);
+  hippoCartes.querySelectorAll(`.hippo-carte[data-slug="${slug}"]`).forEach(el => el.remove());
+  rangerHippo();
+}
+function pickCard(slug, opts = {}){
+  const c = PAR_SLUG[slug];
+  if(!c) return false;
+  const parLaMain = opts.anim !== false;
+  const anim = parLaMain && !REDUIT.matches;
+  if(!opts.forcer && boiteDort()){
+    trembler(slug);
+    direBulle(phaseCourante === 4 ? 'matin' : 'dort', slug);
+    return false;
+  }
+  if(journee.includes(slug)){ trembler(slug); return false; }
+  if(journee.length >= MAX_CARTES){
+    retirerCarte(journee[0], anim);   /* le cerveau ne garde pas tout */
+    if(parLaMain) direBulle('trop', slug);
+  }
+  journee.push(slug);
+  rangerHippo();
+  planter(slug, anim);
+  const decor = c.base ? poserDecor(c) : null;
+  const mini = poserHippo(slug);
+  if(anim){
+    /* seule la vue qu'on regarde voyage ; l'autre est déjà à jour */
+    const x0 = CARTE.x0 + c.i * CARTE.pas + defil, y0 = CARTE.y - 7;
+    const vue = Math.round(cutCourant);
+    if(vue === 0) volDehors(c, x0, y0, decor);
+    else if(vue === 1) volDedans(c, x0, y0, mini);
+  }
+  emettreJournee();
+  return true;
+}
+function resetDay(){
+  for(const slug of [...journee]) retirerCarte(slug, false);
+  journee = [];
+  vols.replaceChildren();
+  cacherBulle();
+  emettreJournee();
+}
+document.getElementById('journee').addEventListener('click', () => {
+  resetDay();
+  poserDefil(0);
+  animateTime(0);
+});
+/* ?cartes=pouce,ogre,copains : posées sans animation, même la nuit */
+if(URL_ETAT.cartes) URL_ETAT.cartes.forEach(s => pickCard(s, { anim: false, forcer: true }));
 </script>
 </body>
 </html>
