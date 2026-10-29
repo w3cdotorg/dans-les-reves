@@ -113,7 +113,7 @@
 
 **Interfaces:**
 - Produces : `#g-dehors` contient `#p-ciel-soleil`, `#p-ciel-lune` (+ étoiles = nœuds `#knot` dans `#g-etoiles`), `#p-sol`, `#p-expo` (le bâtiment de l'expo, pièce grise à fenêtres cousues), `#p-fenetre`, `#p-lit`, `#p-lampe`, `#p-doudou`, et la **tête de l'enfant de profil réutilisée** par `<use href="#p-tete">` + cheveux + œil (la même pièce que Dedans, sans cerveau : `#g-dehors` masque le cerveau par ordre de dessin). **Emplacements de décor** : 4 groupes vides `#slot-0..3` aux positions `(600,330)`, `(700,300)`, `(780,350)`, `(640,420)` où Task 8 insère la forme de décor des cartes choisies (`#d-<slug>`), les cartes `gens` à gauche de l'enfant `(120,380)`.
-- Éléments de nuit (`#p-lit`, `#p-lampe`, `#p-lune`, `#g-etoiles`, `#p-doudou`) ont `data-nuit="1"` ; éléments de jour (`#p-ciel-soleil`, `#p-expo`) `data-jour="1"` — Task 7 pilote leur opacité.
+- Éléments de nuit (`#p-lit`, `#p-lampe`, `#p-lune`, `#g-etoiles`, `#p-doudou`) ont `data-nuit="1"` ; éléments de jour (`#p-ciel-soleil`, `#p-expo`) `data-jour="1"` ; éléments de chambre (`#p-fenetre`, `#p-lit`, `#p-lampe`, `#p-doudou`) `data-chambre="1"` (revue Task 4) — Task 7 pilote leur opacité : jour t=0, chambre t≥1, nuit t 2–3 en fondu.
 
 - [ ] **Step 1 : Dessiner** la scène fixe de jour et de nuit (le lit est dans le même décor, l'enfant s'y couche par une simple translation + rotation de la tête en Task 7 — prévoir `#g-enfant-dehors` avec `transform-origin` au cou).
 - [ ] **Step 2 : Vérifier** — `test/shot.sh "vue=0" shots/t4-jour.png` (temporairement `#g-dedans{opacity:0}` si Task 6 n'existe pas encore : retirer avant commit) ; lire : décor lisible, slots vides sans trou visible. Console propre.
