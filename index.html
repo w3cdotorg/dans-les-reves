@@ -159,7 +159,10 @@ h1{
   overflow:hidden;
   box-shadow:inset 0 0 0 1px rgba(var(--ombre),.15);
 }
-svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);margin:0 auto}
+/* isolation : les multiply de la scène (toile, nuit, encres riso) restent DANS
+   le SVG ; sans elle, en riso, la toile se multipliait avec le fond de la carte
+   (papier × papier → beige). */
+svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);margin:0 auto;isolation:isolate}
 
 /* ===== 7. Pièces de laine et fils (règle de thème) =====
    Une pièce = un élément .w qui déclare sa laine et son encre :
@@ -194,9 +197,14 @@ svg#scene{display:block;width:100%;height:auto;max-height:var(--hauteur-svg);mar
 
 /* La toile du SVG : lin + grain en feutrine, papier + grain en riso. */
 .toile-lin{fill:url(#linen)}
-.toile-grain{fill:var(--toile);filter:url(#linenGrain);opacity:.9}
+/* Le grain ne doit PAS masquer la trame : le rect est blanc (neutre en
+   multiply), le filtre n'y dépose que le bruit sombre, et le rect se multiplie
+   avec le lin dessous. Résultat : lin intact + grain, comme le fond du body.
+   (Un aplat --toile à .9 d'opacité, comme dans la maquette v10, cachait la
+   trame à 90 %.) Même mécanique en riso, sur le papier. */
+.toile-grain{fill:#fff;filter:url(#linenGrain);mix-blend-mode:multiply}
 [data-theme=riso] .toile-lin{fill:var(--papier)}
-[data-theme=riso] .toile-grain{fill:var(--papier);filter:url(#paperGrain);opacity:1}
+[data-theme=riso] .toile-grain{filter:url(#paperGrain)}
 
 /* ===== 8. Curseur du temps et ses cinq moments ===== */
 .time-control{display:flex;flex-direction:column;gap:10px}
@@ -659,7 +667,12 @@ function setLite(on){
    Chrome headless à froid, le script ne s'exécute qu'à ~140 ms alors que la
    peinture elle-même coûte ~10 ms ; la valeur brute mesurait le démarrage du
    navigateur et allégeait toutes les captures. Au-delà de LITE_SEUIL_MS de
-   rendu, la machine peine : on allège. */
+   rendu, la machine peine : on allège.
+   ⚠ Onglet ouvert en arrière-plan : les rAF y sont suspendus, le laps
+   compterait tout le temps passé caché. On ne mesure donc que page visible ;
+   si elle se cache pendant la mesure, on n'en conclut rien et on remesure au
+   retour au premier plan (mesure alors plus courte que le premier rendu :
+   au pire on n'allège pas, jamais d'allègement à tort). */
 const LITE_SEUIL_MS = 120;
 const REDUIT = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -670,11 +683,24 @@ const REDUIT = matchMedia('(prefers-reduced-motion: reduce)');
   if(choix === true){ setLite(true); return; }
   if(choix === false) return;
   if(REDUIT.matches){ setLite(true); return; }
+  mesurerRendu();
+})();
+
+function mesurerRendu(){
+  if(document.visibilityState !== 'visible'){
+    document.addEventListener('visibilitychange', mesurerRendu, { once: true });
+    return;
+  }
+  let interrompu = false;
+  const surChangement = () => { interrompu = true; };
+  document.addEventListener('visibilitychange', surChangement, { once: true });
   const t0 = performance.now();
   requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.removeEventListener('visibilitychange', surChangement);
+    if(interrompu){ mesurerRendu(); return; }
     if(performance.now() - t0 > LITE_SEUIL_MS) setLite(true);
   }));
-})();
+}
 
 /* ===== 5. Curseurs : état initial et pastilles =====
    Squelette : les pastilles placent les curseurs, les curseurs allument la

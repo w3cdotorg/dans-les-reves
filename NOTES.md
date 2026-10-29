@@ -279,3 +279,11 @@ Découvertes et choix non évidents :
   tâche qui pilote la nuit devra soit déplacer le dégradé, soit en faire un autre.
 - **Règle `.w`** : aucune pièce ne porte d'attribut `transform` (la `transform` CSS du
   décalage d'encre riso le remplacerait) ; écrit en commentaire à côté de la règle CSS.
+
+## 2026-10-29 — Objectif ajouté : « il faut que ce soit fun à utiliser »
+
+Demande du propriétaire en cours de réalisation. Inscrit dans la spec (§2, critères
+concrets : retour immédiat < 100 ms à chaque appui, cerveau-personnage, surprises,
+récompenses, mouvement à ressort mais doux) et dans les Global Constraints du plan, pour
+que chaque sous-agent et chaque reviewer le portent. Les tâches déjà faites (1) seront
+reprises au polish (Task 18) pour les retours des boutons et curseurs.

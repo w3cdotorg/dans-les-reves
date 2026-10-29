@@ -37,6 +37,26 @@ peut vivre tout le cycle jour → nuit → matin.
 ## 2. Objectifs, non-objectifs, anti-objectifs
 
 **Objectifs**
+- **C'est fun à utiliser** (objectif ajouté par le propriétaire le 29/10, à égalité avec les
+  deux autres). Concrètement, « fun » se vérifie :
+  - *Tout répond au doigt, tout de suite* : chaque appui produit un retour visible en moins
+    de 100 ms (la carte se soulève et oscille, l'épingle se plante avec un petit rebond, la
+    pastille gonfle, le bouton s'enfonce). Rien n'est inerte.
+  - *Le cerveau est un personnage* : il mange les souvenirs qui arrivent (petit « miam »
+    visuel : l'hippocampe gonfle), il ronfle en nuit profonde, ses yeux s'agitent en nuit
+    des rêves, il bâille au matin ; l'enfant endormi sourit ou fronce les sourcils.
+  - *Des surprises* : « Encore un rêve » change la variante ; une bouloche se décroche
+    parfois et flotte ; les épingles brillent quand on passe dessus ; la lune cligne de
+    l'œil une fois sur dix ; un chien pirate passe dans un coin après la chanson.
+  - *Le rire désamorce* : les transformations de la télécommande sont franchement
+    ridicules (l'ogre rapetisse avec un bruit de ballon qui se dégonfle… **dessiné**, pas
+    sonore ; oreilles de lapin ; danse maladroite) et la phrase le dit avec humour.
+  - *Des récompenses* : étoiles, confettis de laine, un « bravo » brodé, et à la fin de
+    l'histoire du pouce, un badge en feutrine « Je connais mon cerveau ».
+  - *Le mouvement est juteux* : easings à ressort (`cubic-bezier(.34,1.56,.64,1)`),
+    squash & stretch léger sur les pièces, jamais linéaire ; mais tout reste **doux**
+    (pas de flash, pas de secousse violente, pas de son hors voix et chanson) et tout
+    est coupé par `prefers-reduced-motion`.
 - Un enfant de 5 ans pilote tout seul : gros boutons, pastilles, curseurs, cartes à toucher.
 - Chaque zone touchée est nommée et expliquée en deux phrases, lues à voix haute (voix
   coupée par défaut, comme les deux grands frères).
@@ -458,3 +478,6 @@ Dehors piloté par les cartes (§4.2, §5), loupe en laine complète avec pause 
   jolie sur un appareil lent.
 - `prefers-reduced-motion`, clavier, tablette : OK.
 - Le style ne ressemble ni aux aînés ni à un vectoriel « habituel » : on voit la laine.
+- **C'est fun** : chaque appui a un retour immédiat ; le cerveau-personnage réagit à chaque
+  moment ; au moins cinq surprises et trois récompenses sont en place ; un parent qui
+  teste la page sourit au moins une fois sans qu'on lui dise où regarder.
