@@ -85,7 +85,7 @@ contours : en feutrine les contours sont des **coutures** (traits pointillés, f
 relief), en riso ils sont la **passe d'encre bleue** décalée. Interrupteur 🧶 / 🖨️ en
 haut de page, mémorisé en `localStorage`.
 
-**Recette du filtre feutrine (v4, validée en capture)**, dans l'ordre :
+**Recette du filtre feutrine (v5, validée en capture)**, dans l'ordre :
 1. découpe aux ciseaux : `feTurbulence` basse fréquence (.04) + `feDisplacementMap` 2.4 ;
 2. bord pelucheux fin : turbulence 1.1 + déplacement 1.1 ;
 3. fibres **mates** : bump map (`fractalNoise` 1.5×1.1, 3 octaves) → `feDiffuseLighting`
@@ -95,10 +95,11 @@ haut de page, mémorisé en `localStorage`.
 4. volume « coussin » : érosion 3.2 + flou 2.2 → le pourtour est un peu plus sombre (.16) ;
 5. épaisseur : anneau érodé 1.2, liseré blanc (.5) décalé haut-gauche, liseré sombre (.3)
    décalé bas-droite, légèrement floutés ;
-6. bouloches : `fractalNoise` .16 à 1 octave, **seuil alpha très dur** (40·a − 27.5) → une
-   poignée de blobs par pièce, dilatés .9, floutés .45, blancs à .42 avec une ombre
-   minuscule. ⚠ En v3 le seuil (14·a − 8.4) donnait de la neige partout : les bouloches
-   doivent rester rares ;
+6. bouloches : `fractalNoise` **.3 à 1 octave, seuil alpha très dur (60·a − 46.5)** → une
+   poignée de blobs par pièce, dilatés .55, floutés .45, blancs à .42 avec une ombre
+   minuscule. ⚠ Calibré sur un banc d'essai de 4 variantes (capture) : avec un seuil plus
+   doux (14·a − 8.4 en v3, 40·a − 27.5 en v4) c'est de la neige / des pois partout. Les
+   bouloches doivent rester **rares** pour rester jolies ;
 7. ombre portée douce (1.3, 2.6, σ 1.9, .34) : la pièce est posée sur la toile.
 Toile de fond : motif de lin (`<pattern>` 7 px) + grain multiplié. Fil : filtre `thread`
 (déplacement .9 + petite ombre) pour un point un peu irrégulier.

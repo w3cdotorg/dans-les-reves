@@ -74,9 +74,9 @@
       <feFlood flood-color="#3a2a1e" flood-opacity=".3" result="dark"/>
       <feComposite in="dark" in2="ringLo2" operator="in" result="ringLo"/>
       <!-- 5. bouloches : quelques petites boules de fibres, claires avec une ombre minuscule -->
-      <feTurbulence type="fractalNoise" baseFrequency=".16" numOctaves="1" seed="31" result="pn"/>
-      <feColorMatrix in="pn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 40 -27.5" result="pills0"/>
-      <feMorphology in="pills0" operator="dilate" radius=".9" result="pills1"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="1" seed="31" result="pn"/>
+      <feColorMatrix in="pn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 60 -46.5" result="pills0"/>
+      <feMorphology in="pills0" operator="dilate" radius=".55" result="pills1"/>
       <feGaussianBlur in="pills1" stdDeviation=".45" result="pills2"/>
       <feComposite in="pills2" in2="inner" operator="in" result="pills"/>
       <feFlood flood-color="#fff" flood-opacity=".42" result="pillWhite"/>
