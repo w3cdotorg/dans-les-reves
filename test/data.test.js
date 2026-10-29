@@ -125,7 +125,7 @@ test('INFO : ≥ 32 zones, ids du brief, deux phrases chacune', () => {
   for(const [vue, liste] of Object.entries(ids)){
     for(const id of liste){
       assert.ok(INFO[id], 'zone manquante : ' + id);
-      assert.equal(INFO[id].vue, Number(vue), id + ' vue');
+      assert.ok([].concat(INFO[id].vue).includes(Number(vue)), id + ' vue');
     }
   }
   for(const c of CARTES.filter(c => c.cat === 'vu' || c.cat === 'gens')){
@@ -134,9 +134,15 @@ test('INFO : ≥ 32 zones, ids du brief, deux phrases chacune', () => {
   }
   for(const [id, z] of Object.entries(INFO)){
     assert.ok(z.emoji && z.titre && z.texte, id);
-    assert.ok([0,1,2].includes(z.vue), id + ' vue');
+    /* vue : un nombre, ou un tableau non vide d'entiers 0..2 sans doublon */
+    const vues = [].concat(z.vue);
+    assert.ok(vues.length >= 1 && vues.every(v => [0,1,2].includes(v)), id + ' vue');
+    assert.equal(new Set(vues).size, vues.length, id + ' vue sans doublon');
     assert.equal(phrases(z.texte), 2, id + ' : deux phrases → ' + z.texte);
   }
+  /* l'écran du rêve et la boîte à souvenirs sont visibles Dehors et Dedans */
+  assert.deepEqual(plain(INFO.ecran.vue), [0,1]);
+  assert.deepEqual(plain(INFO.boite.vue), [0,1]);
   assert.match(INFO['decor-pouce'].texte, /statue en bronze/);
   assert.match(INFO['decor-pouce'].texte, /César/);
   assert.match(INFO['decor-pouce'].texte, /ne bouge pas/);
@@ -156,6 +162,8 @@ test('jeux : 8 + 8 questions', () => {
   assert.equal(JEU_REVE.find(q => q.q.includes('un pouce de 12 mètres')).reponse, 'vrai');
   assert.equal(JEU_REVE.find(q => q.q.includes('un ogre gigantesque')).reponse, 'reve');
   assert.equal(JEU_REVE.filter(q => q.reponse === 'vrai').length, 4);
+  /* jamais la peur là où l'enfant dort (revue tâche 2) */
+  for(const q of JEU_REVE) assert.doesNotMatch(q.q, /chambre|\blit\b/, q.q);
 });
 
 test('histoire du pouce : ≥ 10 étapes, actions, prénom', () => {
@@ -232,6 +240,8 @@ test('honnêteté (recherche §5) : mots interdits absents, prudences présentes
   assert.doesNotMatch(tout, /poison|poubelle|déchet/i, 'on dit « se rince »');
   assert.doesNotMatch(tout, /vainc|vaincu|tué|tuer/i, 'jamais vaincu');
   assert.doesNotMatch(tout, /cassé|erreur/i, 'le cauchemar n\'est pas une erreur');
+  /* le progrès moteur pendant le sommeil n'est pas établi chez l'enfant (revue tâche 2) */
+  assert.doesNotMatch(tout, /encore mieux demain|mieux après une bonne nuit/i);
   assert.match(tout, /beaucoup de chercheurs pensent que/i);
   assert.match(tout, /les chercheurs ne savent pas encore tout/i);
   assert.match(tout, /sommeil profond/);

@@ -650,7 +650,7 @@ const CARTES = [
     texte:"Waf, waf : un chien tout content t'a dit bonjour en remuant la queue. Il entre dans ta tête par tes yeux, avec la queue qui remue et tout !" },
   { slug:'velo', nom:'un vélo', g:'m', emoji:'🚲', cat:'vu', charge:0, entree:'oeil', base:true,
     greffe:{ nom:'un vélo', forme:'velo', g:'m' },
-    texte:"Tu as fait du vélo, et tu as tenu en équilibre comme {un champion|une championne} ! Ton cerveau garde ce souvenir pour que tu pédales encore mieux demain." },
+    texte:"Tu as fait du vélo, et tu as tenu en équilibre comme {un champion|une championne} ! Cette nuit, ton cerveau va rejouer tes essais, tout seul, pendant que tu dors." },
   { slug:'piscine', nom:'la piscine', g:'f', emoji:'🏊', cat:'vu', charge:0, entree:'oeil', base:true,
     greffe:{ nom:'une piscine', forme:'piscine', g:'f' },
     texte:"Plouf, la piscine ! Tu as fait des bulles et des éclaboussures, et ton cerveau a tout vu." },
@@ -729,7 +729,11 @@ const MODIFS = {
 
 /* ===== E. Zones nommées (spec §5) =====
    vue 0 = Dehors, 1 = Dedans, 2 = Tout près. Les ids sont repris tels quels par
-   les zones cliquables (data-id). Deux phrases, un fait qui épate. */
+   les zones cliquables (data-id). Deux phrases, un fait qui épate.
+   `vue` est un nombre OU un tableau de nombres : une zone présente dans plusieurs
+   vues (l'écran du rêve et la boîte à souvenirs, vues 0 et 1) porte la liste, et
+   ses zones cliquables sont actives dans chacune des vues listées.
+   Lire avec [].concat(zone.vue). */
 const INFO = {
   // ---- Dedans : le cerveau et ses voisins
   'cortex':{ vue:1, emoji:'🧠', titre:'Le cortex, la grande couverture plissée',
@@ -786,9 +790,9 @@ const INFO = {
     texte:"Par la fenêtre, tu vois s'il fait jour ou nuit, et l'horloge de ta tête aussi. Le matin, la lumière qui entre est le plus doux des réveils !" },
   'expo':{ vue:0, emoji:'🏛️', titre:"Le bâtiment de l'expo",
     texte:"Ici, des artistes ont peint des dessins géants sur les murs : c'est une expo de street art. Ouvre grand les yeux, car tout ce que tu vois ici peut entrer dans ta tête !" },
-  'boite':{ vue:0, emoji:'📦', titre:'La boîte à souvenirs',
+  'boite':{ vue:[0,1], emoji:'📦', titre:'La boîte à souvenirs',
     texte:"Dans cette boîte, il y a des souvenirs pour ta journée : des choses vues, des mots entendus, des gens et ce que tu as ressenti. Choisis-en quatre au plus, car ton cerveau ne peut pas tout garder !" },
-  'ecran':{ vue:0, emoji:'🎬', titre:"L'écran des rêves",
+  'ecran':{ vue:[0,1], emoji:'🎬', titre:"L'écran des rêves",
     texte:"La nuit, ton cerveau projette ici le film de tes rêves, fabriqué avec des morceaux de ta journée tout mélangés. Ce film peut être drôle, bizarre ou faire peur, mais il n'est jamais pour de vrai." },
 
   // ---- Dehors : le décor qui n'apparaît que si sa carte est choisie
@@ -799,7 +803,7 @@ const INFO = {
   'decor-chien':{ vue:0, emoji:'🐶', titre:'Le chien',
     texte:"Ce chien remue la queue pour te dire bonjour, il est content de te voir ! Son nez sent les odeurs des milliers de fois mieux que le tien." },
   'decor-velo':{ vue:0, emoji:'🚲', titre:'Le vélo',
-    texte:"Pour tenir sur un vélo, ton cervelet travaille à toute vitesse et te garde en équilibre. La nuit, ton cerveau rejoue tes essais : c'est pour ça qu'on y arrive souvent mieux après une bonne nuit !" },
+    texte:"Pour tenir sur un vélo, ton cervelet travaille à toute vitesse et te garde en équilibre. La nuit, ton cerveau rejoue tes essais, comme s'il pédalait tout seul dans ta tête !" },
   'decor-piscine':{ vue:0, emoji:'🏊', titre:'La piscine',
     texte:"Plouf, dans l'eau, ton corps devient tout léger, comme un astronaute dans l'espace ! Nager, ça fatigue bien : ce soir, tu vas dormir comme un loir." },
   'decor-gateau':{ vue:0, emoji:'🎂', titre:"Le gâteau d'anniversaire",
@@ -847,7 +851,7 @@ const JEU_PARTIES = [
 ];
 const JEU_REVE = [
   { q:'Devant une expo, il y a un pouce de 12 mètres, en bronze.',              emoji:'👍', reponse:'vrai' },
-  { q:'Dans ta chambre, un ogre gigantesque avec un pouce à la place du nez.',  emoji:'👹', reponse:'reve' },
+  { q:'Sur un toboggan, un ogre gigantesque qui a un pouce à la place du nez.', emoji:'👹', reponse:'reve' },
   { q:"Un chien qui fait du vélo en chantant à tue-tête.",                       emoji:'🐶', reponse:'reve' },
   { q:'Ton cœur continue de battre pendant que tu dors.',                       emoji:'❤️', reponse:'vrai' },
   { q:'Une glace géante qui parle et qui connaît ton prénom.',                  emoji:'🍦', reponse:'reve' },
