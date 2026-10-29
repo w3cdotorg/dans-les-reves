@@ -11,7 +11,7 @@
      (section 4 du script) part de l'exécution du script, donc n'en souffre pas. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    DANS LES RÊVES — mini-explorateur du cerveau et des rêves (4-5 ans)
@@ -85,6 +85,12 @@
 
   /* la nuit qui tombe sur la toile */
   --nuit-1:#8d8cae; --nuit-2:#3f3f74; --nuit-3:#262a58;
+  --nuit-4:#141533;                /* la nuit d'un cauchemar, plus profonde (Task 10) */
+
+  /* le rêve (Task 10) : l'écran teinté d'un beau rêve, le bouton « Encore un rêve »,
+     l'alarme orange d'un rêve bizarre (la laine de l'amygdale et sa lueur) */
+  --p-ecran-doux:#fff3c4; --p-ecran-bouton:#4b4f9e;
+  --p-amygdale-bizarre:#f28c28; --amygdale-orange:#ff9a1f;
 
   /* têtes de verre des épingles (consommées par <use href="#pin" style="color:…">) */
   --glass-red:#f05a4a; --glass-blue:#3f9be0; --glass-yellow:#f3c73a;
@@ -460,7 +466,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    l'assombrissement pour garder la trame et les contrastes (NOTES.md, Task 7). En riso,
    tous les groupes de la scène se multiplient avec la toile : la nuit assombrit aussi
    les pièces, d'où un plafond plus bas. */
-.nuit{fill:var(--nuit-3);mix-blend-mode:multiply;opacity:calc(var(--nuit,0) * var(--nuit-max,.8))}
+.nuit{fill:var(--nuit-couleur, var(--nuit-3));mix-blend-mode:multiply;opacity:calc(var(--nuit,0) * var(--nuit-max,.8));transition:fill 1.2s ease}
 [data-theme=riso]{--nuit-max:.4}
 
 /* ===== 7 quinquies. Vue « Tout près » : à hauteur de neurones (Task 5) =====
@@ -746,6 +752,85 @@ symbol{overflow:visible}
 #bulle-boite.visible{opacity:1;visibility:visible;pointer-events:auto;cursor:pointer;transition:opacity .12s}
 .bulle-texte{font-family:var(--font-display);font-weight:600;font-size:19px;fill:var(--fil-encre, var(--ui-encre));text-anchor:middle}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ===== 7 octies. Le rêve et l'écran (Task 10) =====
+   #g-ecran : le nuage-écran (#p-ecran, une pièce de laine complète, épinglée), le film
+   (#g-reve, rempli par renderDream), le bouton #encore et la légende #t-phrase.
+   RÈGLE DU <use> (section 7) : tout se règle par une classe posée sur l'élément lui-même
+   ou par une variable ; le verdict du rêve (body[data-verdict], posé par le script) ne
+   pose QUE des variables, qui traversent les clones (Dehors, la loupe de Task 14).
+   Les effets de la nuit (toile plus profonde, alarme) ne valent que la nuit des rêves
+   (data-temps 3) ; au matin, le rêve reste à l'écran, sa teinte aussi. */
+body[data-temps="3"][data-verdict=cauchemar]{--nuit-couleur:var(--nuit-4)}
+body[data-temps="3"][data-verdict=bizarre]{
+  --p-amygdale:var(--p-amygdale-bizarre);--amygdale-rouge:var(--amygdale-orange);--amygdale-halo:var(--amygdale-orange);
+  --amygdale-encre:var(--encre-orange)}   /* riso : orange d'impression (en feutrine, --encre-orange n'existe pas : la laine) */
+body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ecran-laine:var(--p-ecran-doux);--ecran-encre:var(--ecran-encre-doux)}
+[data-theme=riso]{--ecran-encre:var(--papier);--ecran-encre-doux:color-mix(in srgb, var(--ink-jaune) 32%, var(--papier));--legende-filtre:none}
+/* l'alarme bat plus vite pendant un cauchemar (classe posée par le script, nuit des rêves) */
+#p-amygdale.pulse.alarme{animation-duration:.95s}
+/* l'enfant sourit après un beau rêve (la bouche est un .fil : la transform est permise) */
+#p-bouche{transition:transform .5s var(--ui-ressort)}
+#p-bouche.sourit{transform:scale(1.18,1.7)}
+
+/* le nuage : il n'est pas assombri par la nuit (les pièces sont en normal sur la toile) ;
+   en riso, le groupe ne se multiplie pas avec la toile assombrie, sur une sous-couche de papier */
+[data-theme=riso] #scene-inner>#g-ecran{mix-blend-mode:normal}
+.sous-ecran{fill:var(--riso-papier, none)}
+#p-ecran{--encre:var(--ecran-encre);transition:fill .8s ease}
+.fil.ecran-couture{--f:var(--fil-sable);stroke-width:1.6}
+#ecran-corps,#g-legende,#g-reve{pointer-events:none}
+.ecran-tremble{transform-box:fill-box;transform-origin:50% 50%}
+.ecran-tremble.tremble{animation:var(--amb-anim, ecran-tremble) .5s ease-in-out infinite}
+@keyframes ecran-tremble{25%{transform:translate(-1.3px,.5px) rotate(-.45deg)}50%{transform:translate(1px,-.7px) rotate(.35deg)}75%{transform:translate(-.5px,.9px) rotate(-.2deg)}}
+
+/* le film : il se projette (script : iris + lumière, 400 ms), puis le modificateur.
+   Les classes .m-<modif> sont posées sur chaque .reve-pose (et sur le contexte) */
+.reve-film,.reve-pose{transform-box:fill-box;transform-origin:50% 50%}
+.reve-pose{transition:transform .6s var(--ui-ressort)}
+.reve-pose.m-gigantesque{transform-origin:50% 72%;transform:scale(2.2)}   /* il grandit vers le haut et déborde du nuage */
+.reve-pose.m-minuscule{transform:scale(.4)}
+.reve-pose.m-envers{transform:scale(1,-1)}
+.reve-pose.m-couleur{filter:hue-rotate(140deg)}
+.reve-pose.m-desobeit{animation:var(--amb-anim, desobeit) 1.7s ease-in-out infinite}
+@keyframes desobeit{15%{transform:translate(-6px,0) rotate(-9deg)}30%{transform:translate(5px,-4px) rotate(7deg)}45%{transform:rotate(-4deg)}60%{transform:translate(4px,2px) rotate(10deg)}80%{transform:translate(-3px,0) rotate(-6deg)}}
+.reve-contexte{opacity:.9;transition:opacity .6s}
+.reve-contexte.m-gigantesque{opacity:0}   /* « les copains ont disparu » */
+/* les deux parties d'une greffe, placées sur la base par des variables (posées sur le <use>) ;
+   l'origine 0 0 est celle du <symbol> (le plus proche viewport) */
+.a-tete,.a-corps{transform-box:view-box;transform-origin:0 0}
+.a-tete{transform:translate(calc(var(--tete-x,0) * 1px),calc(var(--tete-y,0) * 1px)) scale(var(--tete-s,1))}
+.a-corps{transform:translate(calc(var(--corps-x,0) * 1px),calc(var(--corps-y,0) * 1px)) scale(var(--corps-s,1));visibility:var(--corps-vis, visible)}
+.remue{transform-box:fill-box;transform-origin:100% 100%;animation:var(--amb-anim, remue) .7s ease-in-out infinite alternate}
+@keyframes remue{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
+/* le rêve tout flou d'une journée vide : des taches pâles qui flottent */
+.flou{filter:blur(9px);animation:var(--amb-anim, flou-derive) 7s ease-in-out infinite}
+.tache{fill:var(--t);opacity:.8}
+@keyframes flou-derive{50%{transform:translate(8px,-5px) scale(1.06)}}
+/* après les raccourcis « animation » ci-dessus (qui remettent l'état à running) */
+:is(.ecran-tremble.tremble,.reve-pose.m-desobeit,.remue,.flou){animation-play-state:var(--amb-play, running)}
+
+/* « Encore un rêve » : une pilule de feutre ; elle s'enfonce sous le doigt (< 100 ms) */
+#encore{cursor:pointer;outline:none;pointer-events:auto}
+#encore[aria-hidden=true]{visibility:hidden;pointer-events:none}
+.encore-corps{transform-box:fill-box;transform-origin:50% 50%;transition:transform .22s var(--ui-ressort)}
+.encore-corps.appui{transform:translateY(1.5px) scale(.95);transition-duration:.06s}
+@media (hover:hover){.encore-corps:hover:not(.appui){transform:translateY(-2px)}}
+.encore-focus{fill:none;stroke:var(--ui-indigo);stroke-width:3;opacity:0}
+#encore:focus-visible .encore-focus{opacity:1}
+.encore-texte{font-family:var(--font-display);font-weight:600;font-size:17px;text-anchor:middle;fill:var(--riso-papier, var(--fil-blanc));pointer-events:none}
+
+/* la phrase : à gauche du nuage, en haut (sur le mur de la chambre) en vue Dehors, où le dessous
+   du nuage est le lit et le doudou ; sous le nuage, posée sur la boîte, en vue Dedans ; elle
+   glisse avec le fondu (--vue, posée par setCut ; --leg-dy, la descente, par le script selon sa
+   hauteur). Baloo 2, 18 px de la scène, brun foncé (riso : bleu) sur la feutrine crème */
+.legende{transform:translate(calc(min(1, var(--vue, 0)) * 342px),calc(min(1, var(--vue, 0)) * var(--leg-dy, 0px)));transition:opacity .3s}
+.legende.vide{opacity:0;visibility:hidden}
+.legende-fond{filter:var(--legende-filtre, var(--w-lite-filter))}
+.t-phrase{margin:0;padding:9px 13px 11px;font-family:"Baloo 2",var(--font-display);font-weight:600;font-size:18px;line-height:1.18;
+  color:var(--fil-encre, var(--encre));text-wrap:pretty;hyphens:none}
+/* les cartes du cortex qui ne servent pas au rêve pâlissent (spec §4.5-1) */
+.hippo-carte.oubliee{opacity:.4}
 
 /* ===== 8. Volet d'information (#info) =====
    Il monte par-dessus le bas de la scène ; caché tant qu'il n'a pas la classe
@@ -1537,6 +1622,455 @@ html:not([data-pret]) *{transition:none!important}
           </symbol>
           </g>
           <!-- CARTES-END -->
+          <!-- REVE-BEGIN -->
+          <!-- ===== Le rêve (Task 10) : généré par tools/gen-reve.py, ne pas retoucher à la main =====
+               #g-base-<forme> : la grande forme de rêve (vignette × 3, ≈ 120 px, centrée sur (0,0)) ;
+                 data-tete / data-corps : où se posent les deux parties d'une greffe (x y échelle) ;
+               #g-greffe-<forme> : .a-tete et .a-corps, placées par des variables (--tete-x… --corps-s) ;
+               #g-greffe-<forme>-dos : ce qui passe derrière la base ; #g-reve-flou : la journée vide.
+               Pièces .w.lite (filtre #woolMini) seulement. -->
+          <g id="g-reve-assets">
+          <symbol id="g-base-pouce" overflow="visible" data-tete="0 0 1" data-corps="0 0 1">
+            <path class="w lite mini pastel" style="--p:var(--p-socle)" data-ink="bleu" d="M-33 42H33C36.3 42 39 44.7 39 48V54C39 57.3 36.3 60 33 60H-33C-36.3 60-39 57.3-39 54V48C-39 44.7-36.3 42-33 42Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-bronze)" data-ink="jaune" d="M-27 45C-28.5 24-30 6-28.5-15C-27-39-18-57 0-57C18-57 27-39 28.5-15C30 6 28.5 24 27 45Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-bronze-ombre)" data-ink="rose" d="M13.5-52.5C24-43.5 28.5-28.5 28.5-15C30 6 28.5 24 27 45H16.5C19.5 24 21 6 20.4-15C19.8-30 18-42 13.5-52.5Z"/>
+            <path class="fil epais gros" style="--f:var(--fil-brun)" d="M-27 45C-28.5 24-30 6-28.5-15C-27-39-18-57 0-57C18-57 27-39 28.5-15C30 6 28.5 24 27 45"/>
+            <path class="w lite mini pastel" style="--p:var(--p-ongle)" data-ink="jaune" d="M-18.6-39.6C-18.6-55.8 18.6-55.8 18.6-39.6L17.4-22.5C16.8-15 12-11.4 0-11.4C-12-11.4-16.8-15-17.4-22.5Z"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-18.6-39.6C-18.6-55.8 18.6-55.8 18.6-39.6L17.4-22.5C16.8-15 12-11.4 0-11.4C-12-11.4-16.8-15-17.4-22.5Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M-10.2-46.5Q-10.8-36-9-25.5"/>
+            <path class="fil epais gros" style="--f:var(--fil-brun)" d="M-22.5 6Q0 13.5 22.5 6M-21 19.2Q0 25.2 21 19.2"/>
+          </symbol>
+          <symbol id="g-base-glace" overflow="visible" data-tete="0 -24 1" data-corps="0 6 1">
+            <path class="w lite mini orange" style="--p:var(--p-cornet)" data-ink="jaune" d="M-22.5-9H22.5L2.4 55.5Q0 58.8-2.4 55.5Z"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-16.5 0L7.5 30M0-7.5L15 12M16.5 0L-7.5 30M0-7.5L-15 12"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-27-12C-33-24-27-42-12-46.5C-3-52.5 9-52.5 15-46.5C28.5-42 33-24 27-12C22.5-4.5 18-10.5 13.5-6C9-1.5 4.5-9 0-4.5C-4.5 0-9-9-13.5-4.5C-18 0-22.5-4.5-27-12Z"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M-4.8-52.8C-4.8-57.1-1.3-60.6 3-60.6C7.3-60.6 10.8-57.1 10.8-52.8C10.8-48.5 7.3-45 3-45C-1.3-45-4.8-48.5-4.8-52.8Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M-16.5-31.5Q-13.5-40.5-4.5-42"/>
+          </symbol>
+          <symbol id="g-base-chien" overflow="visible" data-tete="24 -27 1" data-corps="-12 24 1">
+            <path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:9" data-ink="jaune" d="M-36 30Q-57 18-51-3"/>
+            <path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-42 51C-48 27-39 0-18-3C3-6 18 12 21 30C22.5 39 21 48 18 51Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-chien)" data-ink="jaune" d="M-3-27C-3-45 9-54 21-54C33-54 42-45 42-33C51-33 57-27 57-19.5C57-12 51-7.5 42-7.5C36-1.5 27 1.5 18 0C6-1.5-3-12-3-27Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-chien-clair)" data-ink="jaune" d="M33-16.8C33-21.4 38.4-25.2 45-25.2C51.6-25.2 57-21.4 57-16.8C57-12.2 51.6-8.4 45-8.4C38.4-8.4 33-12.2 33-16.8Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M9-48C-3-48-9-33-6-18C-4.5-10.5 3-9 6-15C9-24 15-36 9-48Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-cerise);--tw:6.6" data-ink="rose" d="M1.5-4.5Q12 3 24-1.5"/>
+            <circle class="noeud-brun" cx="55.2" cy="-21" r="3.1"/>
+            <circle class="noeud-brun" cx="27" cy="-33" r="2.3"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M43.5-10.8Q48-7.8 52.5-10.8"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-3 51V36M9 51V30"/>
+          </symbol>
+          <symbol id="g-base-velo" overflow="visible" data-tete="0 0 .8" data-corps="0 10 1">
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M-55.5 24C-55.5 9.9-44.1-1.5-30-1.5C-15.9-1.5-4.5 9.9-4.5 24C-4.5 38.1-15.9 49.5-30 49.5C-44.1 49.5-55.5 38.1-55.5 24ZM-48.9 24C-48.9 13.6-40.4 5.1-30 5.1C-19.6 5.1-11.1 13.6-11.1 24C-11.1 34.4-19.6 42.9-30 42.9C-40.4 42.9-48.9 34.4-48.9 24Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M4.5 24C4.5 9.9 15.9-1.5 30-1.5C44.1-1.5 55.5 9.9 55.5 24C55.5 38.1 44.1 49.5 30 49.5C15.9 49.5 4.5 38.1 4.5 24ZM11.1 24C11.1 13.6 19.6 5.1 30 5.1C40.4 5.1 48.9 13.6 48.9 24C48.9 34.4 40.4 42.9 30 42.9C19.6 42.9 11.1 34.4 11.1 24Z"/>
+            <path class="fil gros" style="--f:var(--fil-sable)" d="M-30 6V42M-48 24H-12M30 6V42M12 24H48"/>
+            <path class="w lite mini trait" style="--p:var(--p-velo);--tw:7.8" data-ink="rose" d="M-30 24L-9-12H24L30 24M-9-12L3 24H-30M3 24L24-12"/>
+            <path class="w lite mini trait" style="--p:var(--p-roue);--tw:6" data-ink="bleu" d="M-9-12L-12-22.5M24-12L21-30H33"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-22.5-27H-3C0-27 1.5-22.5-1.5-21H-22.5C-25.5-22.5-25.5-27-22.5-27Z"/>
+            <circle cx="-30" cy="24" r="2.5" fill="url(#knot)"/>
+            <circle cx="30" cy="24" r="2.5" fill="url(#knot)"/>
+            <circle cx="3" cy="24" r="2.9" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="g-base-piscine" overflow="visible" data-tete="0 24 .9" data-corps="0 8 1">
+            <path class="w lite mini pastel" style="--p:var(--p-bord-piscine)" data-ink="bleu" d="M-51-3H51C54.3-3 57-.3 57 3V9C57 12.3 54.3 15 51 15H-51C-54.3 15-57 12.3-57 9V3C-57-.3-54.3-3-51-3Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-eau)" data-ink="bleu" d="M-51 12H51V45C51 51 48 54 42 54H-42C-48 54-51 51-51 45Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M-42 27Q-34.5 19.5-27 27T-12 27T3 27T18 27M-36 42Q-28.5 34.5-21 42T-6 42T9 42T24 42"/>
+            <path class="w lite mini trait" style="--p:var(--p-socle);--tw:5.4" data-ink="bleu" d="M33-39V18M48-39V18"/>
+            <path class="fil gros" style="--f:var(--fil-sable)" d="M33-27H48M33-12H48M33 3H48"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" fill-rule="evenodd" d="M-39-22.5C-39-32.4-30.9-40.5-21-40.5C-11.1-40.5-3-32.4-3-22.5C-3-12.6-11.1-4.5-21-4.5C-30.9-4.5-39-12.6-39-22.5ZM-30-22.5C-30-27.5-26-31.5-21-31.5C-16-31.5-12-27.5-12-22.5C-12-17.5-16-13.5-21-13.5C-26-13.5-30-17.5-30-22.5Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M-37.5-22.5H-31.5M-10.5-22.5H-4.5M-21-39V-33M-21-12V-6"/>
+          </symbol>
+          <symbol id="g-base-gateau" overflow="visible" data-tete="0 18 .9" data-corps="0 6 1">
+            <path class="w lite mini pastel" style="--p:var(--p-assiette)" data-ink="bleu" d="M-48 42H48C51.3 42 54 44.7 54 48V48C54 51.3 51.3 54 48 54H-48C-51.3 54-54 51.3-54 48V48C-54 44.7-51.3 42-48 42Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-gateau)" data-ink="jaune" d="M-33-3H33C38-3 42 1 42 6V36C42 41 38 45 33 45H-33C-38 45-42 41-42 36V6C-42 1-38-3-33-3Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glacage)" data-ink="rose" d="M-45-3C-45-15 45-15 45-3V9C39 18 33 6 27 12C21 24 12 9 4.5 15C-3 24-12 9-19.5 15C-27 24-36 9-45 15Z"/>
+            <path class="fil gros" style="--f:var(--fil-rouge)" d="M-39 31.5H39"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-21-39H-18C-16.3-39-15-37.7-15-36V-12C-15-10.3-16.3-9-18-9H-21C-22.7-9-24-10.3-24-12V-36C-24-37.7-22.7-39-21-39Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-1.5-43.5H1.5C3.2-43.5 4.5-42.2 4.5-40.5V-13.5C4.5-11.8 3.2-10.5 1.5-10.5H-1.5C-3.2-10.5-4.5-11.8-4.5-13.5V-40.5C-4.5-42.2-3.2-43.5-1.5-43.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M18-39H21C22.7-39 24-37.7 24-36V-12C24-10.3 22.7-9 21-9H18C16.3-9 15-10.3 15-12V-36C15-37.7 16.3-39 18-39Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M-19.5-56.2C-14.1-49.2-14.1-42.2-19.5-42.2C-24.9-42.2-24.9-49.2-19.5-56.2Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M0-60.7C5.4-53.7 5.4-46.7 0-46.7C-5.4-46.7-5.4-53.7 0-60.7Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M19.5-56.2C24.9-49.2 24.9-42.2 19.5-42.2C14.1-42.2 14.1-49.2 19.5-56.2Z"/>
+          </symbol>
+          <symbol id="g-base-tracteur" overflow="visible" data-tete="-20 -30 .8" data-corps="0 6 1">
+            <path class="w lite mini vert" style="--p:var(--p-tracteur)" data-ink="bleu" d="M-45-3V-48C-45-51-42-54-39-54H-3C0-54 3-51 3-48V-3Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-vitre)" data-ink="bleu" d="M-33.9-46.5H-9.6C-7.6-46.5-6-44.9-6-42.9V-29.1C-6-27.1-7.6-25.5-9.6-25.5H-33.9C-35.9-25.5-37.5-27.1-37.5-29.1V-42.9C-37.5-44.9-35.9-46.5-33.9-46.5Z"/>
+            <path class="w lite mini vert" style="--p:var(--p-tracteur)" data-ink="bleu" d="M0-21H42C48-21 51-18 51-12V15H0Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M31.2-43.5H32.4C34.1-43.5 35.4-42.2 35.4-40.5V-22.5C35.4-20.8 34.1-19.5 32.4-19.5H31.2C29.5-19.5 28.2-20.8 28.2-22.5V-40.5C28.2-42.2 29.5-43.5 31.2-43.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-54 24C-54 7.4-40.6-6-24-6C-7.4-6 6 7.4 6 24C6 40.6-7.4 54-24 54C-40.6 54-54 40.6-54 24Z"/>
+            <path class="w lite mini" style="--p:var(--p-moyeu)" data-ink="jaune" d="M-37.8 24C-37.8 16.4-31.6 10.2-24 10.2C-16.4 10.2-10.2 16.4-10.2 24C-10.2 31.6-16.4 37.8-24 37.8C-31.6 37.8-37.8 31.6-37.8 24Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M16.5 34.5C16.5 23.7 25.2 15 36 15C46.8 15 55.5 23.7 55.5 34.5C55.5 45.3 46.8 54 36 54C25.2 54 16.5 45.3 16.5 34.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-moyeu)" data-ink="jaune" d="M27.6 34.5C27.6 29.9 31.4 26.1 36 26.1C40.6 26.1 44.4 29.9 44.4 34.5C44.4 39.1 40.6 42.9 36 42.9C31.4 42.9 27.6 39.1 27.6 34.5Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M9-9H42"/>
+            <circle cx="-24" cy="24" r="2.5" fill="url(#knot)"/>
+            <circle cx="36" cy="34.5" r="2" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="g-base-orage" overflow="visible" data-tete="0 -12 1.1" data-corps="0 0 1">
+            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-45 6C-57 6-60-12-48-18C-51-36-30-45-18-33C-12-51 15-54 21-36C33-45 51-33 45-18C57-15 57 6 45 6Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M3 0L-15 27H-3L-12 54L15 18H3L12 0Z"/>
+            <path class="fil gros" style="--f:var(--fil-vague)" d="M-36 18L-42 33M-24 27L-30 42M30 18L24 33M42 27L36 42"/>
+          </symbol>
+          <symbol id="g-base-manege" overflow="visible" data-tete="3 9 .8" data-corps="0 6 1">
+            <path class="w lite mini trait" style="--p:var(--p-or);--tw:4.8" data-ink="jaune" d="M-36-12V39M36-12V39M0-9V39"/>
+            <path class="w lite mini pastel" style="--p:var(--p-assiette)" data-ink="bleu" d="M-45 39H45C48.3 39 51 41.7 51 45V48C51 51.3 48.3 54 45 54H-45C-48.3 54-51 51.3-51 48V45C-51 41.7-48.3 39-45 39Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-cheval)" data-ink="jaune" d="M-18 24C-18 12-9 6 3 6H9L15-3C18-6 24-6 25.5-1.5L27 6C28.5 10.5 25.5 13.5 21 12L16.5 10.5L15 21C15 27 10.5 28.5 6 28.5H-12C-15 28.5-18 27-18 24Z"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-12 28.5L-15 37.5M6 28.5L9 37.5M10.5 1.5Q6 7.5 4.5 12"/>
+            <circle class="noeud-brun" cx="19.8" cy="1.8" r="1.6"/>
+            <path class="w lite mini pastel" style="--p:var(--p-manege)" data-ink="rose" d="M-51-18L0-54L51-18C42-9 33-18 25.5-10.5C18-3 9-12 0-6C-9-12-18-3-25.5-10.5C-33-18-42-9-51-18Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M0-51V-9M-24-34.5L-25.5-13.5M24-34.5L25.5-13.5"/>
+            <circle cx="0" cy="-57" r="4" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="g-base-copains" overflow="visible" data-tete="-25.5 -8.1 .9;27 -11.1 .9" data-corps="0 15 1">
+            <path class="w lite mini orange" style="--p:var(--p-copain-1)" data-ink="jaune" d="M-49.5 60C-49.5 24.9-39.9 9.9-25.5 9.9C-11.1 9.9-1.5 24.9-1.5 60Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-44.4-8.1C-44.4-18.5-35.9-27-25.5-27C-15.1-27-6.6-18.5-6.6-8.1C-6.6 2.3-15.1 10.8-25.5 10.8C-35.9 10.8-44.4 2.3-44.4-8.1Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-44.8-10C-46.3-28.9-36.8-29.3-25.5-29.3C-14.2-29.3-4.7-28.9-6.2-10C-14.2-20.4-36.8-20.4-44.8-10Z"/>
+            <circle class="noeud-brun" cx="-32.7" cy="-7.2" r="1.9"/>
+            <circle class="noeud-brun" cx="-18.3" cy="-7.2" r="1.9"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-31.5-.2Q-25.5 4.7-19.5-.2"/>
+            <path class="w lite mini vert" style="--p:var(--p-copain-2)" data-ink="bleu" d="M3 60C3 21.9 12.6 6.9 27 6.9C41.4 6.9 51 21.9 51 60Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M8.1-11.1C8.1-21.5 16.6-30 27-30C37.4-30 45.9-21.5 45.9-11.1C45.9-.7 37.4 7.8 27 7.8C16.6 7.8 8.1-.7 8.1-11.1Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M7.7-13C6.2-31.9 15.7-32.3 27-32.3C38.3-32.3 47.8-31.9 46.3-13C38.3-23.4 15.7-23.4 7.7-13Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M1.1-7.3C1.1-10.7 3.8-13.4 7.2-13.4C10.5-13.4 13.2-10.7 13.2-7.3C13.2-4 10.5-1.3 7.2-1.3C3.8-1.3 1.1-4 1.1-7.3Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M40.8-7.3C40.8-10.7 43.5-13.4 46.8-13.4C50.2-13.4 52.9-10.7 52.9-7.3C52.9-4 50.2-1.3 46.8-1.3C43.5-1.3 40.8-4 40.8-7.3Z"/>
+            <circle class="noeud-brun" cx="19.8" cy="-10.2" r="1.9"/>
+            <circle class="noeud-brun" cx="34.2" cy="-10.2" r="1.9"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M21-3.2Q27 1.7 33-3.2"/>
+          </symbol>
+          <symbol id="g-base-parents" overflow="visible" data-tete="-25.5 -22.2 .9;27 -23.1 .9" data-corps="0 10 1">
+            <path class="w lite mini" style="--p:var(--p-papa)" data-ink="bleu" d="M-52.5 60C-52.5 11.6-41.7-3.4-25.5-3.4C-9.3-3.4 1.5 11.6 1.5 60Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-45.3-22.2C-45.3-33.1-36.4-42-25.5-42C-14.6-42-5.7-33.1-5.7-22.2C-5.7-11.3-14.6-2.4-25.5-2.4C-36.4-2.4-45.3-11.3-45.3-22.2Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-45.7-24.2C-47.3-44-37.4-44.4-25.5-44.4C-13.6-44.4-3.7-44-5.3-24.2C-13.6-35.1-37.4-35.1-45.7-24.2Z"/>
+            <circle class="noeud-brun" cx="-33" cy="-21.2" r="2"/>
+            <circle class="noeud-brun" cx="-18" cy="-21.2" r="2"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-31.8-13.9Q-25.5-8.8-19.2-13.9"/>
+            <path class="w lite mini brun" style="--p:var(--p-cheveux-c)" data-ink="rose" d="M6.2 7.1C2.4-30.7 6.2-43.9 27-43.9C47.8-43.9 51.6-30.7 47.8 7.1Z"/>
+            <path class="w lite mini" style="--p:var(--p-maman)" data-ink="rose" d="M0 60C0 9.9 10.8-5.1 27-5.1C43.2-5.1 54 9.9 54 60Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M8.1-23.1C8.1-33.5 16.6-42 27-42C37.4-42 45.9-33.5 45.9-23.1C45.9-12.7 37.4-4.2 27-4.2C16.6-4.2 8.1-12.7 8.1-23.1Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-cheveux-c)" data-ink="rose" d="M7.7-25C6.2-43.9 15.7-44.3 27-44.3C38.3-44.3 47.8-43.9 46.3-25C38.3-35.4 15.7-35.4 7.7-25Z"/>
+            <circle class="noeud-brun" cx="19.8" cy="-22.2" r="1.9"/>
+            <circle class="noeud-brun" cx="34.2" cy="-22.2" r="1.9"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M21-15.2Q27-10.3 33-15.2"/>
+          </symbol>
+          <symbol id="g-base-mamie" overflow="visible" data-tete="0 -18 1.1" data-corps="0 10 1">
+            <path class="w lite mini pastel" style="--p:var(--p-mamie)" data-ink="rose" d="M-39 60C-39 19.8-23.4 4.8 0 4.8C23.4 4.8 39 19.8 39 60Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M-24-18C-24-31.3-13.3-42 0-42C13.3-42 24-31.3 24-18C24-4.7 13.3 6 0 6C-13.3 6-24-4.7-24-18Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-24.5-20.4C-26.4-44.4-14.4-44.9 0-44.9C14.4-44.9 26.4-44.4 24.5-20.4C14.4-33.6-14.4-33.6-24.5-20.4Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-10.8-48C-10.8-54-6-58.8 0-58.8C6-58.8 10.8-54 10.8-48C10.8-42 6-37.2 0-37.2C-6-37.2-10.8-42-10.8-48Z"/>
+            <circle class="noeud-brun" cx="-9.1" cy="-16.8" r="2.4"/>
+            <circle class="noeud-brun" cx="9.1" cy="-16.8" r="2.4"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-7.7-7.9Q0-1.8 7.7-7.9"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-4.2-16.5H4.2"/>
+            <path class="fil lunettes gros" style="--f:var(--fil-brun)" d="M-18.6-16.5C-18.6-21.9-4.8-21.9-4.8-16.5C-4.8-11.1-18.6-11.1-18.6-16.5ZM4.8-16.5C4.8-21.9 18.6-21.9 18.6-16.5C18.6-11.1 4.8-11.1 4.8-16.5Z"/>
+            <circle cx="-15" cy="22.5" r="2.2" fill="url(#knot)"/>
+            <circle cx="-7.5" cy="25.8" r="2.2" fill="url(#knot)"/>
+            <circle cx="0" cy="27" r="2.2" fill="url(#knot)"/>
+            <circle cx="7.5" cy="25.8" r="2.2" fill="url(#knot)"/>
+            <circle cx="15" cy="22.5" r="2.2" fill="url(#knot)"/>
+          </symbol>
+          <symbol id="g-base-maitresse" overflow="visible" data-tete="24 -11.1 .9" data-corps="0 10 1">
+            <path class="w lite mini vert-fonce" style="--p:var(--p-tableau)" data-ink="bleu" d="M-52.5-54H4.5C7-54 9-52 9-49.5V-10.5C9-8 7-6 4.5-6H-52.5C-55-6-57-8-57-10.5V-49.5C-57-52-55-54-52.5-54Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M-46.5-18L-37.5-42L-28.5-18M-42.9-27H-32.1M-19.5-42V-18M-19.5-42C-7.5-42-7.5-30-19.5-30C-6-30-6-18-19.5-18"/>
+            <path class="w lite mini orange" style="--p:var(--p-maitresse)" data-ink="jaune" d="M-3 60C-3 21.9 7.8 6.9 24 6.9C40.2 6.9 51 21.9 51 60Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-c)" data-ink="jaune" d="M5.1-11.1C5.1-21.5 13.6-30 24-30C34.4-30 42.9-21.5 42.9-11.1C42.9-.7 34.4 7.8 24 7.8C13.6 7.8 5.1-.7 5.1-11.1Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M4.7-13C3.2-31.9 12.7-32.3 24-32.3C35.3-32.3 44.8-31.9 43.3-13C35.3-23.4 12.7-23.4 4.7-13Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M15.5-34.7C15.5-39.4 19.3-43.2 24-43.2C28.7-43.2 32.5-39.4 32.5-34.7C32.5-30 28.7-26.2 24-26.2C19.3-26.2 15.5-30 15.5-34.7Z"/>
+            <circle class="noeud-brun" cx="16.8" cy="-10.2" r="1.9"/>
+            <circle class="noeud-brun" cx="31.2" cy="-10.2" r="1.9"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M18-3.2Q24 1.7 30-3.2"/>
+            <path class="w lite mini trait" style="--p:var(--p-bois);--tw:4.8" data-ink="rose" d="M6 39L-15-3"/>
+          </symbol>
+          <symbol id="g-base-doudou" overflow="visible" data-tete="0 -4.5 1" data-corps="0 10 1">
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-15-18C-24-36-27-57-18-60C-9-60-6-39-6-18ZM9-18C9-39 12-60 21-58.5C30-57 24-36 15-18Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-15-24C-19.5-36-21-51-18-52.5C-13.5-52.5-10.8-39-10.5-24ZM12-24C12-39 15-52.5 19.5-51C22.5-48 19.5-36 15-24Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-27 54C-33 36-24 15 0 15C24 15 33 36 27 54Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-21.6-4.5C-21.6-16.4-11.9-26.1 0-26.1C11.9-26.1 21.6-16.4 21.6-4.5C21.6 7.4 11.9 17.1 0 17.1C-11.9 17.1-21.6 7.4-21.6-4.5Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-30 51C-30 47.7-26 45-21 45C-16 45-12 47.7-12 51C-12 54.3-16 57-21 57C-26 57-30 54.3-30 51Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M12 51C12 47.7 16 45 21 45C26 45 30 47.7 30 51C30 54.3 26 57 21 57C16 57 12 54.3 12 51Z"/>
+            <path class="fil gros" style="--f:var(--fil-brun)" d="M-12.6-7.8Q-8.1-3.3-3.6-7.8M3.6-7.8Q8.1-3.3 12.6-7.8"/>
+            <circle class="noeud-brun" cx="0" cy="3" r="2.2"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M0 16.5L-15 9V24ZM0 16.5L15 9V24Z"/>
+          </symbol>
+          <symbol id="g-base-calin" overflow="visible" data-tete="0 0 1" data-corps="0 0 1">
+            <path class="w lite mini" style="--p:var(--p-coeur)" data-ink="rose" d="M0 45C-18 30-45 15-45-9C-45-27-30-36-18-36C-9-36-3-30 0-24C3-30 9-36 18-36C30-36 45-27 45-9C45 15 18 30 0 45Z"/>
+            <path class="fil gros" style="--f:var(--fil-blanc)" d="M-27-18Q-25.5-25.5-18-27"/>
+            <path class="w lite mini trait" style="--p:var(--p-peau-d);--tw:10.8" data-ink="jaune" d="M-55.5-9C-45 24-15 30 4.5 18"/>
+            <path class="w lite mini trait" style="--p:var(--p-peau-a);--tw:10.8" data-ink="jaune" d="M55.5-9C45 24 15 30-4.5 18"/>
+            <path class="w lite mini" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-2.4 17.4C-2.4 13.1 1.1 9.6 5.4 9.6C9.7 9.6 13.2 13.1 13.2 17.4C13.2 21.7 9.7 25.2 5.4 25.2C1.1 25.2-2.4 21.7-2.4 17.4Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-13.2 17.4C-13.2 13.1-9.7 9.6-5.4 9.6C-1.1 9.6 2.4 13.1 2.4 17.4C2.4 21.7-1.1 25.2-5.4 25.2C-9.7 25.2-13.2 21.7-13.2 17.4Z"/>
+          </symbol>
+          <symbol id="g-greffe-ogre" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini vert" style="--p:var(--p-ogre)" data-ink="jaune" d="M-30-1C-30-6.5-26.9-11-23-11C-19.1-11-16-6.5-16-1C-16 4.5-19.1 9-23 9C-26.9 9-30 4.5-30-1Z"/>
+            <path class="w lite mini vert" style="--p:var(--p-ogre)" data-ink="jaune" d="M16-1C16-6.5 19.1-11 23-11C26.9-11 30-6.5 30-1C30 4.5 26.9 9 23 9C19.1 9 16 4.5 16-1Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-27.4 0C-27.4-3-25.9-5.5-24-5.5C-22.1-5.5-20.6-3-20.6 0C-20.6 3-22.1 5.5-24 5.5C-25.9 5.5-27.4 3-27.4 0Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-bouche)" data-ink="rose" d="M20.6 0C20.6-3 22.1-5.5 24-5.5C25.9-5.5 27.4-3 27.4 0C27.4 3 25.9 5.5 24 5.5C22.1 5.5 20.6 3 20.6 0Z"/>
+            <path class="w lite mini vert" style="--p:var(--p-ogre)" data-ink="jaune" d="M-22 1C-22-10.6-12.2-20 0-20C12.2-20 22-10.6 22 1C22 12.6 12.2 22 0 22C-12.2 22-22 12.6-22 1Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-6-19Q-4-24-1-20M2-20Q5-25 7-19"/>
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-13.6-3C-13.6-6.1-11.1-8.6-8-8.6C-4.9-8.6-2.4-6.1-2.4-3C-2.4 .1-4.9 2.6-8 2.6C-11.1 2.6-13.6 .1-13.6-3Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M2.4-3C2.4-6.1 4.9-8.6 8-8.6C11.1-8.6 13.6-6.1 13.6-3C13.6 .1 11.1 2.6 8 2.6C4.9 2.6 2.4 .1 2.4-3Z"/>
+            <circle class="noeud-brun" cx="-7" cy="-2.4" r="2.5"/>
+            <circle class="noeud-brun" cx="9" cy="-2.4" r="2.5"/>
+            <path class="w lite mini trait" style="--p:var(--p-roue);--tw:3.8" data-ink="bleu" d="M-16-12L-4-8M4-8L16-12"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-1.5 1C-3 5.5 2 6.5 2.5 3"/>
+            <path class="w lite mini brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-12 8C-7 18 7 18 12 8C6 11-6 11-12 8Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-8 9.5L-6 15L-4 10.5ZM4 10.5L6 15L8 9.5Z"/>
+            <circle class="noeud-brun" cx="14" cy="9" r="1.6"/>
+            <circle class="noeud-brun" cx="-15" cy="12" r="1.2"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-pirate" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M44 32C58 10 60-14 50-38C56-14 54 10 41 30Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M47 26C56 8 57-12 51-32"/>
+            <path class="w lite mini trait" style="--p:var(--p-or);--tw:5" data-ink="jaune" d="M34 28L50 38"/>
+            <path class="w lite mini trait" style="--p:var(--p-bois);--tw:4.4" data-ink="rose" d="M42 33L37 44"/>
+            <circle cx="50" cy="38" r="2.4" fill="url(#knot)"/>
+          </g>
+          <g class="a-tete">
+            <path class="w lite mini" style="--p:var(--p-pirate)" data-ink="bleu" d="M-31-13C-25-22-15-38 0-38C15-38 25-22 31-13C18-19-18-19-31-13Z"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M-27-15.5Q0-23 27-15.5"/>
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-4.6-27C-4.6-29.5-2.5-31.6 0-31.6C2.5-31.6 4.6-29.5 4.6-27C4.6-24.5 2.5-22.4 0-22.4C-2.5-22.4-4.6-24.5-4.6-27Z"/>
+            <circle class="noeud-brun" cx="-1.6" cy="-27.6" r="1.1"/>
+            <circle class="noeud-brun" cx="1.6" cy="-27.6" r="1.1"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-5-21L5-17M-5-17L5-21"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-21-13L20 5"/>
+            <path class="w lite mini" style="--p:var(--p-pirate)" data-ink="bleu" d="M1.5-2C1.5-5 4.4-7.5 8-7.5C11.6-7.5 14.5-5 14.5-2C14.5 1 11.6 3.5 8 3.5C4.4 3.5 1.5 1 1.5-2Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-dragon-dos" overflow="visible"><g class="a-corps">
+            <path class="w lite mini vert" style="--p:var(--p-dragon)" data-ink="bleu" d="M-22-6C-38-40-70-48-88-22C-78-26-68-22-64-14C-58-22-48-22-44-12C-38-18-30-16-26-6Z"/>
+            <path class="w lite mini vert" style="--p:var(--p-dragon)" data-ink="bleu" d="M22-6C38-40 70-48 88-22C78-26 68-22 64-14C58-22 48-22 44-12C38-18 30-16 26-6Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-30-14L-60-34M-44-12L-68-26M30-14L60-34M44-12L68-26"/>
+          </g></symbol>
+          <symbol id="g-greffe-dragon" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M-14-18L-12-32L-6-20ZM14-18L12-32L6-20Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M20 4C30-6 42-4 46 2C54-2 60 4 56 10C62 14 56 20 48 16C44 22 32 20 28 12C24 12 20 8 20 4Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M26 6C32 2 38 4 40 8C44 6 48 10 44 13C40 16 34 15 32 12C29 12 26 9 26 6Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-glace-dos" overflow="visible"><g class="a-corps">
+            <path class="w lite mini orange" style="--p:var(--p-cornet)" data-ink="jaune" d="M-27 38H27L2.5 98Q0 102-2.5 98Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-18 44L10 80M2 42L18 62M18 44L-10 80M-2 42L-18 62"/>
+          </g></symbol>
+          <symbol id="g-greffe-glace" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-25-20C-30-31-22-45-8-46C0-51 11-48 15-43C26-41 30-30 25-20C21-15 17-20 12-17C8-14 4-19 0-16C-4-13-8-18-12-15C-16-12-21-16-25-20Z"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M-2.4-50C-2.4-53 0-55.4 3-55.4C6-55.4 8.4-53 8.4-50C8.4-47 6-44.6 3-44.6C0-44.6-2.4-47-2.4-50Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-16-33Q-13-41-5-42"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M-19-19C-19-9-16-4-15-4C-14-4-12-9-12-17Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M12-17C12-7 14-1 15.5-1C17-1 18-7 18-19Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glace-rose)" data-ink="rose" d="M16 4.3C18.6 7.7 18.6 11.1 16 11.1C13.4 11.1 13.4 7.7 16 4.3Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-chien-dos" overflow="visible"><g class="a-corps">
+            <g class="remue"><path class="w lite mini trait orange" style="--p:var(--p-chien);--tw:7" data-ink="jaune" d="M-50 14Q-72 6-68-18"/></g>
+          </g></symbol>
+          <symbol id="g-greffe-chien" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M-15-15C-25-19-33-9-31 6C-30 13-24 15-21 9C-19 2-17-7-13-13Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-chien-oreille)" data-ink="rose" d="M15-15C25-19 33-9 31 6C30 13 24 15 21 9C19 2 17-7 13-13Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-6.5 5C-6.5 2.3-3.6 .2 0 .2C3.6 .2 6.5 2.3 6.5 5C6.5 7.7 3.6 9.8 0 9.8C-3.6 9.8-6.5 7.7-6.5 5Z"/>
+            <circle class="noeud-blanc" cx="-1.8" cy="3.6" r="1.3"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M-3.5 11C-3.5 19 3.5 19 3.5 11Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-anniversaire" overflow="visible">
+          <g class="a-corps">
+            <path class="fil" style="--f:var(--fil-brun)" d="M-56-22Q0 14 56-22"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M-48-11.5L-36-11.5L-42-.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-27-2.5L-15-2.5L-21 8.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-flamme)" data-ink="jaune" d="M-6 .5L6 .5L0 11.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-cerise)" data-ink="rose" d="M15-2.5L27-2.5L21 8.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M36-11.5L48-11.5L42-.5Z"/>
+          </g>
+          <g class="a-tete">
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-12-39H-10C-8.9-39-8-38.1-8-37V-25C-8-23.9-8.9-23-10-23H-12C-13.1-23-14-23.9-14-25V-37C-14-38.1-13.1-39-12-39Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-1-44H1C2.1-44 3-43.1 3-42V-26C3-24.9 2.1-24 1-24H-1C-2.1-24-3-24.9-3-26V-42C-3-43.1-2.1-44-1-44Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M10-39H12C13.1-39 14-38.1 14-37V-25C14-23.9 13.1-23 12-23H10C8.9-23 8-23.9 8-25V-37C8-38.1 8.9-39 10-39Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-14-33L-8-31M-3-38L3-36M8-33L14-31"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M-11-47.7C-8.4-44.3-8.4-40.9-11-40.9C-13.6-40.9-13.6-44.3-11-47.7Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M0-52.7C2.6-49.3 2.6-45.9 0-45.9C-2.6-45.9-2.6-49.3 0-52.7Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M11-47.7C13.6-44.3 13.6-40.9 11-40.9C8.4-40.9 8.4-44.3 11-47.7Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-orage" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M-52-12L-60 4H-54L-60 18L-46-2H-52L-48-12Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M56 4L48 20H54L48 34L62 14H56L60 4Z"/>
+          </g>
+          <g class="a-tete">
+            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-26-30C-32-30-32-40-26-42C-26-50-16-54-10-48C-6-56 6-56 10-48C16-54 26-50 25-42C32-41 32-30 25-30Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M3-33L-6-18H0L-5-4L9-22H3L7-33Z"/>
+            <path class="fil" style="--f:var(--fil-vague)" d="M-18-26L-21-21M18-26L15-21"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-pouce" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini brun" style="--p:var(--p-bronze-clair)" data-ink="jaune" d="M-23-12C-23-42 23-42 23-12L21-5C14-9-14-9-21-5Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-ongle)" data-ink="jaune" d="M-21-20C-17-38 17-38 21-20C10-25-10-25-21-20Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-23-12C-23-42 23-42 23-12L21-5C14-9-14-9-21-5Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-12-30Q-14-22-13-14"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-copains" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-63-38C-63-45.2-57.2-51-50-51C-42.8-51-37-45.2-37-38C-37-30.8-42.8-25-50-25C-57.2-25-63-30.8-63-38Z"/>
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M-63.4-38.6C-64.3-52.3-57.8-52.7-50-52.7C-42.2-52.7-35.7-52.3-36.6-38.6C-42.2-46.1-57.8-46.1-63.4-38.6Z"/>
+            <circle class="noeud-brun" cx="-54.8" cy="-37.4" r="1.9"/>
+            <circle class="noeud-brun" cx="-45.2" cy="-37.4" r="1.9"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-54.4-32.8Q-50-28.6-45.6-32.8"/>
+            <path class="w lite mini" style="--p:var(--p-peau-b)" data-ink="jaune" d="M37-40C37-47.2 42.8-53 50-53C57.2-53 63-47.2 63-40C63-32.8 57.2-27 50-27C42.8-27 37-32.8 37-40Z"/>
+            <path class="w lite mini orange" style="--p:var(--p-cheveux-b)" data-ink="jaune" d="M36.6-40.6C35.7-54.3 42.2-54.7 50-54.7C57.8-54.7 64.3-54.3 63.4-40.6C57.8-48.1 42.2-48.1 36.6-40.6Z"/>
+            <circle class="noeud-brun" cx="45.2" cy="-39.4" r="1.9"/>
+            <circle class="noeud-brun" cx="54.8" cy="-39.4" r="1.9"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M45.6-34.8Q50-30.6 54.4-34.8"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-ri" overflow="visible">
+          <g class="a-tete">
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-14-4Q-9-11-4-4M4-4Q9-11 14-4"/>
+            <path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-20.5 4C-20.5 2-18 .4-15 .4C-12 .4-9.5 2-9.5 4C-9.5 6-12 7.6-15 7.6C-18 7.6-20.5 6-20.5 4Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M9.5 4C9.5 2 12 .4 15 .4C18 .4 20.5 2 20.5 4C20.5 6 18 7.6 15 7.6C12 7.6 9.5 6 9.5 4Z"/>
+            <path class="w lite mini brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-14 3C-12 21 12 21 14 3C6 7-6 7-14 3Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-10 5C-5 8 5 8 10 5L9 8.5C4 10.5-4 10.5-9 8.5Z"/>
+            <path class="w lite mini" style="--p:var(--p-joue)" data-ink="rose" d="M-5 15C-3 17.5 3 17.5 5 15C3 13.5-3 13.5-5 15Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-peur" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-17.4-3C-17.4-7.6-13.6-11.4-9-11.4C-4.4-11.4-.6-7.6-.6-3C-.6 1.6-4.4 5.4-9 5.4C-13.6 5.4-17.4 1.6-17.4-3Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M.6-3C.6-7.6 4.4-11.4 9-11.4C13.6-11.4 17.4-7.6 17.4-3C17.4 1.6 13.6 5.4 9 5.4C4.4 5.4 .6 1.6 .6-3Z"/>
+            <circle class="noeud-brun" cx="-9" cy="-2" r="2.3"/>
+            <circle class="noeud-brun" cx="9" cy="-2" r="2.3"/>
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-17-16Q-10-23-3-16M3-16Q10-23 17-16"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-4 12C-4 9-2.2 6.6 0 6.6C2.2 6.6 4 9 4 12C4 15 2.2 17.4 0 17.4C-2.2 17.4-4 15-4 12Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M22-17C24.8-13.4 24.8-9.8 22-9.8C19.2-9.8 19.2-13.4 22-17Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-fache" overflow="visible">
+          <g class="a-tete">
+            <circle class="noeud-brun" cx="-8.5" cy="-1" r="2.6"/>
+            <circle class="noeud-brun" cx="8.5" cy="-1" r="2.6"/>
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-8 13Q0 6 8 13"/>
+            <path class="w lite mini trait" style="--p:var(--p-roue);--tw:4.6" data-ink="bleu" d="M-17-13L-3-6M17-13L3-6"/>
+            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-31-26C-31-29.3-28.3-32-25-32C-21.7-32-19-29.3-19-26C-19-22.7-21.7-20-25-20C-28.3-20-31-22.7-31-26ZM-35.2-20C-35.2-22.3-33.3-24.2-31-24.2C-28.7-24.2-26.8-22.3-26.8-20C-26.8-17.7-28.7-15.8-31-15.8C-33.3-15.8-35.2-17.7-35.2-20Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M19-26C19-29.3 21.7-32 25-32C28.3-32 31-29.3 31-26C31-22.7 28.3-20 25-20C21.7-20 19-22.7 19-26ZM26.8-20C26.8-22.3 28.7-24.2 31-24.2C33.3-24.2 35.2-22.3 35.2-20C35.2-17.7 33.3-15.8 31-15.8C28.7-15.8 26.8-17.7 26.8-20Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-calin" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini trait" style="--p:var(--p-peau-d);--tw:9" data-ink="jaune" d="M-60-14C-58 24-24 36 6 22"/>
+            <path class="w lite mini trait" style="--p:var(--p-peau-a);--tw:9" data-ink="jaune" d="M60-14C58 24 24 36-6 22"/>
+            <path class="w lite mini" style="--p:var(--p-peau-d)" data-ink="jaune" d="M-.5 22C-.5 18.4 2.4 15.5 6 15.5C9.6 15.5 12.5 18.4 12.5 22C12.5 25.6 9.6 28.5 6 28.5C2.4 28.5-.5 25.6-.5 22Z"/>
+            <path class="w lite mini" style="--p:var(--p-peau-a)" data-ink="jaune" d="M-12.5 22C-12.5 18.4-9.6 15.5-6 15.5C-2.4 15.5 .5 18.4 .5 22C.5 25.6-2.4 28.5-6 28.5C-9.6 28.5-12.5 25.6-12.5 22Z"/>
+            <path class="w lite mini" style="--p:var(--p-coeur)" data-ink="rose" d="M0-38C-4-42-10-41-10-36C-10-31-4-28 0-24C4-28 10-31 10-36C10-41 4-42 0-38Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-chanson" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini" style="--p:var(--p-notes)" data-ink="bleu" d="M-35.6-14C-35.6-16.3-33.1-18.2-30-18.2C-26.9-18.2-24.4-16.3-24.4-14C-24.4-11.7-26.9-9.8-30-9.8C-33.1-9.8-35.6-11.7-35.6-14Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-notes);--tw:2.6" data-ink="bleu" d="M-25-15V-38Q-19-35-18-29"/>
+            <path class="w lite mini" style="--p:var(--p-notes)" data-ink="bleu" d="M17-24C17-26.1 19.2-27.8 22-27.8C24.8-27.8 27-26.1 27-24C27-21.9 24.8-20.2 22-20.2C19.2-20.2 17-21.9 17-24Z"/>
+            <path class="w lite mini" style="--p:var(--p-notes)" data-ink="bleu" d="M29-28C29-30.1 31.2-31.8 34-31.8C36.8-31.8 39-30.1 39-28C39-25.9 36.8-24.2 34-24.2C31.2-24.2 29-25.9 29-28Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-notes);--tw:2.4" data-ink="bleu" d="M26.5-25V-46M38.5-29V-50"/>
+            <path class="w lite mini trait" style="--p:var(--p-notes);--tw:4.2" data-ink="bleu" d="M26.5-46L38.5-50"/>
+            <path class="w lite mini" style="--p:var(--p-notes)" data-ink="bleu" d="M-10.4-40C-10.4-41.9-8.4-43.4-6-43.4C-3.6-43.4-1.6-41.9-1.6-40C-1.6-38.1-3.6-36.6-6-36.6C-8.4-36.6-10.4-38.1-10.4-40Z"/>
+            <path class="w lite mini trait" style="--p:var(--p-notes);--tw:2.2" data-ink="bleu" d="M-2-41V-58"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-doudou" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M-15-15C-22-34-22-54-13-56C-4-56-4-36-7-17Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-doudou)" data-ink="jaune" d="M15-15C22-34 22-54 13-56C4-56 4-36 7-17Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-13-20C-17-34-17-49-12-50C-8-50-8-36-9-21Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M13-20C17-34 17-49 12-50C8-50 8-36 9-21Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-velo" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M-51 54C-51 44.6-43.4 37-34 37C-24.6 37-17 44.6-17 54C-17 63.4-24.6 71-34 71C-43.4 71-51 63.4-51 54ZM-46.5 54C-46.5 47.1-40.9 41.5-34 41.5C-27.1 41.5-21.5 47.1-21.5 54C-21.5 60.9-27.1 66.5-34 66.5C-40.9 66.5-46.5 60.9-46.5 54Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" fill-rule="evenodd" d="M17 54C17 44.6 24.6 37 34 37C43.4 37 51 44.6 51 54C51 63.4 43.4 71 34 71C24.6 71 17 63.4 17 54ZM21.5 54C21.5 47.1 27.1 41.5 34 41.5C40.9 41.5 46.5 47.1 46.5 54C46.5 60.9 40.9 66.5 34 66.5C27.1 66.5 21.5 60.9 21.5 54Z"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M-34 41V67M-47 54H-21M34 41V67M21 54H47"/>
+            <path class="w lite mini trait" style="--p:var(--p-velo);--tw:4" data-ink="rose" d="M-34 54L0 40L34 54"/>
+            <circle cx="-34" cy="54" r="2.6" fill="url(#knot)"/>
+            <circle cx="34" cy="54" r="2.6" fill="url(#knot)"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-piscine" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M-50 22.8C-46 28-46 33.2-50 33.2C-54 33.2-54 28-50 22.8Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M-60 8.6C-57 12.5-57 16.4-60 16.4C-63 16.4-63 12.5-60 8.6Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M52 16.8C56 22 56 27.2 52 27.2C48 27.2 48 22 52 16.8Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M60 34.6C63 38.5 63 42.4 60 42.4C57 42.4 57 38.5 60 34.6Z"/>
+          </g>
+          <g class="a-tete">
+            <path class="w lite mini trait" style="--p:var(--p-eau);--tw:3" data-ink="bleu" d="M-16-2H-27M16-2H27"/>
+            <path class="w lite mini" style="--p:var(--p-eau)" data-ink="bleu" fill-rule="evenodd" d="M-16-2C-16-6.1-12.6-9.5-8.5-9.5C-4.4-9.5-1-6.1-1-2C-1 2.1-4.4 5.5-8.5 5.5C-12.6 5.5-16 2.1-16-2ZM-13.3-2C-13.3-4.7-11.2-6.8-8.5-6.8C-5.8-6.8-3.7-4.7-3.7-2C-3.7 .7-5.8 2.8-8.5 2.8C-11.2 2.8-13.3 .7-13.3-2Z"/>
+            <path class="w lite mini" style="--p:var(--p-eau)" data-ink="bleu" fill-rule="evenodd" d="M1-2C1-6.1 4.4-9.5 8.5-9.5C12.6-9.5 16-6.1 16-2C16 2.1 12.6 5.5 8.5 5.5C4.4 5.5 1 2.1 1-2ZM3.7-2C3.7-4.7 5.8-6.8 8.5-6.8C11.2-6.8 13.3-4.7 13.3-2C13.3 .7 11.2 2.8 8.5 2.8C5.8 2.8 3.7 .7 3.7-2Z"/>
+            <path class="fil" style="--f:var(--fil-brun)" d="M-2-3Q0-5 2-3"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-gateau" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini pastel" style="--p:var(--p-gateau)" data-ink="jaune" d="M-15-36H15C16.7-36 18-34.7 18-33V-22C18-20.3 16.7-19 15-19H-15C-16.7-19-18-20.3-18-22V-33C-18-34.7-16.7-36-15-36Z"/>
+            <path class="w lite mini pastel" style="--p:var(--p-glacage)" data-ink="rose" d="M-19-36C-19-41 19-41 19-36V-31C17-27 14-32 11-29C8-25 5-31 2-28C-1-25-4-31-7-28C-10-25-13-31-16-28C-18-26-19-29-19-31Z"/>
+            <path class="w lite mini" style="--p:var(--p-bougie)" data-ink="bleu" d="M-1-50H1C1.8-50 2.5-49.3 2.5-48.5V-38.5C2.5-37.7 1.8-37 1-37H-1C-1.8-37-2.5-37.7-2.5-38.5V-48.5C-2.5-49.3-1.8-50-1-50Z"/>
+            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M0-57.7C2.6-54.3 2.6-50.9 0-50.9C-2.6-50.9-2.6-54.3 0-57.7Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-tracteur" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-59 42C-59 29.3-48.7 19-36 19C-23.3 19-13 29.3-13 42C-13 54.7-23.3 65-36 65C-48.7 65-59 54.7-59 42Z"/>
+            <path class="w lite mini" style="--p:var(--p-moyeu)" data-ink="jaune" d="M-46 42C-46 36.5-41.5 32-36 32C-30.5 32-26 36.5-26 42C-26 47.5-30.5 52-36 52C-41.5 52-46 47.5-46 42Z"/>
+            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M28 52C28 44.3 34.3 38 42 38C49.7 38 56 44.3 56 52C56 59.7 49.7 66 42 66C34.3 66 28 59.7 28 52Z"/>
+            <path class="w lite mini" style="--p:var(--p-moyeu)" data-ink="jaune" d="M36 52C36 48.7 38.7 46 42 46C45.3 46 48 48.7 48 52C48 55.3 45.3 58 42 58C38.7 58 36 55.3 36 52Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M-52 42H-20M-36 26V58"/>
+            <circle cx="-36" cy="42" r="2.4" fill="url(#knot)"/>
+            <circle cx="42" cy="52" r="1.8" fill="url(#knot)"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-manege-dos" overflow="visible"><g class="a-corps">
+            <path class="w lite mini trait" style="--p:var(--p-or);--tw:5" data-ink="jaune" d="M0-92V78"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M0-80V70"/>
+          </g></symbol>
+          <symbol id="g-greffe-manege" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini pastel" style="--p:var(--p-manege)" data-ink="rose" d="M-31-24L0-46L31-24C25-19 19-25 15-20C10-15 5-21 0-17C-5-21-10-15-15-20C-19-25-25-19-31-24Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M0-45V-20M-15-37L-15-21M15-37L15-21"/>
+            <circle cx="0" cy="-48" r="3" fill="url(#knot)"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-parents" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini" style="--p:var(--p-cheveux-a)" data-ink="bleu" d="M0 5C-4 0-13 0-18 6C-13 9-4 9 0 7C4 9 13 9 18 6C13 0 4 0 0 5Z"/>
+            <path class="w lite mini" style="--p:var(--p-coeur)" data-ink="rose" d="M-12-12C-10-16-3-16-2-12C-1-16 6-16 8-12C10-8 4-4-2 0C-8-4-14-8-12-12Z"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-mamie" overflow="visible">
+          <g class="a-tete">
+            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M-10-27C-10-32.5-5.5-37 0-37C5.5-37 10-32.5 10-27C10-21.5 5.5-17 0-17C-5.5-17-10-21.5-10-27Z"/>
+            <path class="fil" style="--f:var(--fil-sable)" d="M-6-30Q0-25 6-30"/>
+            <path class="fil epais" style="--f:var(--fil-brun)" d="M-16-2C-16-8-3-8-3-2C-3 4-16 4-16-2ZM3-2C3-8 16-8 16-2C16 4 3 4 3-2ZM-3-3H3"/>
+          </g>
+          </symbol>
+          <symbol id="g-greffe-maitresse" overflow="visible">
+          <g class="a-corps">
+            <path class="w lite mini vert-fonce" style="--p:var(--p-tableau)" data-ink="bleu" d="M36.5-34H71.5C72.9-34 74-32.9 74-31.5V-6.5C74-5.1 72.9-4 71.5-4H36.5C35.1-4 34-5.1 34-6.5V-31.5C34-32.9 35.1-34 36.5-34Z"/>
+            <path class="w lite mini" style="--p:var(--p-bois)" data-ink="rose" fill-rule="evenodd" d="M34.5-37H73.5C75.4-37 77-35.4 77-33.5V-4.5C77-2.6 75.4-1 73.5-1H34.5C32.6-1 31-2.6 31-4.5V-33.5C31-35.4 32.6-37 34.5-37ZM36.5-34H71.5C72.9-34 74-32.9 74-31.5V-6.5C74-5.1 72.9-4 71.5-4H36.5C35.1-4 34-5.1 34-6.5V-31.5C34-32.9 35.1-34 36.5-34Z"/>
+            <path class="fil" style="--f:var(--fil-blanc)" d="M40-10L45-28L50-10M42-17H48M56-28V-10M56-28C63-28 63-19 56-19C64-19 64-10 56-10"/>
+            <path class="w lite mini trait" style="--p:var(--p-bois);--tw:3" data-ink="rose" d="M30 20L58-2"/>
+          </g>
+          </symbol>
+          <symbol id="g-reve-flou" overflow="visible"><g class="flou">
+            <path class="tache" style="--t:var(--p-lune)" d="M-96 -10C-96 -26.569 -75.4058 -40 -50 -40C-24.5942 -40 -4 -26.569 -4 -10C-4 6.568999999999999 -24.5942 20 -50 20C-75.4058 20 -96 6.568999999999999 -96 -10Z"/>
+            <path class="tache" style="--t:var(--p-pineale)" d="M-10 -30C-10 -44.3598 7.908000000000001 -56 30 -56C52.092 -56 70 -44.3598 70 -30C70 -15.6402 52.092 -4 30 -4C7.908000000000001 -4 -10 -15.6402 -10 -30Z"/>
+            <path class="tache" style="--t:var(--p-vague)" d="M-10 30C-10 14.535599999999999 12.384999999999998 2 40 2C67.61500000000001 2 90 14.535599999999999 90 30C90 45.4644 67.61500000000001 58 40 58C12.384999999999998 58 -10 45.4644 -10 30Z"/>
+            <path class="tache" style="--t:var(--p-glace-rose)" d="M-64 40C-64 27.8494 -48.7782 18 -30 18C-11.221799999999998 18 4 27.8494 4 40C4 52.1506 -11.221799999999998 62 -30 62C-48.7782 62 -64 52.1506 -64 40Z"/>
+          </g></symbol>
+          </g>
+          <clipPath id="clip-ecran"><path d="M700 88C700 42.7 796.1 63.6 776.3 104.3C790.4 75.3 846.5 126.3 817.9 141.2C839.8 129.8 843.2 192.8 820.3 183.6C849.2 195.2 798.2 249.4 783 222.2C792.3 239 728.3 259.3 725.8 240.3C727.9 256.7 672.1 256.7 674.2 240.3C671.7 259.3 607.7 239 617 222.2C601.8 249.4 550.8 195.2 579.7 183.6C556.8 192.8 560.2 129.8 582.1 141.2C553.5 126.3 609.6 75.3 623.7 104.3C603.9 63.6 700 42.7 700 88Z"/></clipPath>
+          <clipPath id="clip-ecran-grand"><rect x="520" y="0" width="346" height="330"/></clipPath>
+          <!-- REVE-END -->
         </defs>
 
         <!-- Tous les groupes de la scène vivent dans #scene-inner : la loupe
@@ -2004,7 +2538,42 @@ html:not([data-pret]) *{transition:none!important}
             </g>
           </g>
           <!-- ===== Écran du rêve (nuage-écran) ===== -->
-          <g id="g-ecran"></g>
+          <g id="g-ecran">
+            <!-- ECRAN-BEGIN -->
+            <!-- Le nuage-écran (Task 10, généré par tools/gen-reve.py) : #ecran-corps (le nuage, le film, l'épingle ;
+                 opacité selon le temps, tremble en cauchemar), le bouton #encore, la légende #t-phrase. -->
+            <g id="ecran-corps">
+              <g class="ecran-tremble">
+                <path class="sous-ecran" d="M700 85C700 38.2 799.3 59.9 778.8 102C793.4 72 851.3 124.9 821.7 140.3C844.5 128.5 848 193.8 824.2 184.4C854.2 196.3 801.5 252.6 785.6 224.5C795.4 241.7 729.2 262.9 726.6 243.3C728.9 260.1 671.1 260.1 673.4 243.3C670.8 262.9 604.6 241.7 614.4 224.5C598.5 252.6 545.8 196.3 575.8 184.4C552 193.8 555.5 128.5 578.3 140.3C548.7 124.9 606.6 72 621.2 102C600.7 59.9 700 38.2 700 85Z"/>
+                <path id="p-ecran" class="w ecran-laine" style="--p:var(--ecran-laine, var(--p-ecran))" data-ink="jaune" d="M700 85C700 38.2 799.3 59.9 778.8 102C793.4 72 851.3 124.9 821.7 140.3C844.5 128.5 848 193.8 824.2 184.4C854.2 196.3 801.5 252.6 785.6 224.5C795.4 241.7 729.2 262.9 726.6 243.3C728.9 260.1 671.1 260.1 673.4 243.3C670.8 262.9 604.6 241.7 614.4 224.5C598.5 252.6 545.8 196.3 575.8 184.4C552 193.8 555.5 128.5 578.3 140.3C548.7 124.9 606.6 72 621.2 102C600.7 59.9 700 38.2 700 85Z"/>
+                <path class="fil couture ecran-couture" d="M700 93C700 49.6 791.8 69 773.3 108.3C786.3 80.6 840.1 128.3 813.2 142.8C833.5 131.8 836.8 191.2 815.5 182.4C842.7 193.7 793.7 244.4 779.6 218.5C788.4 234.6 727.1 253.7 724.7 235.4C726.8 251.1 673.2 251.1 675.3 235.4C672.9 253.7 611.6 234.6 620.4 218.5C606.3 244.4 557.3 193.7 584.5 182.4C563.2 191.2 566.5 131.8 586.8 142.8C559.9 128.3 613.7 80.6 626.7 108.3C608.2 69 700 49.6 700 93Z"/>
+                <g id="g-reve-cadre" clip-path="url(#clip-ecran)">
+                  <g id="g-reve" transform="translate(700 168)" aria-hidden="true"></g>
+                </g>
+                <g transform="translate(818 92) rotate(14)"><use href="#pin" style="color:var(--glass-yellow)"/></g>
+              </g>
+            </g>
+            <!-- « Encore un rêve » : une pilule de feutre cousue en haut à gauche du nuage (≥ 44 de haut) -->
+            <g id="encore" class="encore" role="button" tabindex="0" aria-label="Encore un rêve" aria-hidden="true">
+              <g class="encore-corps">
+                <path class="encore-focus" d="M570 30H682C696.3598 30 708 41.6402 708 56V56C708 70.3598 696.3598 82 682 82H570C555.6402 82 544 70.3598 544 56V56C544 41.6402 555.6402 30 570 30Z"/>
+                <path class="w lite reserve encore-fond" style="--p:var(--p-ecran-bouton)" data-ink="bleu" d="M570 34H682C694.1506 34 704 43.8494 704 56V56C704 68.1506 694.1506 78 682 78H570C557.8494 78 548 68.1506 548 56V56C548 43.8494 557.8494 34 570 34Z"/>
+                <path class="fil couture" style="--f:var(--fil-blanc)" d="M570 39H682C691.3891 39 699 46.6109 699 56V56C699 65.3891 691.3891 73 682 73H570C560.6109 73 553 65.3891 553 56V56C553 46.6109 560.6109 39 570 39Z"/>
+                <text class="encore-texte" x="626" y="62">🔁 Encore un rêve</text>
+              </g>
+            </g>
+            <!-- La phrase du rêve : dessinée à sa place de la vue Dehors (sur le mur, à gauche du nuage,
+                 en haut) ; en vue Dedans, elle glisse sous le nuage, posée sur la boîte (translation selon
+                 --vue et --leg-dy, CSS) ; le fond se règle sur la hauteur du texte (script). -->
+            <g id="g-legende" class="legende">
+              <path class="legende-fond w lite reserve" style="--p:var(--riso-papier, var(--p-carte))" d=""/>
+              <path class="legende-bord fil couture" style="--f:var(--fil-sable)" d=""/>
+              <foreignObject x="188" y="26" width="324" height="250">
+                <div xmlns="http://www.w3.org/1999/xhtml" id="t-phrase" class="t-phrase" aria-live="polite"></div>
+              </foreignObject>
+            </g>
+            <!-- ECRAN-END -->
+          </g>
           <!-- ===== Boîte à souvenirs (cartes de la journée) ===== -->
           <!-- ===== La boîte à souvenirs (Task 8) : bac de feutre en bas de la scène,
                23 cartes sur un rail qu'on fait défiler au doigt (#boite-rail, translation
@@ -2122,6 +2691,7 @@ html:not([data-pret]) *{transition:none!important}
      G. L'histoire du pouce : HISTOIRE
      H. La télécommande : TRANSFOS
      I. Gabarits de phrases : PHRASES
+     J. Le générateur de rêve : composeDream
    Règles d'écriture (recherche §5) : tutoiement, deux phrases, un fait qui
    épate ; jamais « le cerveau se repose », jamais « chasser le monstre »,
    jamais « ton cerveau s'est trompé » ; le cerveau « se rince » ; les
@@ -2155,6 +2725,8 @@ function lerpArr(arr, t){
    g       : genre et nombre de `nom` et de `greffe.nom` (m | f | mp | fp),
              pour accorder « est devenu(e)(s) » et le modificateur
    ton     : cartes réconfort uniquement, le nom vu de l'enfant (« ta chanson »)
+   nomPhrase : ressentis uniquement, le nom dans la phrase du rêve (« mélangé un vélo
+             avec le moment où tu as ri » : « avec j'ai ri » ne se dit pas)
    texte   : les deux phrases lues quand on touche la carte */
 const CARTES = [
   // ---- Choses vues (entrent par l'œil)
@@ -2212,13 +2784,13 @@ const CARTES = [
     greffe:{ nom:'la maîtresse', forme:'maitresse', g:'f' },
     texte:"La maîtresse t'a appris une nouvelle chanson à l'école. Cette nuit, ton cerveau va la rejouer pour bien la ranger !" },
   // ---- Ce que j'ai ressenti (jamais base : greffe ou contexte seulement)
-  { slug:'ri', nom:"j'ai ri", g:'m', emoji:'😂', cat:'ressenti', charge:1, entree:'oreille', base:false,
+  { slug:'ri', nom:"j'ai ri", nomPhrase:'le moment où tu as ri', g:'m', emoji:'😂', cat:'ressenti', charge:1, entree:'oreille', base:false,
     greffe:{ nom:'un grand sourire', forme:'ri', g:'m' },
     texte:"Tu as tellement ri que tu en avais mal au ventre ! Les souvenirs où l'on rit, ton cerveau les garde bien précieusement." },
-  { slug:'peur', nom:"j'ai eu peur", g:'m', emoji:'😱', cat:'ressenti', charge:3, entree:'oreille', base:false,
+  { slug:'peur', nom:"j'ai eu peur", nomPhrase:'le moment où tu as eu peur', g:'m', emoji:'😱', cat:'ressenti', charge:3, entree:'oreille', base:false,
     greffe:{ nom:'de grands yeux tout ronds', forme:'peur', g:'mp' },
     texte:"Avoir peur, ça arrive à tout le monde, même aux grands ! Ton alarme de la peur a sonné, et cette nuit, ton cerveau va s'en occuper." },
-  { slug:'fache', nom:'je me suis {fâché|fâchée}', g:'m', emoji:'😠', cat:'ressenti', charge:2, entree:'oreille', base:false,
+  { slug:'fache', nom:'je me suis {fâché|fâchée}', nomPhrase:"le moment où tu t'es {fâché|fâchée}", g:'m', emoji:'😠', cat:'ressenti', charge:2, entree:'oreille', base:false,
     greffe:{ nom:'des sourcils fâchés', forme:'fache', g:'mp' },
     texte:"Grrr, tu t'es {fâché|fâchée} tout rouge, ça arrive ! La colère aussi entre dans le sac à souvenirs, et la nuit, ton cerveau la range." },
   /* Ledger : le câlin est un ressenti (joie), qui peut servir de réconfort
@@ -2442,6 +3014,165 @@ const PHRASES = {
   finitBien: "… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul.",
   cle: "C'est mon cerveau qui a mélangé. C'est un rêve. Je change de chaîne."
 };
+/* ===== J. Le générateur de rêve (spec §4.5, Task 10) =====
+   composeDream(slugs, { seed, genre }) → null (journée vide : l'appelant affiche
+   PHRASES.flou) ou { mode, base, greffe, contexte, oublies, reconfort, modif,
+   verdict, phrase }. Déterministe : même journée et même graine, même rêve ;
+   « Encore un rêve » change la graine (le modificateur, pas les rôles).
+
+   1. Les rôles (slugs du plus ancien au plus récent ; « ex æquo » = le plus récent) :
+      - une carte apaisante (charge < 0) n'est jamais greffe. Si la greffe fait peur
+        (charge 3) et que la journée a une carte apaisante, la plus récente est
+        mise de côté : c'est elle qui finira le rêve (reconfort, verdict finitBien) ;
+      - la greffe est la carte de charge la plus forte. Si UNE seule carte a cette
+        charge, elle est la greffe et la base se choisit parmi les autres. Si
+        plusieurs cartes ont la charge la plus forte (glace + chien, copains +
+        pirate), la base se choisit d'abord, puis la greffe parmi les autres
+        cartes les plus fortes : « le chien est devenu une glace » (spec §4.5,
+        exemple et test du brief) ;
+      - la base est la plus concrète des cartes base:true (vu > gens > mot >
+        ressenti ; une carte réconfort compte selon sa porte : le doudou, qu'on
+        voit, comme une chose vue ; la chanson comme un mot) ;
+      - sans base possible (ogre + j'ai ri), le rêve est celui de la carte seule
+        (mode « seul », gabarit PHRASES.seul), dessiné par sa forme de base si
+        elle en a une, sinon par sa vignette ; une journée d'une carte aussi ;
+      - le contexte est la plus concrète des cartes qui restent ; les autres sont
+        oubliées pour ce rêve.
+   2. Le modificateur vient de la charge de la greffe (§4.5-3) : 3 gigantesque,
+      2 à l'envers / qui n'obéit pas, 1 multiplié, 0 tout petit / d'une autre
+      couleur. En mode « seul » (spec : « tout petit, multiplié ou d'une autre
+      couleur »), sauf la peur (gigantesque) et la colère (à l'envers / n'obéit pas).
+   3. Le verdict vient de la même charge : 3 cauchemar (ou finitBien), 2 bizarre,
+      1 rigolo, 0 et apaisante beau.
+   4. La phrase : le gabarit figé de PHRASES, rempli puis accordé (voir accorder). */
+const CONCRET = { vu:4, gens:3, mot:2, ressenti:1 };
+const concret = c => CONCRET[c.cat] ?? (c.entree === 'oeil' ? 4 : 2);
+/* le pluriel d'une greffe, quand la base est plurielle (« les copains sont devenus
+   des pirates ») ; une greffe déjà plurielle (mp, fp) n'y est pas */
+const PLURIEL = {
+  pouce:['des pouces géants', 'mp'], glace:['des glaces', 'fp'], chien:['des chiens', 'mp'], velo:['des vélos', 'mp'],
+  piscine:['des piscines', 'fp'], gateau:['des gâteaux', 'mp'], tracteur:['des tracteurs', 'mp'],
+  orage:["des nuages d'orage", 'mp'], manege:['des manèges', 'mp'], ogre:['des ogres', 'mp'], pirate:['des pirates', 'mp'],
+  dragon:['des dragons', 'mp'], anniversaire:["des fêtes d'anniversaire", 'fp'], mamie:['des mamies', 'fp'],
+  maitresse:['des maîtresses', 'fp'], ri:['de grands sourires', 'mp'], doudou:['des doudous', 'mp']
+};
+const pluriel = g => g === 'mp' || g === 'fp';
+const VOYELLE = /^[aeiouyéèêàâîôœ]/i;
+/* « un chien » → « le chien », « une glace » → « la glace », « un orage » → « l'orage »,
+   « des pirates » / « de grands yeux » → « les … » ; « le pouce géant », « mamie »,
+   « papa et maman » restent tels quels */
+function defini(nom){
+  const m = /^(un|une|des|de) (.*)$/.exec(nom);
+  if(!m) return nom;
+  if(m[1] === 'des' || m[1] === 'de') return 'les ' + m[2];
+  return VOYELLE.test(m[2]) ? "l'" + m[2] : (m[1] === 'un' ? 'le ' : 'la ') + m[2];
+}
+/* le nom d'une carte dans la phrase du narrateur, qui tutoie l'enfant : « ton doudou »
+   (pas « mon doudou »), « le moment où tu as ri » (pas « j'ai ri ») */
+const nomDit = c => c.ton || c.nomPhrase || c.nom;
+/* une greffe-attribut (des yeux, des sourcils, des bras, un sourire, des notes) ne
+   remplace pas la base, elle s'y ajoute : « le vélo avait des sourcils fâchés » */
+const attribut = c => c.cat === 'ressenti' || c.cat === 'reconfort';
+
+function composeDream(slugs, opts = {}){
+  const seed = Math.abs(Math.floor(Number(opts.seed) || 0));
+  const vus = new Set();
+  const jour = [];
+  for(const s of Array.isArray(slugs) ? slugs : []){
+    const c = CARTES.find(x => x.slug === s);
+    if(c && !vus.has(s)){ vus.add(s); jour.push(c); }
+  }
+  if(!jour.length) return null;
+  const rang = c => jour.indexOf(c);
+  /* le plus concret, puis le plus récent */
+  const plusConcret = liste => liste.reduce((m, c) => (!m || concret(c) > concret(m) || (concret(c) === concret(m) && rang(c) > rang(m))) ? c : m, null);
+  const plusRecent = liste => liste.reduce((m, c) => (!m || rang(c) > rang(m)) ? c : m, null);
+
+  const forts = jour.filter(c => c.charge >= 0);
+  const apaisantes = jour.filter(c => c.charge < 0);
+  const max = forts.length ? Math.max(...forts.map(c => c.charge)) : null;
+  const sommet = forts.filter(c => c.charge === max);
+  const reconfort = max === 3 && apaisantes.length ? plusRecent(apaisantes) : null;
+  const libres = jour.filter(c => c !== reconfort);
+
+  let base = null, greffe = null;
+  if(sommet.length === 1){
+    const g = sommet[0];
+    base = plusConcret(libres.filter(c => c !== g && c.base));
+    if(base) greffe = g;
+  }else if(sommet.length > 1){
+    base = plusConcret(libres.filter(c => c.base));
+    greffe = base && plusRecent(sommet.filter(c => c !== base));
+    if(!greffe) base = null;
+  }
+  /* mode « seul » : la carte la plus forte (la greffe qui n'a pas trouvé de base),
+     sinon, journée tout apaisante, la plus concrète */
+  const mode = base ? 'reve' : 'seul';
+  if(!base) base = sommet.length ? plusRecent(sommet.filter(c => c.base).length ? sommet.filter(c => c.base) : sommet) : plusConcret(libres);
+  const reste = libres.filter(c => c !== base && c !== greffe);
+  const contexte = plusConcret(reste);
+  const oublies = reste.filter(c => c !== contexte);
+
+  const charge = (greffe || base).charge;
+  let modif;
+  if(charge === 3) modif = 'gigantesque';
+  else if(charge === 2) modif = seed % 2 ? 'envers' : 'desobeit';
+  else if(mode === 'seul') modif = ['minuscule', 'multiplie', 'couleur'][seed % 3];
+  else modif = charge === 1 ? 'multiplie' : (seed % 2 ? 'minuscule' : 'couleur');
+  const verdict = charge === 3 ? (reconfort ? 'finitBien' : 'cauchemar')
+    : charge === 2 ? 'bizarre' : charge === 1 ? 'rigolo' : 'beau';
+
+  return { mode, base, greffe, contexte, oublies, reconfort, modif, verdict,
+    phrase: phraseDuReve({ mode, base, greffe, reconfort, modif }, opts.genre) };
+}
+
+/* Remplit le gabarit et l'accorde. Règles (toutes testées sur toutes les paires) :
+   - {BASE} au défini (« le chien », « l'orage », « ton doudou ») ; en mode « seul »,
+     une carte sans forme de base est dite par sa greffe (« l'ogre », « les notes
+     de musique ») : c'est ce que montre l'écran ;
+   - « est devenu » s'accorde avec la base (est devenue, sont devenus, sont
+     devenues) ; une greffe-attribut donne « avait / avaient » ;
+   - base au pluriel : la greffe passe au pluriel (PLURIEL), « des pirates » ;
+   - {MODIF} s'accorde avec la greffe (MODIFS.f / mp / fp), ou avec la base en mode
+     « seul » ; « qui n'obéit pas » passe à l'imparfait du récit (n'obéissait pas) ;
+   - « était … l'a rejoué » du gabarit « seul » s'accorde (était / étaient, l'a
+     rejouée, les a rejoués, les a rejouées) ;
+   - « c'est {VRAI} » : « c'est une statue » si la base est le pouce de César, sinon
+     « ce n'est pas pour de vrai » ;
+   - puis les contractions et élisions (de le → du, à le → au, le/la + voyelle → l'),
+     les espaces, et l'accord de genre de l'enfant (inflect). */
+function phraseDuReve({ mode, base, greffe, reconfort, modif }, genre){
+  const M = MODIFS[modif];
+  const formeModif = g => g === 'f' ? M.f : g === 'mp' ? M.mp : g === 'fp' ? M.fp : M.nom;
+  let p;
+  if(mode === 'seul'){
+    const parGreffe = !base.base;
+    const g = parGreffe ? base.greffe.g : base.g;
+    const sujet = parGreffe ? defini(base.greffe.nom) : (base.ton || defini(base.nom));
+    p = PHRASES.seul.replace('{BASE}', sujet).replace('{MODIF}', formeModif(g));
+    if(pluriel(g)) p = p.replace(' était ', ' étaient ').replace("l'a rejoué", g === 'fp' ? 'les a rejouées' : 'les a rejoués');
+    else if(g === 'f') p = p.replace("l'a rejoué", "l'a rejouée");
+  }else{
+    let nomG = greffe.greffe.nom, gG = greffe.greffe.g;
+    if(pluriel(base.g) && !pluriel(gG) && PLURIEL[greffe.greffe.forme]) [nomG, gG] = PLURIEL[greffe.greffe.forme];
+    const verbe = attribut(greffe) ? (pluriel(base.g) ? 'avaient' : 'avait')
+      : base.g === 'f' ? 'est devenue' : base.g === 'mp' ? 'sont devenus' : base.g === 'fp' ? 'sont devenues' : 'est devenu';
+    p = PHRASES.reve
+      .replace('{BASE} est devenu', (base.ton || defini(base.nom)) + ' ' + verbe)
+      .replace('{GREFFE}', nomG)
+      .replace('{MODIF}', formeModif(gG))
+      .replace('{C1}', nomDit(base))
+      .replace('{C2}', nomDit(greffe))
+      .replace("c'est {VRAI}", base.slug === 'pouce' ? "c'est une statue" : "ce n'est pas pour de vrai");
+  }
+  if(reconfort) p += ' ' + PHRASES.finitBien.replace('{RECONFORT}', reconfort.ton || nomDit(reconfort));
+  p = p.replace(/qui n'obéit pas/g, "qui n'obéissait pas").replace(/qui n'obéissent pas/g, "qui n'obéissaient pas")
+    .replace(/\b([Dd])e le /g, '$1u ').replace(/\b([Dd])e les /g, '$1es ')
+    .replace(/(^|\s)à le /g, '$1au ').replace(/(^|\s)à les /g, '$1aux ')
+    .replace(/\b([Ll])[ea] (?=[aeiouyéèêàâîôœ])/g, "$1'")
+    .replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1').trim();
+  return inflect(p, genre);
+}
 /* PURE-END */
 </script>
 
@@ -2457,6 +3188,7 @@ const PHRASES = {
      6. Avatar : garçon / fille, peau, cheveux
      7. Volet d'information, feuille de réglages, clavier
      8. Cartes-souvenirs : la boîte, les épingles, la journée
+     9. Le rêve : l'écran, renderDream, les verdicts
    ========================================================================== */
 
 /* ===== 1. Paramètres d'URL et préférences =====
@@ -2631,6 +3363,7 @@ function setCut(c){
     g.style.visibility = opFond > 0 ? 'visible' : 'hidden';
   });
   document.body.dataset.vue = n;
+  root.style.setProperty('--vue', c);   /* la phrase du rêve glisse avec le fondu (Task 10) */
   cutRange.value = Math.round(c * 100);
   uiCut(c);
 }
@@ -2693,6 +3426,7 @@ const TEMPS = {
   grandis:    [0, 0, 1, .3, 0],     /* l'étiquette « je grandis » sur le crâne : la nuit profonde seulement */
   zzz:        [0, 0, 1, 1, 0],      /* le lobe frontal se repose */
   amygdale:   [0, 0, .3, 1, 0],     /* l'amygdale s'allume en rêve */
+  ecran:      [0, .3, 1, 1, 1],     /* le nuage-écran du rêve (Task 10) : il n'est pas là le jour */
   phaseNuit:  [0, 0, 1, .2, 0],     /* Tout près : vagues, fuseaux, rinçage, cellule */
   synapses:   [1, .5, .2, 1, .8]    /* Tout près : les étincelles du jour et des rêves */
 };
@@ -2710,6 +3444,7 @@ const PHASES_PRES = { nuit: 'phaseNuit', synapses: 'synapses' };
 const dehors = VUES[0], pres = VUES[2];
 const enfantDehors = document.getElementById('g-enfant-dehors');
 const zzz = document.getElementById('g-zzz');
+const ecranCorps = document.getElementById('ecran-corps');
 const tete = Object.fromEntries(['p-paupiere', 'fil-oeil-ferme', 'p-pineale', 'p-amygdale', 'p-bouche', 'fil-lune-oeil', 'fil-lune-clin']
   .map(id => [id, document.getElementById(id)]));
 const montrer = (el, op) => {   /* opacité + visibility:hidden à 0 (rien à peindre, comme setCut) */
@@ -2745,6 +3480,8 @@ function setTime(t){
     : '';
   /* Dedans : le frontal se repose */
   montrer(zzz, v.zzz);
+  /* le nuage-écran du rêve (Task 10), Dehors comme Dedans */
+  montrer(ecranCorps, v.ecran);
   /* Tout près : les métiers de la nuit et les étincelles */
   pres.querySelectorAll('[data-phase]').forEach(el => montrer(el, v[PHASES_PRES[el.dataset.phase]] ?? 1));
   /* l'état lisible, l'habillage, le curseur */
@@ -3534,6 +4271,231 @@ document.getElementById('journee').addEventListener('click', () => {
 });
 /* ?cartes=pouce,ogre,copains : posées sans animation, même la nuit */
 if(URL_ETAT.cartes) URL_ETAT.cartes.forEach(s => pickCard(s, { anim: false, forcer: true }));
+
+/* ===== 9. Le rêve : l'écran, renderDream, les verdicts (Task 10) =====
+   Le film est composé par composeDream (bloc PURE) à partir de la journée, et dessiné
+   dans #g-reve (centré sur le nuage) :
+     .reve-film                       (projeté : iris + lumière, 400 ms ; « Encore » : clignote)
+       .reve-contexte > <use #d-…>    (en petit, derrière ; s'efface en « gigantesque »)
+       .reve-sujets > .reve-sujet     (1, ou 3 en « multiplié » : <g transform> de place)
+         .reve-miroir > .reve-pose.m-<modif>   (la transform du modificateur, en CSS)
+           <use #g-greffe-<g>-dos>, <use #g-base-<b>>, <use #g-greffe-<g>> (une par tête)
+       .reve-reconfort                (finitBien : la carte apaisante entre dans l'écran)
+   Une carte sans forme de base (mode « seul ») est dessinée par sa vignette, en grand.
+   renderDream(dream, { anim }) : dream = composeDream(…), ou null (journée vide : le rêve
+   est flou, PHRASES.flou). effacerReve() vide tout. Le verdict est posé sur
+   document.body.dataset.verdict (CSS : variables seulement) ; les classes de la tête
+   (sourcil .fronce, bouche .sourit, amygdale .alarme) et le tremblement de l'écran ne
+   valent que la nuit des rêves (le sourire aussi au matin).
+   Déclenchement : événement « temps » (phase 3 : le rêve ; phase 4 : il reste ; sinon
+   effacé), événement « journee » (phases 3-4 : refait), avatar (l'accord de la phrase).
+   « Encore un rêve » (#encore) : seed + 1, puis le film clignote et se refait.
+   Pour Task 11 (la télécommande) : reveCourant (le rêve affiché), seed, renderDream,
+   direPhrase(texte), poserVerdict(v), les .reve-pose du film (y poser une transformation),
+   ancresDe(forme) (où sont les têtes d'une base, pour y coudre des oreilles de lapin). */
+const reveG = document.getElementById('g-reve');
+const reveCadre = document.getElementById('g-reve-cadre');
+const ecranTremble = ecranCorps.querySelector('.ecran-tremble');
+const legende = document.getElementById('g-legende');
+const legendeFond = legende.querySelector('.legende-fond');
+const legendeBord = legende.querySelector('.legende-bord');
+const tPhrase = document.getElementById('t-phrase');
+const encore = document.getElementById('encore');
+const encoreCorps = encore.querySelector('.encore-corps');
+const sourcil = document.getElementById('p-sourcil');
+/* le fond de la phrase, à sa place de la vue Dehors (le mur, à gauche du nuage) ; en vue Dedans
+   elle glisse de DX vers la droite et son bas se pose sur la boîte (BAS) : une phrase longue
+   monte sur le bas du nuage, vide (le film est au milieu) */
+const LEGENDE = { x: 182, y: 20, w: 336, dx: 342, bas: 462 };
+const HEUREUX = ['beau', 'rigolo', 'finitBien'];
+/* « multiplié » : trois exemplaires (x, y, échelle, inclinaison) ; le contexte : en bas à gauche */
+const MULTI = [[-84, 22, .54, -8], [0, -12, .6, 0], [84, 22, .54, 8]];
+const CONTEXTE = { x: -100, y: 30, taille: 62 };
+let seed = 0;               /* la graine du rêve : « Encore un rêve » l'augmente */
+let reveCourant = null;     /* le rêve affiché (résultat de composeDream), null sinon */
+
+/* la phrase, et son fond de feutrine réglé sur la hauteur du texte */
+function direPhrase(texte){
+  /* typographie française : pas de « ! » ni de « » » seul en début de ligne */
+  tPhrase.textContent = (texte || '').replace(/ ([!?:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0');
+  legende.classList.toggle('vide', !texte);
+  ajusterLegende();
+}
+function ajusterLegende(){
+  if(!tPhrase.textContent) return;
+  const h = tPhrase.offsetHeight;   /* px CSS du foreignObject = unités de la scène */
+  legendeFond.setAttribute('d', rrD(LEGENDE.x, LEGENDE.y, LEGENDE.w, h + 12, 16));
+  legendeBord.setAttribute('d', rrD(LEGENDE.x + 5, LEGENDE.y + 5, LEGENDE.w - 10, h + 2, 12));
+  legende.style.setProperty('--leg-dy', `${LEGENDE.bas - (h + 12) - LEGENDE.y}px`);
+}
+new ResizeObserver(ajusterLegende).observe(tPhrase);   /* Baloo 2 arrive après le premier rendu */
+
+/* les points d'accroche d'une base : [[x, y, échelle]…] (data-tete, data-corps du <symbol>) */
+function ancresDe(forme){
+  const sym = document.getElementById('g-base-' + forme);
+  const lire = v => (v || '0 0 1').split(';').map(t => t.trim().split(/\s+/).map(Number));
+  return sym ? { tetes: lire(sym.dataset.tete), corps: lire(sym.dataset.corps)[0] } : null;
+}
+function construirePose(dream){
+  const pose = svgEl('g', { class: 'reve-pose m-' + dream.modif });
+  const forme = dream.base.greffe.forme;
+  const ancres = dream.base.base ? ancresDe(forme) : null;
+  if(!ancres){   /* une carte sans forme de base : sa vignette, en grand */
+    svgEl('use', { href: '#v-' + dream.base.slug, transform: 'scale(2.6)' }, pose);
+    return pose;
+  }
+  if(!dream.greffe){
+    svgEl('use', { class: 'reve-base', href: '#g-base-' + forme }, pose);
+    return pose;
+  }
+  const g = dream.greffe.greffe.forme, [cx, cy, cs] = ancres.corps;
+  const style = ([tx, ty, ts], k) => `--tete-x:${tx};--tete-y:${ty};--tete-s:${ts};--corps-x:${cx};--corps-y:${cy};--corps-s:${cs}`
+    + (k ? ';--corps-vis:hidden' : '');   /* deux têtes (les copains) : le corps de la greffe une seule fois */
+  if(document.getElementById(`g-greffe-${g}-dos`)) svgEl('use', { class: 'reve-greffe dos', href: `#g-greffe-${g}-dos`, style: style(ancres.tetes[0], 0) }, pose);
+  svgEl('use', { class: 'reve-base', href: '#g-base-' + forme }, pose);
+  ancres.tetes.forEach((t, k) => svgEl('use', { class: 'reve-greffe', href: '#g-greffe-' + g, style: style(t, k) }, pose));
+  return pose;
+}
+/* le contexte, en petit derrière : son décor (ou sa vignette), ajusté dans un carré */
+function poserContexte(film, carte, cache){
+  const g = svgEl('g', { class: 'reve-contexte' + (cache ? ' m-gigantesque' : '') }, film);
+  const u = svgEl('use', { href: (carte.base ? '#d-' : '#v-') + carte.slug }, g);
+  const b = u.getBBox();
+  const s = b.width && b.height ? Math.min(CONTEXTE.taille / b.width, CONTEXTE.taille / b.height) : 1;
+  const x = (seed % 2 ? -1 : 1) * CONTEXTE.x;   /* « Encore » : il change de côté */
+  u.setAttribute('transform', `translate(${x - (b.x + b.width / 2) * s} ${CONTEXTE.y - (b.y + b.height / 2) * s}) scale(${s})`);
+  return g;
+}
+/* finitBien : la carte apaisante entre dans l'écran (en haut, côté épingle) */
+function poserReconfort(film, carte){
+  const place = svgEl('g', { class: 'reve-reconfort', transform: 'translate(92 -46)' }, film);
+  const g = svgEl('g', {}, place);
+  svgEl('use', { href: '#v-' + carte.slug, transform: 'scale(1.25)' }, g);
+  return g;
+}
+function poserVerdict(v){
+  if(v) document.body.dataset.verdict = v;
+  else delete document.body.dataset.verdict;
+  appliquerTete();
+}
+function appliquerTete(){
+  const v = document.body.dataset.verdict, reves = phaseCourante === 3;
+  sourcil.classList.toggle('fronce', reves && (v === 'cauchemar' || v === 'bizarre'));
+  tete['p-amygdale'].classList.toggle('alarme', reves && v === 'cauchemar');
+  tete['p-bouche'].classList.toggle('sourit', (reves || phaseCourante === 4) && HEUREUX.includes(v));
+  ecranTremble.classList.toggle('tremble', reves && v === 'cauchemar');
+}
+function montrerEncore(oui){
+  encore.setAttribute('aria-hidden', String(!oui));
+  encore.setAttribute('tabindex', oui ? '0' : '-1');
+  if(!oui && encore.contains(document.activeElement)) encore.blur();
+}
+/* les cartes du cortex qui ne servent pas à ce rêve pâlissent */
+function marquerOublies(oublies){
+  const set = new Set(oublies.map(c => c.slug));
+  cortexCartes.querySelectorAll('.hippo-carte').forEach(el => el.classList.toggle('oubliee', set.has(el.dataset.slug)));
+}
+
+/* le film se projette, puis le modificateur se joue (décoratif : l'état final est en CSS) */
+function projeter(film, dream){
+  animer(film, [{ opacity: 0, transform: 'scale(.55)', filter: 'brightness(2.4)' }, { opacity: 1, transform: 'scale(1)', filter: 'brightness(1)' }],
+    { duration: 400, easing: 'ease-out' });
+  if(!dream) return;
+  const DE = { gigantesque: 'scale(1)', minuscule: 'scale(1)', envers: 'scale(1,1)' }[dream.modif];
+  if(DE){
+    const vers = { gigantesque: 'scale(2.2)', minuscule: 'scale(.4)', envers: 'scale(1,-1)' }[dream.modif];
+    film.querySelectorAll('.reve-pose').forEach(p => animer(p,
+      dream.modif === 'gigantesque'
+        ? [{ transform: DE }, { transform: 'scale(1.15)', offset: .25 }, { transform: 'scale(2.38)', offset: .8 }, { transform: vers }]
+        : [{ transform: DE }, { transform: vers }],
+      { duration: dream.modif === 'gigantesque' ? 1300 : 700, delay: 450, easing: 'cubic-bezier(.45,0,.3,1)', fill: 'backwards' }));
+  }
+  const ctx = film.querySelector('.reve-contexte.m-gigantesque');
+  if(ctx) animer(ctx, [{ opacity: .9 }, { opacity: 0 }], { duration: 600, delay: 700, fill: 'backwards' });
+  const rec = film.querySelector('.reve-reconfort > g');
+  if(rec) animer(rec, [{ transform: 'translate(70px,140px) scale(.2)', opacity: 0 }, { transform: 'translate(0,0) scale(1.15)', opacity: 1, offset: .75 }, { transform: 'none', opacity: 1 }],
+    { duration: 800, delay: 1900, easing: RESSORT, fill: 'backwards' });
+}
+
+function renderDream(dream, opts = {}){
+  const anim = opts.anim !== false && !REDUIT.matches;
+  reveCourant = dream || null;
+  reveG.replaceChildren();
+  const film = svgEl('g', { class: 'reve-film' }, reveG);
+  reveCadre.setAttribute('clip-path', `url(#${dream && dream.modif === 'gigantesque' ? 'clip-ecran-grand' : 'clip-ecran'})`);
+  if(!dream){   /* journée vide : le cerveau range et se rince, le rêve est tout flou */
+    svgEl('use', { href: '#g-reve-flou' }, film);
+    direPhrase(PHRASES.flou);
+    poserVerdict(null);
+    montrerEncore(false);
+    marquerOublies([]);
+    if(anim) projeter(film, null);
+    return;
+  }
+  if(dream.contexte) poserContexte(film, dream.contexte, dream.modif === 'gigantesque');
+  const sujets = svgEl('g', { class: 'reve-sujets' }, film);
+  for(const [x, y, s, r] of dream.modif === 'multiplie' ? MULTI : [[0, 0, 1, 0]]){
+    const sujet = svgEl('g', { class: 'reve-sujet', transform: `translate(${x} ${y}) rotate(${r}) scale(${s})` }, sujets);
+    /* « Encore un rêve » : une graine sur deux, le film est retourné (gauche-droite) */
+    svgEl('g', { class: 'reve-miroir', transform: seed % 2 ? 'scale(-1 1)' : '' }, sujet).appendChild(construirePose(dream));
+  }
+  if(dream.reconfort) poserReconfort(film, dream.reconfort);
+  direPhrase(dream.phrase);
+  poserVerdict(dream.verdict);
+  montrerEncore(true);
+  marquerOublies(dream.oublies);
+  if(anim) projeter(film, dream);
+}
+function effacerReve(){
+  reveCourant = null;
+  reveG.replaceChildren();
+  reveCadre.setAttribute('clip-path', 'url(#clip-ecran)');
+  direPhrase('');
+  poserVerdict(null);
+  montrerEncore(false);
+  marquerOublies([]);
+}
+const reveDuJour = () => composeDream(journee, { seed, genre: root.dataset.genre });
+/* phase 3 : le rêve ; phase 4 : il reste (refait sans animation s'il manque : on a sauté
+   la nuit des rêves) ; les autres moments : rien à l'écran */
+function majReve(anim, refaire){
+  const p = phaseCourante;
+  if(p === 3) renderDream(reveDuJour(), { anim });
+  else if(p === 4){ if(refaire || !reveG.childElementCount) renderDream(reveDuJour(), { anim: false }); else appliquerTete(); }
+  else effacerReve();
+}
+document.addEventListener('temps', () => majReve(true));
+document.addEventListener('journee', () => { if(phaseCourante === 3 || phaseCourante === 4) majReve(phaseCourante === 3, true); });
+/* l'avatar change : la phrase s'accorde (« le moment où tu t'es fâchée ») */
+new MutationObserver(() => { if(reveCourant) majReve(false, true); }).observe(root, { attributes: true, attributeFilter: ['data-genre'] });
+
+/* « Encore un rêve » : la bobine clignote, puis un autre rêve de la même journée */
+let encoreEnCours = false;
+function encoreUnReve(){
+  if(!reveCourant || encoreEnCours) return;
+  seed++;
+  const film = reveG.querySelector('.reve-film');
+  const a = film && animer(film, [{ opacity: 1, filter: 'brightness(1)' }, { opacity: .2, filter: 'brightness(2)' }, { opacity: .85, filter: 'brightness(1.3)' },
+    { opacity: .1, filter: 'brightness(2.2)' }, { opacity: 1, filter: 'brightness(1)' }], { duration: 300, easing: 'steps(5, jump-none)' });
+  if(!a){ renderDream(reveDuJour(), { anim: false }); return; }
+  encoreEnCours = true;
+  a.onfinish = a.oncancel = () => { encoreEnCours = false; renderDream(reveDuJour(), { anim: true }); };
+}
+encore.addEventListener('pointerdown', () => encoreCorps.classList.add('appui'));
+addEventListener('pointerup', () => encoreCorps.classList.remove('appui'));
+addEventListener('pointercancel', () => encoreCorps.classList.remove('appui'));
+encore.addEventListener('click', encoreUnReve);
+encore.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  if(e.repeat) return;
+  encoreCorps.classList.add('appui');
+  setTimeout(() => encoreCorps.classList.remove('appui'), 110);
+  encoreUnReve();
+});
+/* au chargement (?temps=3&cartes=…) : aucun événement « temps » n'est émis, on lit la phase */
+montrerEncore(false);
+majReve(false, true);
 </script>
 </body>
 </html>
