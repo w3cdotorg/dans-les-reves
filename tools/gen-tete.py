@@ -126,26 +126,32 @@ def rounded(g, r):
 
 # ---------------------------------------------------------------- formes de base
 # Tête (peau), de profil, regard vers la droite — profil d'enfant de 5 ans
-# (Task 3b) : sommet y 48, œil y 190 à mi-hauteur sommet → menton (y 348),
+# (Task 3b) : sommet y 56, œil y 190 à mi-hauteur sommet → menton (y 348),
 # front bombé, arcade discrète, racine du nez en creux (486,194), nez court et
-# retroussé (bout (506,247)), base du nez (489,266), lèvre supérieure un peu en
+# retroussé (bout (507,249)), base du nez (489,266), lèvre supérieure un peu en
 # avant de l'inférieure, jonction des lèvres (488,297), sillon sous la lèvre
-# (480,320), menton rond (484,333)/(472,348), dessous du menton puis gorge (424,376),
-# cou étroit attaché DERRIÈRE le menton (x 301–419) ; la nuque, creusée, remonte
-# presque droite puis file en arrière sous l'occiput.
-H_PTS = [(304,575),(303,500),(301,452),(297,422),(286,400),(266,385),(238,374),(208,360),(184,340),
-         (168,310),(160,262),(160,202),(172,152),(196,108),(232,76),(278,56),(330,48),
-         (384,50),(432,62),(468,88),(488,118),(495,148),(494,170),(489,184),(486,194),
+# (480,320), menton rond (484,333)/(472,348), dessous du menton puis gorge (422,374).
+# Passe 2 : crâne moins profond — l'occiput le plus en arrière à x 187 vers la
+# hauteur des yeux (y 190–232), voûte un peu aplatie ; le bas de l'occiput
+# (205,323)–(248,344) juste sous le cervelet, puis la nuque descend vers l'avant
+# et rejoint le bord arrière du cou (x 312) vers y 352 ; cou x 312–408.
+H_PTS = [(312,575),(312,500),(312,400),(310,355),(300,350),(276,347),(248,344),(222,338),(205,323),
+         (195,300),(190,268),(187,232),(187,190),(191,148),(206,110),(234,80),(276,62),(330,56),
+         (386,57),(434,68),(468,90),(488,118),(495,148),(494,170),(489,184),(486,194),
          (489,210),(495,228),(503,241),(507,249),(503,258),(495,262),(489,266),(487,275),(492,284),
          (492,292),(488,297),(491,303),(488,312),(480,320),(484,333),(472,348),(452,357),
-         (434,364),(424,376),(420,410),(418,470),(417,575)]
+         (436,363),(422,374),(412,396),(408,440),(408,500),(408,575)]
 # Cerveau (hémisphère vu de côté, avant à droite).
 S_PTS = [(466,142),(463,157),(443,171),(428,193),(421,228),(431,240),(434,256),(424,278),
          (398,294),(360,300),(328,296),(306,284),(290,266),(266,252),(240,247),(216,242),
          (202,228),(199,192),(210,156),(238,120),(280,95),(330,86),(380,85),(424,96),(452,115)]
 # Cervelet : corps ovale + bras (pédoncule) qui rejoint le tronc.
-C_PTS = [(196,290),(206,268),(236,258),(266,263),(285,281),(300,292),(314,296),(315,306),
-         (299,311),(282,316),(262,325),(236,327),(210,321),(198,306)]
+# Passe 2 : avancé de (9,2) (9,2 px) pour garder de l'os derrière et dessous
+# quand l'arrière du crâne a reculé.
+C_DX, C_DY = 9, 2
+C_PTS = [(x + C_DX, y + C_DY) for x, y in
+         [(196,290),(206,268),(236,258),(266,263),(285,281),(300,292),(314,296),(315,306),
+          (299,311),(282,316),(262,325),(236,327),(210,321),(198,306)]]
 # Oreille : un pavillon (hélix qui s'enroule, lobe, tragus devant le conduit),
 # de la ligne des sourcils (y 184) à la base du nez (y 286), conduit (300,250).
 E_PTS = [(306,196),(294,186),(278,186),(266,198),(261,218),(262,242),(267,264),(276,280),
@@ -178,20 +184,26 @@ def lobe(g): return rounded(g.buffer(-GAP), 3)
 cortex = S.buffer(2.6)
 # le tronc descend en arrière vers le trou occipital (bas recalé de 8 px vers l'arrière)
 tronc = tube([(320,243,9.5),(323,258,10),(330,276,12.5),(334,293,14),(329,309,11.5),(324,322,8.6),(322,334,7.8)])
-liq = unary_union([S, C, tronc.intersection(box(0,0,900,330))]).buffer(14).buffer(-5)
+# le coussin d'eau : 9 px autour du cerveau, mais jamais à moins de 7 px de la peau
+# (2 de peau + 5 d'os) : à l'arrière, devenu moins profond, il s'amincit.
+liq = unary_union([S, C, tronc.intersection(box(0,0,900,330))]).buffer(14).buffer(-5).intersection(H.buffer(-7))
 # crâne : la voûte (entre la peau et le coussin d'eau, de l'arcade sourcilière à
 # l'occiput) + le plancher (un anneau de 9 px sous le coussin d'eau : toit de
 # l'orbite, fosse sous le lobe temporal, sous le cervelet), percé du TROU
 # OCCIPITAL sous l'oreille, par où le tronc sort vers la moelle.
-vault_keep = Polygon([(540,-20),(540,178),(482,178),(446,184),(400,232),(330,292),(250,322),
-                      (196,330),(110,320),(110,-20)])
+# Sous les cheveux, l'os monte jusqu'à 2 px de la peau (l'arrière du crâne est
+# mince) ; au front, sous la lisière, il laisse 7 px de peau.
+vault_keep = Polygon([(540,-20),(540,178),(482,178),(446,184),(400,232),(330,300),(300,362),
+                      (110,362),(110,-20)])
 foramen = box(309, 326, 337, 380)
-crane = rounded(unary_union([H.buffer(-7).intersection(vault_keep), liq.buffer(9)])
-                .difference(liq).difference(foramen).intersection(H.buffer(-6)), 2.5)
+cap_keep = Polygon([(620,-60),(620,30),(486,100),(330,300),(210,390),(80,470),(-60,470),(-60,-60)])
+voute = unary_union([H.buffer(-2).intersection(cap_keep), H.buffer(-7)]).intersection(vault_keep)
+crane = rounded(unary_union([voute, liq.buffer(7)])
+                .difference(liq).difference(foramen).intersection(H.buffer(-2)), 2)
 # cheveux courts : une calotte de laine sur le haut et l'arrière, bord ondulé,
 # qui s'amincit vers la nuque ; trois mèches de frange sur le front.
-# implantation : front dégagé (lisière vers (482,100)), nuque vers (210,386)
-cap_keep = Polygon([(620,-60),(620,30),(486,100),(330,300),(210,390),(80,470),(-60,470),(-60,-60)])
+# implantation : front dégagé (lisière vers (486,100)), courte lisière de nuque
+# (les cheveux s'arrêtent vers y 326) ; cap_keep est défini avec le crâne.
 ring = H.exterior
 blobs = []; strands = []
 L = ring.length
@@ -201,12 +213,13 @@ for i in range(int(L//5)):
     p = ring.interpolate(sd)
     if not cap_keep.contains(p) or p.y > 392: continue
     if s0 is None: s0 = sd
-    taper = max(0.0, min(1.0, (392 - p.y)/120))          # 1 en haut, 0 à la nuque
-    r = 3 + taper*(8.5 + 2.4*math.sin((sd-s0)/31*2*math.pi))
+    taper = max(0.0, min(1.0, (330 - p.y)/110))          # 1 en haut, 0 à la nuque
+    arriere = max(0.0, min(1.0, (p.x - 187)/70))         # 0 tout à l'arrière : cheveux ras (bord x ≈ 183)
+    r = 3.6 + taper*arriere*(7.5 + 2.4*math.sin((sd-s0)/31*2*math.pi))
     blobs.append(p.buffer(r, 20))
 locks = [tube([(470,80,7),(482,96,4.6),(486,110,1.6)]), tube([(456,70,7),(468,88,4),(472,100,1.4)])]
-hair = unary_union([unary_union(blobs).difference(H.buffer(-6)).intersection(cap_keep)] + locks)
-hair = rounded(biggest(hair.buffer(0).difference(box(0,358,300,600))), 1)   # la nuque, creusée, reste nue
+hair = unary_union([unary_union(blobs).difference(H.buffer(-2.5)).intersection(cap_keep)] + locks)
+hair = rounded(biggest(hair.buffer(0).difference(box(0,326,330,600))), 1)   # courte lisière de nuque
 # fils de laine plus clairs qui suivent la calotte
 inner = H.buffer(1.5).exterior
 for k in range(40):
@@ -215,9 +228,9 @@ for k in range(40):
     if all(cap_keep.buffer(-12).contains(q) and q.y < 330 for q in seg):
         strands.append([(q.x, q.y) for q in seg])
 # cheveux longs (fille) : rideau derrière la tête et le cou
-HL_PTS = [(262,84),(206,108),(166,150),(144,220),(144,300),(150,380),(160,450),(170,490),
-          (186,512),(206,520),(226,512),(246,524),(268,516),(290,524),(306,512),(312,470),
-          (300,410),(262,380),(214,320),(214,200)]
+HL_PTS = [(262,84),(214,104),(190,150),(178,220),(176,300),(180,380),(186,450),(192,490),
+          (204,512),(222,520),(242,512),(262,524),(284,516),(304,524),(318,512),(322,470),
+          (316,410),(290,370),(240,330),(220,200)]
 hairlong = poly(HL_PTS)
 
 # régions profondes
@@ -233,7 +246,7 @@ amygdale = ellipse(356,248,6.6,4.8,-22)
 hypophyse = unary_union([tube([(354,228,1.6),(362,238,1.5),(369,248,1.7)]), Point(371,253).buffer(4.4,24)])
 nerf = unary_union([tube([(449,197,3.4),(426,206,3.1),(400,218,2.9),(380,229,2.7)]), ellipse(375,232,6.2,4.2,-10)])
 # la moelle sort par le trou occipital et descend dans la moitié ARRIÈRE du cou
-moelle = tube([(322,328,7.6),(324,380,7.2),(328,440,7),(330,500,7),(330,580,7)])
+moelle = tube([(323,328,7.6),(328,380,7.2),(332,440,7),(334,500,7),(334,580,7)])   # passe 2 : cou x 312–408, moelle dans le tiers arrière
 
 out = {}
 out['H'] = smooth_path(H_PTS)
@@ -278,7 +291,7 @@ GABARIT = r"""
                  place (recherche §2.8). Repères (Task 3b, profil d'enfant de 5 ans) :
                  œil (460,191), conduit auditif (300,250), bout du nez (506,247),
                  bouche (481,299), menton (472,348), angle de la mâchoire (330,328),
-                 trou occipital (323,340), cou x 301–419.
+                 trou occipital (323,340), occiput x 187, nuque → cou à (312,352), cou x 312–408.
                  Ordre d'empilement = du plus profond au plus proche de l'œil, sauf
                  les régions profondes, posées PAR-DESSUS le cortex en transparence
                  (.profond : opacité .85 + bord cousu .couture) pour qu'on les lise
@@ -300,7 +313,7 @@ GABARIT = r"""
 
             <!-- le cervelet, SÉPARÉ du cerveau, strié de 5 traits brodés -->
             <path id="p-cervelet" class="w" style="--p:var(--p-cervelet)" data-ink="rose" d="{{C}}"/>
-            <path id="fil-cervelet" class="fil" d="M213,270 Q240,264 267,270 M205,281 Q240,274 275,281 M202,292 Q240,286 281,292 M205,303 Q240,298 276,303 M213,314 Q240,310 267,314"/>
+            <path id="fil-cervelet" class="fil" d="M222,272 Q249,266 276,272 M214,283 Q249,276 284,283 M211,294 Q249,288 290,294 M214,305 Q249,300 285,305 M222,316 Q249,312 276,316"/>
 
             <!-- le cerveau : le cortex (couverture plissée, plus sombre) et ses quatre lobes
                  posés dessus ; les sillons entre les lobes laissent voir le cortex -->

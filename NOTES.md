@@ -556,3 +556,37 @@ Demande du propriétaire : « Pourras-tu faire une tête plus anatomiquement cor
 - 0 `.w[transform]`, console propre, 15/15 tests.
 - Pose couchée (−80° comme en Task 4, puis −90°) : la tête repose sur l'oreiller, le pivot (359,440) reste bon.
 - Données `d` de `#g-dedans` : 24 799 → 27 290 octets (pièces du visage en plus).
+
+## 2026-10-29 — Task 3b, passe 2 : crâne moins profond, nuque, cou
+
+Retour du contrôleur sur la passe 1 : la tête restait un œuf, pour deux raisons. Le crâne était trop profond d'avant en arrière (370 px de long pour ~308 px de haut, rapport 1,2, alors qu'un enfant de profil est vers 0,9), et l'arrière de la tête descendait jusqu'à y ≈ 450 derrière le cou, comme un casque. Décision du contrôleur : la tête du plan passe de « x 150–520 » à « x ≈ 185–520 ».
+
+**Proportions retenues.**
+- **Occiput** : son point le plus en arrière est à x 187, vers la hauteur des yeux (y 190–232).
+- **Voûte** : elle remonte vers l'avant jusqu'au sommet (peau y 56, cheveux y 42), un peu aplatie (sommet (330,56)–(386,57)).
+- **Bas de l'occiput** : (205,323) → (248,344), juste sous le cervelet. La nuque descend ensuite vers l'avant et rejoint le bord arrière du cou en (312,352). Rien de la tête (peau ou cheveux) ne descend sous y 352 derrière le cou.
+- **Cou** : x 312–408. Son bord avant sort du dessous du menton par une gorge douce : (452,357) → (436,363) → (422,374) → (412,396) → (408,440).
+- **Moelle** : centres (323,328) → (334,580), dans le tiers arrière du cou, à 9 px au moins du bord.
+- **Pivot** : toujours (359,440), au milieu du cou.
+- **Rapport** : longueur peau 187→507 = 320 px pour une hauteur sommet → menton de 56→348 = 292 px, soit **1,10** (cheveux compris : 183→507 pour 42→348, 1,06). On ne peut pas descendre à 0,9 : la boîte de cerveau x 200–470 et la face jusqu'au nez (507) sont figées par le plan.
+
+**Couches minces à l'arrière.** Le cerveau (pôle occipital x 199) et la peau (x 187) ne sont qu'à 12 px. On y loge, dans l'ordre : peau 2 px, os 5 px, coussin d'eau 3 à 5 px.
+- Le coussin d'eau est désormais coupé à 7 px de la peau (`intersection(H.buffer(-7))`).
+- Sous les cheveux, l'os monte jusqu'à 2 px de la peau (`H.buffer(-2) ∩ cap_keep`) ; au front, il laisse 7 px de peau.
+- Les cheveux commencent à 2,5 px sous la peau (au lieu de 6), sinon ils cachaient l'os de l'arrière.
+- Les boucles sont rases tout à l'arrière (`arriere` = 0 à x 187, rayon 3,6) : le bord des cheveux est à x 183.
+- La frange garde ses mèches. La nuque a une courte lisière : les cheveux s'arrêtent à y 326, à la fois Dedans (`box(0,326,…)`) et Dehors (`HAIRLINE` finit en (204,330)).
+
+**Cervelet.** Le plan le place à (240,290) r ~40, soit un bas à y 327. Avec un bas d'occiput à y ≈ 305 comme demandé, il sortait de la tête : pas de solution avec un recalage ≤ 10 px. J'ai sondé tous les décalages avec shapely, en mesurant la distance à la peau et l'écart au cerveau. **Retenu : (9,2), soit 9,2 px.** Il reste 8,9 px jusqu'à la peau (os et eau compris) et 3,1 px de coussin d'eau entre cervelet et lobe occipital, donc ils restent séparés. Pour cela, le bas de l'occiput descend à (205,323)–(248,344) au lieu de y ≈ 305.
+
+**Ce qui a raté.**
+- **Décalage (7,−7) du cervelet** : il touchait le lobe occipital (écart 0).
+- **Contour d'occiput à y ≈ 305** : 380 px² de cervelet hors de la tête.
+- **Moelle aux centres de la passe 1** : à 2 px du bord arrière du cou, une fois celui-ci passé à x 312 ; elle a été avancée de 4 à 6 px.
+
+**Contrôles.**
+- Générateurs reproductibles à l'octet : même md5 après deux passes.
+- `.w:not(.lite)` : 18 Dedans, 15 Dehors.
+- 0 `.w[transform]`, console propre, 15/15 tests.
+- Pose couchée à −80° et −90° : la tête repose sur l'oreiller.
+- Données `d` de `#g-dedans` : 27 021 octets.
