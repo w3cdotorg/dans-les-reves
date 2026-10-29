@@ -837,7 +837,7 @@ body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ec
    la phrase au-dessus passe alors en plus petit */
 .t-phrase.avec-cle{font-size:16px;padding-bottom:8px}
 .t-cle{margin:0 13px;padding:7px 0 11px;width:calc(298px - min(1, var(--vue, 0)) * 68px);border-top:2px dashed var(--fil-encre, var(--fil-sable));
-  font-family:"Baloo 2",var(--font-display);font-weight:700;font-size:19px;line-height:1.14;
+  font-family:"Baloo 2",var(--font-display);font-weight:700;font-size:21px;line-height:1.12;
   color:var(--fil-encre, var(--p-ecran-bouton));text-wrap:balance;hyphens:none}
 .t-cle[hidden]{display:none}
 /* les cartes du cortex qui ne servent pas au rêve pâlissent (spec §4.5-1) */
@@ -877,6 +877,11 @@ body[data-vue="2"]{--tc-vis:hidden}
 /* les transformations du film (posées par le script sur les éléments du film) */
 .reve-greffe{transition:opacity .7s ease}
 .reve-greffe.efface{opacity:0}
+/* lapin, danse : la greffe s'adoucit (crocs, sourcils fâchés, éclairs, sabre… s'effacent ;
+   un sourire apparaît) ; .doux est posé sur le <use>, les variables traversent le clone */
+.mechant{opacity:var(--doux-mechant,1);transition:opacity .4s}
+.gentil{opacity:var(--doux-gentil,0);transition:opacity .4s}
+.reve-greffe.doux{--doux-mechant:0;--doux-gentil:1}
 .reve-pose.bronze-teinte{filter:sepia(.55) saturate(1.25) hue-rotate(-6deg)}
 .reve-contexte.cache{opacity:0}
 .reve-pose.danse{transform-origin:50% 100%;animation:var(--amb-anim, danse-pose) .55s ease-in-out infinite alternate}
@@ -991,6 +996,9 @@ body[data-vue="2"]{--tc-vis:hidden}
 .chanson-fenetre iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .chanson-chante{margin:0;padding:12px;font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1.2;color:var(--ui-indigo)}
 .chanson-chante small{display:block;margin-top:.4em;font-family:var(--font-texte);font-weight:600;font-size:1rem;color:var(--ui-gris-fonce)}
+/* sous la fenêtre, toujours : quoi qu'il arrive au lecteur, on peut chanter avec elle */
+.chanson-avec{margin:12px 4px 0;font-family:var(--font-display);font-weight:600;font-size:1.1rem;line-height:1.3;color:var(--ui-indigo)}
+.chanson-avec small{font-family:var(--font-texte);font-weight:600;font-size:.95rem;color:var(--ui-gris-fonce)}
 
 /* ===== 12. Téléphone (< 900 px) =====
    Bandeau sur deux lignes, rail horizontal SOUS la scène (même dégradé, même
@@ -1885,21 +1893,18 @@ html:not([data-pret]) *{transition:none!important}
             <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M2.4-3C2.4-6.1 4.9-8.6 8-8.6C11.1-8.6 13.6-6.1 13.6-3C13.6 .1 11.1 2.6 8 2.6C4.9 2.6 2.4 .1 2.4-3Z"/>
             <circle class="noeud-brun" cx="-7" cy="-2.4" r="2.5"/>
             <circle class="noeud-brun" cx="9" cy="-2.4" r="2.5"/>
-            <path class="w lite mini trait" style="--p:var(--p-roue);--tw:3.8" data-ink="bleu" d="M-16-12L-4-8M4-8L16-12"/>
+            <g class="mechant"><path class="w lite mini trait" style="--p:var(--p-roue);--tw:3.8" data-ink="bleu" d="M-16-12L-4-8M4-8L16-12"/></g>
+            <g class="gentil"><path class="fil epais" style="--f:var(--fil-brun)" d="M-15-11Q-10-16-5-12M5-12Q10-16 15-11"/></g>
             <path class="fil" style="--f:var(--fil-brun)" d="M-1.5 1C-3 5.5 2 6.5 2.5 3"/>
-            <path class="w lite mini brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-12 8C-7 18 7 18 12 8C6 11-6 11-12 8Z"/>
-            <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-8 9.5L-6 15L-4 10.5ZM4 10.5L6 15L8 9.5Z"/>
+            <g class="mechant"><path class="w lite mini brun" style="--p:var(--p-bouche)" data-ink="rose" d="M-12 8C-7 18 7 18 12 8C6 11-6 11-12 8Z"/><path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M-8 9.5L-6 15L-4 10.5ZM4 10.5L6 15L8 9.5Z"/></g>
+            <g class="gentil"><path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M-18.2 8C-18.2 6.5-16.3 5.2-14 5.2C-11.7 5.2-9.8 6.5-9.8 8C-9.8 9.5-11.7 10.8-14 10.8C-16.3 10.8-18.2 9.5-18.2 8Z"/><path class="w lite mini pastel" style="--p:var(--p-joue)" data-ink="rose" d="M9.8 8C9.8 6.5 11.7 5.2 14 5.2C16.3 5.2 18.2 6.5 18.2 8C18.2 9.5 16.3 10.8 14 10.8C11.7 10.8 9.8 9.5 9.8 8Z"/><path class="fil epais" style="--f:var(--fil-brun)" d="M-10 9Q0 18 10 9"/></g>
             <circle class="noeud-brun" cx="14" cy="9" r="1.6"/>
             <circle class="noeud-brun" cx="-15" cy="12" r="1.2"/>
           </g>
           </symbol>
           <symbol id="g-greffe-pirate" overflow="visible">
           <g class="a-corps">
-            <path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M44 32C58 10 60-14 50-38C56-14 54 10 41 30Z"/>
-            <path class="fil" style="--f:var(--fil-blanc)" d="M47 26C56 8 57-12 51-32"/>
-            <path class="w lite mini trait" style="--p:var(--p-or);--tw:5" data-ink="jaune" d="M34 28L50 38"/>
-            <path class="w lite mini trait" style="--p:var(--p-bois);--tw:4.4" data-ink="rose" d="M42 33L37 44"/>
-            <circle cx="50" cy="38" r="2.4" fill="url(#knot)"/>
+            <g class="mechant"><path class="w lite mini pastel" style="--p:var(--p-gris)" data-ink="bleu" d="M44 32C58 10 60-14 50-38C56-14 54 10 41 30Z"/><path class="fil" style="--f:var(--fil-blanc)" d="M47 26C56 8 57-12 51-32"/><path class="w lite mini trait" style="--p:var(--p-or);--tw:5" data-ink="jaune" d="M34 28L50 38"/><path class="w lite mini trait" style="--p:var(--p-bois);--tw:4.4" data-ink="rose" d="M42 33L37 44"/><circle cx="50" cy="38" r="2.4" fill="url(#knot)"/></g>
           </g>
           <g class="a-tete">
             <path class="w lite mini" style="--p:var(--p-pirate)" data-ink="bleu" d="M-31-13C-25-22-15-38 0-38C15-38 25-22 31-13C18-19-18-19-31-13Z"/>
@@ -1920,8 +1925,7 @@ html:not([data-pret]) *{transition:none!important}
           <symbol id="g-greffe-dragon" overflow="visible">
           <g class="a-tete">
             <path class="w lite mini orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M-14-18L-12-32L-6-20ZM14-18L12-32L6-20Z"/>
-            <path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M20 4C30-6 42-4 46 2C54-2 60 4 56 10C62 14 56 20 48 16C44 22 32 20 28 12C24 12 20 8 20 4Z"/>
-            <path class="w lite mini orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M26 6C32 2 38 4 40 8C44 6 48 10 44 13C40 16 34 15 32 12C29 12 26 9 26 6Z"/>
+            <g class="mechant"><path class="w lite mini reserve" style="--p:var(--p-flamme)" data-ink="jaune" d="M20 4C30-6 42-4 46 2C54-2 60 4 56 10C62 14 56 20 48 16C44 22 32 20 28 12C24 12 20 8 20 4Z"/><path class="w lite mini orange" style="--p:var(--p-piquant)" data-ink="jaune" d="M26 6C32 2 38 4 40 8C44 6 48 10 44 13C40 16 34 15 32 12C29 12 26 9 26 6Z"/></g>
           </g>
           </symbol>
           <symbol id="g-greffe-glace-dos" overflow="visible"><g class="a-corps">
@@ -1971,12 +1975,11 @@ html:not([data-pret]) *{transition:none!important}
           </symbol>
           <symbol id="g-greffe-orage" overflow="visible">
           <g class="a-corps">
-            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M-52-12L-60 4H-54L-60 18L-46-2H-52L-48-12Z"/>
-            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M56 4L48 20H54L48 34L62 14H56L60 4Z"/>
+            <g class="mechant"><path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M-52-12L-60 4H-54L-60 18L-46-2H-52L-48-12Z"/><path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M56 4L48 20H54L48 34L62 14H56L60 4Z"/></g>
           </g>
           <g class="a-tete">
             <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-26-30C-32-30-32-40-26-42C-26-50-16-54-10-48C-6-56 6-56 10-48C16-54 26-50 25-42C32-41 32-30 25-30Z"/>
-            <path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M3-33L-6-18H0L-5-4L9-22H3L7-33Z"/>
+            <g class="mechant"><path class="w lite mini reserve" style="--p:var(--p-eclair)" data-ink="jaune" d="M3-33L-6-18H0L-5-4L9-22H3L7-33Z"/></g>
             <path class="fil" style="--f:var(--fil-vague)" d="M-18-26L-21-21M18-26L15-21"/>
           </g>
           </symbol>
@@ -2018,19 +2021,16 @@ html:not([data-pret]) *{transition:none!important}
             <path class="w lite mini reserve" style="--p:var(--p-blanc-oeil)" data-ink="jaune" d="M.6-3C.6-7.6 4.4-11.4 9-11.4C13.6-11.4 17.4-7.6 17.4-3C17.4 1.6 13.6 5.4 9 5.4C4.4 5.4 .6 1.6 .6-3Z"/>
             <circle class="noeud-brun" cx="-9" cy="-2" r="2.3"/>
             <circle class="noeud-brun" cx="9" cy="-2" r="2.3"/>
-            <path class="fil epais" style="--f:var(--fil-brun)" d="M-17-16Q-10-23-3-16M3-16Q10-23 17-16"/>
-            <path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-4 12C-4 9-2.2 6.6 0 6.6C2.2 6.6 4 9 4 12C4 15 2.2 17.4 0 17.4C-2.2 17.4-4 15-4 12Z"/>
-            <path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M22-17C24.8-13.4 24.8-9.8 22-9.8C19.2-9.8 19.2-13.4 22-17Z"/>
+            <g class="mechant"><path class="fil epais" style="--f:var(--fil-brun)" d="M-17-16Q-10-23-3-16M3-16Q10-23 17-16"/><path class="w lite mini" style="--p:var(--p-roue)" data-ink="bleu" d="M-4 12C-4 9-2.2 6.6 0 6.6C2.2 6.6 4 9 4 12C4 15 2.2 17.4 0 17.4C-2.2 17.4-4 15-4 12Z"/><path class="w lite mini reserve" style="--p:var(--p-eau)" data-ink="bleu" d="M22-17C24.8-13.4 24.8-9.8 22-9.8C19.2-9.8 19.2-13.4 22-17Z"/></g>
+            <g class="gentil"><path class="fil epais" style="--f:var(--fil-brun)" d="M-7 9Q0 16 7 9"/></g>
           </g>
           </symbol>
           <symbol id="g-greffe-fache" overflow="visible">
           <g class="a-tete">
             <circle class="noeud-brun" cx="-8.5" cy="-1" r="2.6"/>
             <circle class="noeud-brun" cx="8.5" cy="-1" r="2.6"/>
-            <path class="fil epais" style="--f:var(--fil-brun)" d="M-8 13Q0 6 8 13"/>
-            <path class="w lite mini trait" style="--p:var(--p-roue);--tw:4.6" data-ink="bleu" d="M-17-13L-3-6M17-13L3-6"/>
-            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-31-26C-31-29.3-28.3-32-25-32C-21.7-32-19-29.3-19-26C-19-22.7-21.7-20-25-20C-28.3-20-31-22.7-31-26ZM-35.2-20C-35.2-22.3-33.3-24.2-31-24.2C-28.7-24.2-26.8-22.3-26.8-20C-26.8-17.7-28.7-15.8-31-15.8C-33.3-15.8-35.2-17.7-35.2-20Z"/>
-            <path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M19-26C19-29.3 21.7-32 25-32C28.3-32 31-29.3 31-26C31-22.7 28.3-20 25-20C21.7-20 19-22.7 19-26ZM26.8-20C26.8-22.3 28.7-24.2 31-24.2C33.3-24.2 35.2-22.3 35.2-20C35.2-17.7 33.3-15.8 31-15.8C28.7-15.8 26.8-17.7 26.8-20Z"/>
+            <g class="mechant"><path class="fil epais" style="--f:var(--fil-brun)" d="M-8 13Q0 6 8 13"/><path class="w lite mini trait" style="--p:var(--p-roue);--tw:4.6" data-ink="bleu" d="M-17-13L-3-6M17-13L3-6"/><path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M-31-26C-31-29.3-28.3-32-25-32C-21.7-32-19-29.3-19-26C-19-22.7-21.7-20-25-20C-28.3-20-31-22.7-31-26ZM-35.2-20C-35.2-22.3-33.3-24.2-31-24.2C-28.7-24.2-26.8-22.3-26.8-20C-26.8-17.7-28.7-15.8-31-15.8C-33.3-15.8-35.2-17.7-35.2-20Z"/><path class="w lite mini pastel" style="--p:var(--p-nuage)" data-ink="bleu" d="M19-26C19-29.3 21.7-32 25-32C28.3-32 31-29.3 31-26C31-22.7 28.3-20 25-20C21.7-20 19-22.7 19-26ZM26.8-20C26.8-22.3 28.7-24.2 31-24.2C33.3-24.2 35.2-22.3 35.2-20C35.2-17.7 33.3-15.8 31-15.8C28.7-15.8 26.8-17.7 26.8-20Z"/></g>
+            <g class="gentil"><path class="fil epais" style="--f:var(--fil-brun)" d="M-14-9Q-9-14-4-10M4-10Q9-14 14-9"/><path class="fil epais" style="--f:var(--fil-brun)" d="M-8 8Q0 15 8 8"/></g>
           </g>
           </symbol>
           <symbol id="g-greffe-calin" overflow="visible">
@@ -2739,7 +2739,7 @@ html:not([data-pret]) *{transition:none!important}
                   </g>
                 </g>
               </g>
-              <rect class="tc-cible" x="758" y="268" width="104" height="196" rx="18"/>
+              <rect class="tc-cible" x="756" y="268" width="104" height="196" rx="18"/>
             </g>
             <!-- TELECOMMANDE-END -->
           </g>
@@ -2822,13 +2822,15 @@ html:not([data-pret]) *{transition:none!important}
 <!-- ======================= LA CHANSON (Task 11) ======================= -->
 <!-- Ouverte par la télécommande. La fenêtre 16:9 reçoit l'iframe youtube-nocookie.com,
      créée au seul appui (jamais au chargement : aucune requête vers YouTube avant) ;
-     hors ligne, sur erreur ou sans réponse en 4 s : « 🎵 Chante ta chanson ! ». -->
+     hors ligne, depuis un fichier, YouTube injoignable, sur erreur ou sans réponse en 4 s :
+     « 🎵 Chante ta chanson ! ». Dessous, toujours : « Chante avec elle ! » et le titre. -->
 <dialog id="chanson" class="feuille chanson" aria-labelledby="chansonTitre">
   <div class="feuille-tete">
     <h2 id="chansonTitre">🎵 Ta chanson</h2>
     <button type="button" id="chansonClose" class="croix" aria-label="Fermer la chanson"><span aria-hidden="true">✕</span></button>
   </div>
   <div id="chansonFenetre" class="chanson-fenetre"></div>
+  <p class="chanson-avec">🎵 Chante avec elle&nbsp;! <small id="chansonAvec"></small></p>
 </dialog>
 
 <script>
@@ -2846,7 +2848,7 @@ html:not([data-pret]) *{transition:none!important}
      F. Mini-jeux : JEU_PARTIES, JEU_REVE
      G. L'histoire du pouce : HISTOIRE
      H. La télécommande : TRANSFOS, remoteStep
-     I. Gabarits de phrases : PHRASES
+     I. Gabarits de phrases : PHRASES, COURTES
      J. Le générateur de rêve : composeDream
    Règles d'écriture (recherche §5) : tutoiement, deux phrases, un fait qui
    épate ; jamais « le cerveau se repose », jamais « chasser le monstre »,
@@ -3164,6 +3166,9 @@ function remoteStep(n){
   const k = TRANSFOS.length;
   return TRANSFOS[((Math.floor(n) % k) + k) % k].id;
 }
+/* la vidéo de la chanson peut-elle se charger ? Pas hors ligne, ni depuis un fichier ouvert
+   à la main (file:// : YouTube refuse un lecteur sans référent) — on chante alors soi-même */
+const videoPossible = (enLigne, protocole) => enLigne !== false && protocole !== 'file:';
 
 /* ===== I. Gabarits de phrases (spec §4.5-5, §4.6) =====
    Remplis par le générateur de rêve : {BASE} {GREFFE} {MODIF} {C1} {C2} {VRAI}
@@ -3174,6 +3179,12 @@ const PHRASES = {
   flou: "Tu n'as rien mis dans ta journée : cette nuit, ton cerveau range et se rince, et le rêve est tout flou.",
   finitBien: "… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul.",
   cle: "C'est mon cerveau qui a mélangé. C'est un rêve. Je change de chaîne."
+};
+/* la forme courte d'un rêve qui finit bien, une fois le film changé (Task 11) : à part de
+   PHRASES (dont les gabarits sont figés par les tests de données) */
+const COURTES = {
+  reve: "Ton cerveau a mélangé {C1} avec {C2}… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul.",
+  seul: "Ton cerveau a rejoué {C1}… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul."
 };
 /* ===== J. Le générateur de rêve (spec §4.5, Task 10) =====
    composeDream(slugs, { seed, genre }) → null (journée vide : l'appelant affiche
@@ -3286,7 +3297,8 @@ function composeDream(slugs, opts = {}){
     : charge === 2 ? 'bizarre' : charge === 1 ? 'rigolo' : 'beau';
 
   return { mode, base, greffe, contexte, oublies, reconfort, modif, verdict,
-    phrase: phraseDuReve({ mode, base, greffe, reconfort, modif }, opts.genre) };
+    phrase: phraseDuReve({ mode, base, greffe, reconfort, modif }, opts.genre),
+    courte: phraseCourte({ mode, base, greffe, reconfort }, opts.genre) };
 }
 
 /* Remplit le gabarit et l'accorde. Règles (toutes testées sur toutes les paires) :
@@ -3334,6 +3346,21 @@ function phraseDuReve({ mode, base, greffe, reconfort, modif }, genre){
       .replace("c'est {VRAI}", base.slug === 'pouce' ? "c'est une statue" : "ce n'est pas pour de vrai");
   }
   if(reconfort) p += ' ' + PHRASES.finitBien.replace('{RECONFORT}', reconfort.ton || nomDit(reconfort));
+  return finir(p, genre);
+}
+/* finitBien, une fois le film changé (Task 11) : la forme courte, « Ton cerveau a mélangé
+   … avec … mais ta chanson était dans ta tête… » ; null sans carte réconfort. La carte
+   réconfort au défini : « ta chanson », « ton doudou », « le câlin » */
+function phraseCourte({ mode, base, greffe, reconfort }, genre){
+  if(!reconfort) return null;
+  const p = (mode === 'seul' || !greffe
+    ? COURTES.seul.replace('{C1}', nomDit(base))
+    : COURTES.reve.replace('{C1}', nomDit(base)).replace('{C2}', nomDit(greffe)))
+    .replace('{RECONFORT}', defini(reconfort.ton || reconfort.nom));
+  return finir(p, genre);
+}
+/* contractions, élisions, espaces, accord de genre de l'enfant */
+function finir(p, genre){
   p = p.replace(/qui n'obéit pas/g, "qui n'obéissait pas").replace(/qui n'obéissent pas/g, "qui n'obéissaient pas")
     .replace(/\b([Dd])e le /g, '$1u ').replace(/\b([Dd])e les /g, '$1es ')
     .replace(/(^|\s)à le /g, '$1au ').replace(/(^|\s)à les /g, '$1aux ')
@@ -3888,11 +3915,14 @@ document.getElementById('feuilleClose').addEventListener('click', fermerFeuille)
    refuse d'annuler, le dialog se ferme seul et « close » remet le « ⋯ ») */
 feuille.addEventListener('cancel', e => { e.preventDefault(); fermerFeuille(); });
 feuille.addEventListener('close', () => { feuille.classList.remove('sort'); reglagesBtn.setAttribute('aria-expanded', 'false'); });
-/* un appui sur le fond assombri (hors de la feuille) la referme */
-feuille.addEventListener('click', e => {
-  const r = feuille.getBoundingClientRect();
-  if(e.target === feuille && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) fermerFeuille();
-});
+/* un appui sur le fond assombri (hors de la feuille) referme un dialog (réglages, chanson) */
+function fermerSurFond(dialog, fermer){
+  dialog.addEventListener('click', e => {
+    const r = dialog.getBoundingClientRect();
+    if(e.target === dialog && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) fermer();
+  });
+}
+fermerSurFond(feuille, fermerFeuille);
 if(Q.get('reglages') === '1') ouvrirFeuille();
 requestAnimationFrame(() => requestAnimationFrame(() => { root.dataset.pret = '1'; }));
 
@@ -4692,17 +4722,22 @@ majReve(false, true);
      1. épingle la carte réconfort choisie par le parent (prefs reconfort : chanson | doudou |
         calin) sur l'écran, dans #g-reconfort — sauf si le film la montre déjà (finitBien) ;
      3. ouvre la chanson (openSong, dialog#chanson) dans le geste même (l'autoplay est permis) :
-        l'iframe youtube-nocookie.com n'est créée qu'ici, jamais au chargement ; hors ligne, sur
-        erreur, ou sans « load » en 4 s : « 🎵 Chante ta chanson ! » et le titre ;
+        l'iframe youtube-nocookie.com n'est créée qu'ici, jamais au chargement ; hors ligne,
+        depuis un fichier (file://), YouTube injoignable (sonde favicon), sur erreur, ou sans
+        « load » en 4 s : « 🎵 Chante ta chanson ! » et le titre ; sous la fenêtre, toujours,
+        « Chante avec elle ! » et le titre ;
      puis l'écran change de chaîne (deux éclairs doux, 380 ms) et :
      2. transformer(remoteStep(compteur)) : « bronze » (tout se dégonfle comme un vieux ballon,
         la greffe s'efface, une base qui n'est pas le pouce prend la teinte du bronze),
         « lapin » (oreilles roses, nez qui remue, carotte), « danse » (les chiens pirates
-        débarquent, tout danse) ; le modificateur est retiré, le verdict devient finitBien
+        débarquent, tout danse) — pour ces deux-là, la greffe reste mais s'adoucit (.doux :
+        plus de crocs ni de sourcils fâchés, un sourire) ; le modificateur est retiré, le verdict devient finitBien
         (la nuit redevient --nuit-3, l'amygdale se calme, le sourcil se défronce, il sourit) ;
-     4. la phrase de la transformation (TRANSFOS) et, en gros dessous, la phrase-clé (#t-cle).
+     4. la phrase de la transformation (TRANSFOS) et, en gros dessous, la phrase-clé (#t-cle) ;
+        une journée vide (rêve flou) : seulement PHRASES.flou, rien à changer.
    finitBien (une carte apaisante dans la journée, Task 10) : la carte entre d'elle-même dans
-   l'écran (renderDream), puis les étapes 2 et 4 se jouent seules (à 3,2 s), sans chanson.
+   l'écran (renderDream), puis les étapes 2 et 4 se jouent seules (à 3,2 s), sans chanson,
+   avec la forme courte du rêve (dream.courte, bloc PURE) et la phrase-clé.
    Un nouveau rêve (Encore, la journée, une nouvelle nuit des rêves) remet tout à zéro ; le
    même rêve redessiné sans animation (l'avatar change) garde sa chaîne. Le compteur, lui,
    continue : chaque appui change de chaîne. Écoute « reve » (section 9) et « temps ». */
@@ -4717,6 +4752,7 @@ const gReconfort = document.getElementById('g-reconfort');
 const chanson = document.getElementById('chanson');
 const chansonFenetre = document.getElementById('chansonFenetre');
 const chansonTitre = document.getElementById('chansonTitre');
+const chansonAvec = document.getElementById('chansonAvec');
 const LIBELLES = { 3: ['Je change', 'de chaîne !'], 4: ['Tu veux lui', 'changer', 'sa tête ?'] };
 const LIBELLE_PAS = 13.5;
 const CHANSON = { titre: 'Hey, ho, les chiens pirates !', ytid: 'jqGPppvVmBc' };
@@ -4804,12 +4840,18 @@ function chanteTaChanson(titre){
   p.appendChild(document.createElement('small')).textContent = titre;
   chansonFenetre.replaceChildren(p);
 }
+/* l'iframe a beau envoyer « load » (Chrome le fait aussi pour sa page d'erreur), YouTube peut
+   être injoignable : une petite requête (sans cookie, sans cache, réponse opaque) le vérifie,
+   en même temps ; si elle échoue, on retire le lecteur et on chante. Elle ne part qu'après
+   l'appui, comme l'iframe. */
+const SONDE_YT = 'https://www.youtube-nocookie.com/favicon.ico';
 function openSong(){
   const { titre, ytid } = chansonPrefs();
   chansonTitre.textContent = '🎵 ' + titre;
+  chansonAvec.textContent = titre;
   if(!chanson.open){ chanson.classList.remove('sort'); chanson.showModal(); }
   clearTimeout(tc.attente);
-  if(!navigator.onLine){ chanteTaChanson(titre); return; }
+  if(!videoPossible(navigator.onLine, location.protocol)){ chanteTaChanson(titre); return; }
   const f = document.createElement('iframe');
   let charge = false;
   f.title = titre;
@@ -4825,6 +4867,8 @@ function openSong(){
   f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(ytid)}?autoplay=1`;
   chansonFenetre.replaceChildren(f);
   tc.attente = setTimeout(() => { if(!charge && f.isConnected) chanteTaChanson(titre); }, CHANSON_ATTENTE);
+  fetch(SONDE_YT, { mode: 'no-cors', cache: 'no-store', credentials: 'omit' })
+    .catch(() => { if(f.isConnected) chanteTaChanson(titre); });
 }
 /* fermeture : sortie rapide (140 ms), ou sèche (sec : le matin est fini, la nuit revient) ;
    « close » vide la fenêtre : la musique s'arrête avec l'iframe */
@@ -4844,10 +4888,7 @@ chanson.addEventListener('close', () => {
   chansonFenetre.replaceChildren();
   if(tcVisible() && (document.activeElement === document.body || !document.activeElement)) telecommande.focus({ preventScroll: true });
 });
-chanson.addEventListener('click', e => {   /* un appui sur le fond (hors de la feuille) la referme */
-  const r = chanson.getBoundingClientRect();
-  if(e.target === chanson && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) closeSong();
-});
+fermerSurFond(chanson, () => closeSong());
 
 /* --- 2. transformer le film (sans jamais le faire disparaître d'un coup) --- */
 /* le ballon qui se dégonfle : il part de la transform du modificateur, flotte, et se pose */
@@ -4885,7 +4926,11 @@ function transformer(id, anim){
     c.classList.remove(m);
     c.classList.toggle('cache', id === 'danse');   /* les chiens prennent sa place */
   });
-  film.querySelectorAll('.reve-greffe').forEach(g => g.classList.toggle('efface', id === 'bronze'));
+  /* bronze : la greffe s'efface ; lapin, danse : elle reste, mais adoucie (plus de crocs, un sourire) */
+  film.querySelectorAll('.reve-greffe').forEach(g => {
+    g.classList.toggle('efface', id === 'bronze');
+    g.classList.toggle('doux', id !== 'bronze');
+  });
   /* le grand cadre du géant : rendu au nuage une fois le film revenu à sa taille */
   const auNuage = () => { if(film.isConnected) reveCadre.setAttribute('clip-path', 'url(#clip-ecran)'); };
   if(anim) setTimeout(auNuage, 1150); else auNuage();
@@ -4943,8 +4988,9 @@ function applyRemote(){
   const film = reveG.querySelector('.reve-film'), reve = reveCourant;
   changerDeChaine(film, () => {
     if(!film || !film.isConnected || reveCourant !== reve) return;   /* un autre rêve entre-temps */
-    if(reve) transformer(id, true);                                  /* 2 */
-    direTransfo(reve ? TRANSFOS.find(t => t.id === id).texte : PHRASES.flou);   /* 4 */
+    if(!reve){ direPhrase(PHRASES.flou); return; }                   /* journée vide : rien à changer */
+    transformer(id, true);                                           /* 2 */
+    direTransfo(TRANSFOS.find(t => t.id === id).texte);              /* 4 */
   });
 }
 const appui = on => { tcCorps.classList.toggle('appui', on); tcBoutons.classList.toggle('appui', on); };
@@ -4962,12 +5008,6 @@ telecommande.addEventListener('keydown', e => {
 });
 
 /* --- un rêve vient d'être dessiné (ou effacé) --- */
-/* finitBien : « … mais ta chanson était dans ta tête… », dit seul */
-function queueFinitBien(dream){
-  const i = dream.phrase.indexOf('…');
-  const q = i < 0 ? '' : dream.phrase.slice(i).replace(/^…\s*mais\s+/, '');
-  return q.charAt(0).toUpperCase() + q.slice(1);
-}
 function surReve(anim){
   clearTimeout(tc.auto);
   if(reveCourant && tc.transfo && !anim && cleDuReve() === tc.cle){
@@ -4986,7 +5026,7 @@ function surReve(anim){
       tc.auto = setTimeout(() => {
         if(reveCourant !== reve) return;
         transformer(remoteStep(tc.compteur++), anime);
-        direTransfo(queueFinitBien(reve));
+        direTransfo(reve.courte);
       }, anime ? TC_AUTO : 0);
     }
   }

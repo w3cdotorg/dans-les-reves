@@ -13,10 +13,11 @@ function charger(){
   const m = html.match(/\/\* PURE-BEGIN \*\/([\s\S]*?)\/\* PURE-END \*\//);
   assert.ok(m, 'bloc PURE introuvable');
   const ctx = {};
-  vm.runInNewContext(m[1] + ';this.__x = {TRANSFOS, PHRASES, remoteStep: typeof remoteStep === "function" ? remoteStep : null}', ctx);
+  vm.runInNewContext(m[1] + ';this.__x = {TRANSFOS, PHRASES, CARTES, composeDream, phraseCourte, videoPossible,'
+    + ' remoteStep: typeof remoteStep === "function" ? remoteStep : null}', ctx);
   return ctx.__x;
 }
-const { TRANSFOS, PHRASES, remoteStep } = charger();
+const { TRANSFOS, PHRASES, CARTES, composeDream, phraseCourte, videoPossible, remoteStep } = charger();
 const compte = id => html.split(`id="${id}"`).length - 1;
 
 test('TRANSFOS : bronze, lapin, danse, dans cet ordre', () => {
@@ -55,4 +56,50 @@ test('aucune requête YouTube écrite dans la page : l\'iframe est créée sur a
   assert.ok(!/<iframe/i.test(html), 'pas d\'<iframe> dans le balisage');
   assert.ok(html.includes('https://www.youtube-nocookie.com/embed/'), 'la vidéo passe par youtube-nocookie.com');
   assert.ok(!/https?:\/\/(www\.)?youtube\.com\//.test(html), 'jamais youtube.com (seulement youtube-nocookie.com)');
+});
+
+test('la vidéo ne se charge ni hors ligne ni depuis un fichier (file://)', () => {
+  assert.equal(videoPossible(true, 'https:'), true);
+  assert.equal(videoPossible(true, 'http:'), true);
+  assert.equal(videoPossible(false, 'https:'), false);
+  assert.equal(videoPossible(true, 'file:'), false);
+  assert.equal(videoPossible(undefined, 'https:'), true, 'navigator.onLine inconnu : on essaie');
+});
+
+/* une phrase courte propre : rien à remplir, pas de « de le », pas de « mon doudou » */
+function courtePropre(p, ctx){
+  assert.equal(typeof p, 'string', ctx);
+  assert.ok(!/[{}]/.test(p), ctx + ' : reste à remplir → ' + p);
+  assert.ok(!/\b[Dd]e (le|les) /.test(p), ctx + ' : « de le » → ' + p);
+  assert.ok(!/\b(le|la|Le|La) [aeiouyéèêàâîôœ]/.test(p), ctx + ' : élision manquante → ' + p);
+  assert.ok(!/ {2}|undefined|null/.test(p), ctx + ' → ' + p);
+  assert.ok(!/\bmon doudou\b/.test(p), ctx + ' : « mon doudou » → ' + p);
+  assert.ok(p.startsWith('Ton cerveau a '), ctx + ' → ' + p);
+  assert.ok(p.endsWith('alors le film a changé tout seul.'), ctx + ' → ' + p);
+}
+
+test('finitBien, forme courte : « Ton cerveau a mélangé … mais ta chanson était dans ta tête… »', () => {
+  const r = composeDream(['pouce', 'ogre', 'chanson'], { seed: 0, genre: 'garcon' });
+  assert.equal(r.verdict, 'finitBien');
+  assert.equal(r.courte, "Ton cerveau a mélangé le pouce géant avec le mot « ogre »… mais ta chanson était dans ta tête, alors le film a changé tout seul.");
+  assert.equal(composeDream(['pouce', 'ogre', 'copains']).courte, null, 'sans carte apaisante : pas de forme courte');
+});
+
+test('finitBien, forme courte : les trois réconforts et plusieurs journées', () => {
+  const PAR = Object.fromEntries(Array.from(CARTES, c => [c.slug, c]));
+  const attendu = { chanson: 'ta chanson', doudou: 'ton doudou', calin: 'le câlin' };
+  const jours = [['pouce', 'ogre'], ['chien', 'peur'], ['copains', 'dragon'], ['glace', 'orage', 'velo'], ['ogre'], ['maitresse', 'pirate', 'fache']];
+  for(const j of jours) for(const genre of ['garcon', 'fille']){
+    for(const slug of ['chanson', 'doudou']){
+      const r = composeDream([...j, slug], { seed: 1, genre });
+      if(r.verdict !== 'finitBien') continue;
+      courtePropre(r.courte, j.join(',') + '+' + slug);
+    }
+    const r = composeDream(j, { seed: 0, genre });
+    for(const slug of Object.keys(attendu)){
+      const p = phraseCourte({ mode: r.mode, base: r.base, greffe: r.greffe, reconfort: PAR[slug] }, genre);
+      courtePropre(p, j.join(',') + ' / ' + slug);
+      assert.ok(p.includes('mais ' + attendu[slug] + ' était'), p);
+    }
+  }
 });

@@ -1010,3 +1010,26 @@ Contrôles : `node --test test/` 16/16 ; console 0 erreur / 0 avertissement (feu
   - Ouvert en `file://`, YouTube n'a pas de référent et peut refuser la lecture (erreur 153). L'iframe se charge quand même, donc pas de repli « Chante ta chanson ». GitHub Pages et http ne sont pas touchés.
   - En danse, l'ogre garde ses crocs et ses sourcils : il danse, il ne change pas de tête.
   - Chrome n'a pas été piloté (Playwright = Firefox). `allow` y est posé par détection.
+
+### Task 11, tour de correction 1
+- **La chanson ne reste jamais muette.**
+  - Sous la fenêtre 16:9, toujours : « 🎵 Chante avec elle ! » + le titre.
+  - Au même appui, une sonde `fetch(youtube-nocookie.com/favicon.ico, no-cors, no-store, sans cookie)`. Si elle échoue, le lecteur est retiré et la fenêtre dit « Chante ta chanson ! ». Il le fallait : Chrome envoie `load` pour sa page d'erreur.
+  - Prédicat pur `videoPossible(enLigne, protocole)` : hors ligne ou en `file://`, pas d'iframe ni de requête. Testé en node, puisque Playwright n'ouvre pas `file:`.
+- **Greffes adoucies** (lapin, danse) :
+  - dans `gen-reve.py`, les pièces qui font peur sont groupées en `.mechant` : crocs et sourcils de l'ogre ; sourcils, bouche et fumée de « fâché » ; sourcils, bouche et goutte de « peur » ; flamme du dragon ; éclairs de l'orage ; sabre du pirate ;
+  - un visage `.gentil` est ajouté : sourire, joues et sourcils levés pour l'ogre ; sourire et sourcils pour « fâché » ; sourire pour « peur » ;
+  - `transformer` pose `.doux` sur les `<use>` de greffe (sauf bronze, qui les efface). Les variables `--doux-mechant` / `--doux-gentil` traversent le clone.
+- **finitBien automatique** : la forme courte `dream.courte`, nouvelle (`COURTES` + `phraseCourte` dans le bloc PURE, mêmes accords que la phrase du rêve par `finir()`). Exemple : « Ton cerveau a mélangé le pouce géant avec le mot « ogre »… mais ta chanson était dans ta tête, alors le film a changé tout seul. » Le réconfort est au défini (« le câlin »).
+  - `COURTES` est à part de `PHRASES`, dont les gabarits sont figés par `data.test.js`.
+- **Petites corrections** :
+  - phrase-clé à 21 px ;
+  - journée vide + appui : seulement `PHRASES.flou`, sans phrase-clé ;
+  - la cible s'arrête à x 860 ;
+  - `fermerSurFond(dialog, fermer)` sert aux deux dialogs.
+- **Contrôles** :
+  - 52/52 ;
+  - Playwright (Firefox) : chargement sans YouTube ; appui → sonde + iframe + « Chante avec elle » ; `page.route` en `internetdisconnected` → lecteur retiré, chant ; hors ligne → chant, 0 requête ;
+  - lapin et danse : l'ogre sourit, sans crocs ;
+  - console de la page propre ; le fond referme la feuille de réglages.
+  - Captures : `shots/t11f-*.png`.

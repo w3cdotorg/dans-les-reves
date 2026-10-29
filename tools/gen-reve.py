@@ -124,10 +124,13 @@ G['ogre'] = {'tete': [
     F("M-6-19Q-4-24-1-20M2-20Q5-25 7-19", BRUN),
     W(circ(-8, -3, 5.6), 'blanc-oeil', 'jaune', 'reserve'), W(circ(8, -3, 5.6), 'blanc-oeil', 'jaune', 'reserve'),
     N(-7, -2.4, 2.5, 'brun'), N(9, -2.4, 2.5, 'brun'),
-    T("M-16-12L-4-8M4-8L16-12", 'roue', 'bleu', 3.8),
+    ('G', 'mechant', [T("M-16-12L-4-8M4-8L16-12", 'roue', 'bleu', 3.8)], 0, 1),
+    ('G', 'gentil', [F("M-15-11Q-10-16-5-12M5-12Q10-16 15-11", BRUN, 'epais')], 0, 1),
     F("M-1.5 1C-3 5.5 2 6.5 2.5 3", BRUN),
-    W("M-12 8C-7 18 7 18 12 8C6 11-6 11-12 8Z", 'bouche', 'rose', 'brun'),
-    W("M-8 9.5L-6 15L-4 10.5ZM4 10.5L6 15L8 9.5Z", 'blanc-oeil', 'jaune', 'reserve'),
+    ('G', 'mechant', [W("M-12 8C-7 18 7 18 12 8C6 11-6 11-12 8Z", 'bouche', 'rose', 'brun'),
+                      W("M-8 9.5L-6 15L-4 10.5ZM4 10.5L6 15L8 9.5Z", 'blanc-oeil', 'jaune', 'reserve')], 0, 1),
+    ('G', 'gentil', [W(ell(-14, 8, 4.2, 2.8), 'joue', 'rose', 'pastel'), W(ell(14, 8, 4.2, 2.8), 'joue', 'rose', 'pastel'),
+                     F("M-10 9Q0 18 10 9", BRUN, 'epais')], 0, 1),
     N(14, 9, 1.6, 'brun'), N(-15, 12, 1.2, 'brun'),
 ]}
 
@@ -140,11 +143,11 @@ G['pirate'] = {'tete': [
     F("M-21-13L20 5", BRUN),
     W(ell(8, -2, 6.5, 5.5), 'pirate', 'bleu'),
 ], 'corps': [
-    W("M44 32C58 10 60-14 50-38C56-14 54 10 41 30Z", 'gris', 'bleu', 'pastel'),
-    F("M47 26C56 8 57-12 51-32", BLANC),
-    T("M34 28L50 38", 'or', 'jaune', 5),
-    T("M42 33L37 44", 'bois', 'rose', 4.4),
-    N(50, 38, 2.4),
+    ('G', 'mechant', [W("M44 32C58 10 60-14 50-38C56-14 54 10 41 30Z", 'gris', 'bleu', 'pastel'),
+                      F("M47 26C56 8 57-12 51-32", BLANC),
+                      T("M34 28L50 38", 'or', 'jaune', 5),
+                      T("M42 33L37 44", 'bois', 'rose', 4.4),
+                      N(50, 38, 2.4)], 0, 1),
 ]}
 
 G['dragon'] = {'dos': [
@@ -152,8 +155,8 @@ G['dragon'] = {'dos': [
     F("M-30-14L-60-34M-44-12L-68-26M30-14L60-34M44-12L68-26", '--fil-blanc'),
 ], 'tete': [
     W("M-14-18L-12-32L-6-20ZM14-18L12-32L6-20Z", 'piquant', 'jaune', 'orange'),
-    W("M20 4C30-6 42-4 46 2C54-2 60 4 56 10C62 14 56 20 48 16C44 22 32 20 28 12C24 12 20 8 20 4Z", 'flamme', 'jaune', 'reserve'),
-    W("M26 6C32 2 38 4 40 8C44 6 48 10 44 13C40 16 34 15 32 12C29 12 26 9 26 6Z", 'piquant', 'jaune', 'orange'),
+    ('G', 'mechant', [W("M20 4C30-6 42-4 46 2C54-2 60 4 56 10C62 14 56 20 48 16C44 22 32 20 28 12C24 12 20 8 20 4Z", 'flamme', 'jaune', 'reserve'),
+                      W("M26 6C32 2 38 4 40 8C44 6 48 10 44 13C40 16 34 15 32 12C29 12 26 9 26 6Z", 'piquant', 'jaune', 'orange')], 0, 1),
 ]}
 
 G['glace'] = {'dos': [
@@ -190,11 +193,11 @@ G['anniversaire'] = {'tete': [
 
 G['orage'] = {'tete': [
     W(NUAGE, 'nuage', 'bleu', 'pastel'),
-    W("M3-33L-6-18H0L-5-4L9-22H3L7-33Z", 'eclair', 'jaune', 'reserve'),
+    ('G', 'mechant', [W("M3-33L-6-18H0L-5-4L9-22H3L7-33Z", 'eclair', 'jaune', 'reserve')], 0, 1),
     F("M-18-26L-21-21M18-26L15-21", '--fil-vague'),
 ], 'corps': [
-    W("M-52-12L-60 4H-54L-60 18L-46-2H-52L-48-12Z", 'eclair', 'jaune', 'reserve'),
-    W("M56 4L48 20H54L48 34L62 14H56L60 4Z", 'eclair', 'jaune', 'reserve'),
+    ('G', 'mechant', [W("M-52-12L-60 4H-54L-60 18L-46-2H-52L-48-12Z", 'eclair', 'jaune', 'reserve'),
+                      W("M56 4L48 20H54L48 34L62 14H56L60 4Z", 'eclair', 'jaune', 'reserve')], 0, 1),
 ]}
 
 G['pouce'] = {'tete': [
@@ -218,17 +221,19 @@ G['ri'] = {'tete': [
 G['peur'] = {'tete': [
     W(circ(-9, -3, 8.4), 'blanc-oeil', 'jaune', 'reserve'), W(circ(9, -3, 8.4), 'blanc-oeil', 'jaune', 'reserve'),
     N(-9, -2, 2.3, 'brun'), N(9, -2, 2.3, 'brun'),
-    ('F', "M-17-16Q-10-23-3-16M3-16Q10-23 17-16", BRUN, 'epais'),
-    W(ell(0, 12, 4, 5.4), 'roue', 'bleu'),
-    W(goutte(22, -12, 2.8), 'eau', 'bleu', 'reserve'),
+    ('G', 'mechant', [('F', "M-17-16Q-10-23-3-16M3-16Q10-23 17-16", BRUN, 'epais'),
+                      W(ell(0, 12, 4, 5.4), 'roue', 'bleu'),
+                      W(goutte(22, -12, 2.8), 'eau', 'bleu', 'reserve')], 0, 1),
+    ('G', 'gentil', [F("M-7 9Q0 16 7 9", BRUN, 'epais')], 0, 1),
 ]}
 
 G['fache'] = {'tete': [
     N(-8.5, -1, 2.6, 'brun'), N(8.5, -1, 2.6, 'brun'),
-    ('F', "M-8 13Q0 6 8 13", BRUN, 'epais'),
-    T("M-17-13L-3-6M17-13L3-6", 'roue', 'bleu', 4.6),
-    W(circ(-25, -26, 6) + circ(-31, -20, 4.2), 'nuage', 'bleu', 'pastel'),
-    W(circ(25, -26, 6) + circ(31, -20, 4.2), 'nuage', 'bleu', 'pastel'),
+    ('G', 'mechant', [('F', "M-8 13Q0 6 8 13", BRUN, 'epais'),
+                      T("M-17-13L-3-6M17-13L3-6", 'roue', 'bleu', 4.6),
+                      W(circ(-25, -26, 6) + circ(-31, -20, 4.2), 'nuage', 'bleu', 'pastel'),
+                      W(circ(25, -26, 6) + circ(31, -20, 4.2), 'nuage', 'bleu', 'pastel')], 0, 1),
+    ('G', 'gentil', [F("M-14-9Q-9-14-4-10M4-10Q9-14 14-9", BRUN, 'epais'), F("M-8 8Q0 15 8 8", BRUN, 'epais')], 0, 1),
 ]}
 
 G['calin'] = {'corps': [
@@ -362,6 +367,9 @@ G['chiens-pirates'] = {'corps': [
     ('G', 'danse-chien d2', chien_pirate(-1, True), 88, 1.1),
 ]}
 
+# Les pièces qui font peur portent .mechant, et un visage gentil (sourire, sourcils levés)
+# .gentil, caché : sur un film changé par la télécommande (lapin, danse), la classe .doux du
+# <use> pose les variables --doux-mechant:0 / --doux-gentil:1 (elles traversent le clone).
 def greffe_partie(els):
     L = []
     for e in els:
@@ -552,7 +560,7 @@ def bloc_telecommande():
           '      </g>',
           '    </g>',
           '  </g>',
-          '  <rect class="tc-cible" x="758" y="268" width="104" height="196" rx="18"/>',
+          '  <rect class="tc-cible" x="756" y="268" width="104" height="196" rx="18"/>',
           '</g>',
           '<!-- TELECOMMANDE-END -->']
     return '\n'.join(I + l for l in L) + '\n'
