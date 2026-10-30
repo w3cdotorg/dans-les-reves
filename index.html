@@ -242,6 +242,37 @@ body{
    le SVG et ne se mêlent pas au fond de la page. */
 svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 
+/* ===== 6 bis. La loupe (Task 14) =====
+   #lens : une lentille ronde de 160 px posée dans .cadre (le cadre la rogne au bord de
+   la scène). Elle contient un <svg> dont le <use href="#scene-inner"> reprend TOUTE la
+   scène : thème, allègement, genre et pause lui arrivent par les variables de <html>
+   (RÈGLE DU <use>, section 7), la laine y est donc complète (filtre --w-filter).
+   pointer-events:none : jamais un clic de pris aux zones. Le rebord cousu est un
+   ::after (la lentille garde ses 160 px de dessin : grossissement exact). */
+#lens{
+  position:absolute;left:0;top:0;width:160px;height:160px;z-index:6;display:none;
+  border-radius:50%;overflow:hidden;pointer-events:none;
+  background:var(--ui-fond);
+  box-shadow:0 10px 26px rgba(43,42,51,.34), 0 2px 6px rgba(43,42,51,.25);
+}
+#lens.on{display:block;animation:lens-pop .38s var(--ui-ressort) both}
+#lens svg{display:block;width:160px;height:160px}
+#lens::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  border:6px solid var(--ui-sable);
+  box-shadow:inset 0 0 0 1.5px rgba(43,42,51,.18), inset 0 0 14px rgba(43,42,51,.28);
+  background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.75) 50%, transparent 62%) -160px 0 / 160px 100% no-repeat;
+}
+#lens::before{   /* le point de couture : une fine ligne pointillée sur le rebord */
+  content:"";position:absolute;inset:6px;border-radius:50%;z-index:1;
+  border:1.5px dashed color-mix(in srgb, var(--ui-gris) 70%, var(--ui-sable));
+}
+#lens.on::after{animation:lens-reflet .7s ease-out .25s 1 both}
+#lens:focus-visible{outline:3px solid var(--ui-indigo);outline-offset:3px}
+@keyframes lens-pop{from{scale:.6;opacity:0}to{scale:1;opacity:1}}
+@keyframes lens-reflet{to{background-position:160px 0}}
+.cadre.lens-on{touch-action:none}   /* au doigt : la loupe se déplace, la page ne défile pas */
+
 /* Le rail : glissière de 52 px collée au bord droit de la scène (maquette,
    right:-6px, ramené à -20px : le rail ne couvre que 32 px de la scène),
    dégradé soleil → coucher → nuit. Le vrai contrôle est
@@ -342,7 +373,8 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    (#scene-inner>g et non #scene>g : tous les groupes vivent dans #scene-inner,
    pour que la loupe clone la scène d'un seul <use>.) Ces groupes ne sont jamais
    repris par <use> : le sélecteur d'ancêtre est permis ici. */
-[data-theme=riso] #scene-inner>g{mix-blend-mode:multiply}
+#scene-inner>g{mix-blend-mode:var(--grp-blend,normal)}
+[data-theme=riso]{--grp-blend:multiply}   /* variable : le clone <use> de la loupe la reçoit de <html> */
 
 /* Contours brodés .fil : fil blanc au point de tige par défaut ; --f change le fil. */
 .fil{fill:none;stroke:var(--fil-encre, var(--f, var(--fil-blanc)));stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;
@@ -357,12 +389,11 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 /* les cheveux longs n'existent que pour la fille */
 #p-cheveux-long{display:var(--cheveux-long, none)}
 /* régions profondes : en transparence, avec un bord cousu plus marqué */
-.profond{opacity:.85}
 .fil.couture{stroke-width:1.7;stroke-dasharray:var(--fil-dash-couture)}
 /* petits points sans laine : trous du bouton, conduit de l'oreille, œil du cheval de mer */
 .trou{fill:var(--riso-papier, var(--skin-shade))}
 #p-oeil ~ .trou{fill:var(--riso-papier, var(--skin))}
-.oeil-hippo{fill:var(--fil-brun)}
+.oeil-hippo{fill:var(--oeil-hippo, var(--fil-brun))}
 /* l'oreille, à la surface, laisse voir le cerveau dessous ; la joue est un voile de laine rose */
 /* riso : en réserve (en feutrine, normal de toute façon). Dedans, l'oreille laisse voir le
    cerveau (.72) ; Dehors, son <use> pose --oreille-opacite:1 (variable : elle traverse le clone). */
@@ -382,8 +413,9 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    tard (.triste, .baille) ne touche à aucun décalage d'encre riso. */
 #p-bouche{--f:var(--fil-bouche);stroke-width:1.9;transform-box:fill-box;transform-origin:center}
 .fil.bord-bouton{stroke:var(--riso-papier, var(--fil-blanc));stroke-width:1;opacity:.9}
-[data-theme=riso] .oeil-hippo{fill:var(--ink-bleu)}
-[data-theme=riso] #p-liquide{opacity:.35}
+[data-theme=riso]{--oeil-hippo:var(--ink-bleu)}
+#p-liquide{opacity:var(--liquide-op,1)}
+[data-theme=riso]{--liquide-op:.35}
 /* riso : les couches de rose se multiplieraient jusqu'au rouge sang et noieraient
    les régions profondes. Le cortex n'est qu'un voile (les sillons entre lobes
    restent clairs), et les régions profondes + l'oreille sont imprimées en
@@ -392,9 +424,11 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    brique. Le cerveau entier (cortex, lobes, cervelet) est donc imprimé en réserve
    comme les régions profondes : rose franc, gai. Le cortex, rose clair, se lit
    dans les sillons entre les lobes. */
-[data-theme=riso] #p-cortex{fill:color-mix(in srgb, var(--ink-rose) 45%, var(--papier));mix-blend-mode:normal}
-[data-theme=riso] :is(#p-frontal,#p-parietal,#p-occipital,#p-temporal,#p-cervelet){mix-blend-mode:normal}
-[data-theme=riso] .profond{opacity:.92;mix-blend-mode:normal}
+#p-cortex{fill:var(--cortex-fill, var(--encre, var(--p)));mix-blend-mode:normal}
+[data-theme=riso]{--cortex-fill:color-mix(in srgb, var(--ink-rose) 45%, var(--papier))}
+:is(#p-frontal,#p-parietal,#p-occipital,#p-temporal,#p-cervelet){mix-blend-mode:normal}
+[data-theme=riso]{--profond-op:.92}
+.profond{opacity:var(--profond-op,.85);mix-blend-mode:normal}
 /* le visage (états pilotés par le temps, Task 7 : variables sur :root, classes sur
    l'élément, jamais de sélecteur d'ancêtre — RÈGLE DU <use>, section 7) :
    - paupière et œil fermé brodé : --paupiere-op (0 le jour, 1 du soir à la fin de la nuit) ;
@@ -434,8 +468,8 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 #p-sol{fill:color-mix(in srgb, var(--sol-base, var(--p-sol)), var(--nuit-3) calc(var(--nuit,0) * var(--sol-nuit, 40%)))}
 .fil.graffiti{--f:var(--fil-rouge);stroke-width:2.2}
 .fil.etoile{stroke-width:1.1}
-.oeil-lune,.nez-doudou{fill:var(--fil-brun)}
-[data-theme=riso] :is(.oeil-lune,.nez-doudou){fill:var(--ink-bleu)}
+.oeil-lune,.nez-doudou{fill:var(--oeil-lune, var(--fil-brun))}
+[data-theme=riso]{--oeil-lune:var(--ink-bleu)}
 #fil-lune-clin{opacity:0}          /* le clin d'œil de la lune le montrera un instant */
 /* la lueur de la lampe : son opacité suit data-nuit (Task 7) ; elle doit rester CLAIRE
    sur le lin assombri. Ordre des groupes oblige (la nuit est dans la toile, dessous),
@@ -446,22 +480,23 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    grandes surfaces (sol, vitres, expo, couverture) ne soient pas sombres ;
    .reserve = imprimé sans multiply (la lune et le soleil sur leur vitre) ;
    l'enfant est un groupe isolé : sa peau ne se multiplie pas avec le sol. */
-[data-theme=riso] .w.pale{fill:color-mix(in srgb, var(--encre) 35%, var(--papier))}
-[data-theme=riso] .w.teinte{fill:color-mix(in srgb, var(--encre) 60%, var(--papier))}
+.w.pale[data-ink]{fill:color-mix(in srgb, var(--encre, var(--p)) var(--pale-mix,100%), var(--papier))}
+.w.teinte[data-ink]{fill:color-mix(in srgb, var(--encre, var(--p)) var(--teinte-mix,100%), var(--papier))}
+[data-theme=riso]{--pale-mix:35%;--teinte-mix:60%}
 .w.reserve{mix-blend-mode:normal}
 [data-theme=riso]{--sol-base:color-mix(in srgb, color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-bleu)) 62%, var(--papier));--sol-nuit:20%}
-[data-theme=riso] #g-enfant-dehors{isolation:isolate}
+#g-enfant-dehors{isolation:var(--enfant-iso, auto)}
+[data-theme=riso]{--enfant-iso:isolate}
 
 /* La toile du SVG : lin + grain en feutrine, papier + grain en riso. */
-.toile-lin{fill:url(#linen)}
+.toile-lin{fill:var(--toile-lin, url(#linen))}
 /* Le grain ne doit PAS masquer la trame : le rect est blanc (neutre en
    multiply), le filtre n'y dépose que le bruit sombre, et le rect se multiplie
    avec le lin dessous. Résultat : lin intact + grain, comme le fond du body.
    (Un aplat --toile à .9 d'opacité, comme dans la maquette v10, cachait la
    trame à 90 %.) Même mécanique en riso, sur le papier. */
-.toile-grain{fill:#fff;filter:url(#linenGrain);mix-blend-mode:multiply}
-[data-theme=riso] .toile-lin{fill:var(--papier)}
-[data-theme=riso] .toile-grain{filter:url(#paperGrain)}
+.toile-grain{fill:#fff;filter:var(--toile-grain, url(#linenGrain));mix-blend-mode:multiply}
+[data-theme=riso]{--toile-lin:var(--papier);--toile-grain:url(#paperGrain)}
 /* La nuit tombe sur la toile (Task 7) : un aplat uniforme --nuit-3 multiplié, la trame
    reste visible dessous. --nuit (0..1) vient de la table du temps ; --nuit-max plafonne
    l'assombrissement pour garder la trame et les contrastes (NOTES.md, Task 7). En riso,
@@ -485,7 +520,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 /* riso : la vue n'est pas multipliée avec les vues du dessous (elle les cacherait mal) ;
    ses pièces se multiplient entre elles, sur la sous-couche de papier. (Seule règle à
    sélecteur d'ancêtre : elle vise le groupe lui-même, jamais cloné seul.) */
-[data-theme=riso] #scene-inner>#g-pres{mix-blend-mode:normal}   /* plus fort que #scene-inner>g */
+#scene-inner>#g-pres{mix-blend-mode:normal}   /* plus fort que #scene-inner>g ; normal aussi en feutrine (inchangé) */
 [data-theme=riso]{
   --pres-bande:color-mix(in srgb, var(--ink-bleu) 30%, var(--papier));
   --pres-bande-op:.8; --pres-bande-blend:normal;   /* multipliée sur le rose, la bande virait au mauve gris */
@@ -707,7 +742,7 @@ symbol{overflow:visible}
 
 /* La boîte : riso, le groupe ne se multiplie pas avec la vue dessous (le bac est
    opaque) ; sa sous-couche de papier bouche les trous du grain #riso. */
-[data-theme=riso] #scene-inner>#g-boite{mix-blend-mode:normal}
+#scene-inner>#g-boite{mix-blend-mode:normal}
 .sous-boite{fill:var(--riso-papier, none)}
 [data-theme=riso]{--boite-encre:color-mix(in srgb, var(--ink-rose) 45%, var(--papier))}
 #p-boite{--encre:var(--boite-encre)}
@@ -742,10 +777,11 @@ symbol{overflow:visible}
 #g-cortex-cartes{pointer-events:none}
 .fil-amygdale{stroke-width:3;--fil-encre:var(--ink, var(--c))}
 .fil-amygdale.c3{--c:var(--fil-rouge)} .fil-amygdale.c2{--c:var(--fil-orange)}
-.fil-amygdale.c1{--c:var(--fil-rose-doux)} .fil-amygdale.cm2{--c:var(--fil-bleu-doux)}
+.fil-amygdale.c1{--c:var(--fil-rose-doux)} .fil-amygdale.cm2{--c:var(--fil-bleu-doux);opacity:var(--amy-cm2-op,1)}
 /* riso : le cortex est imprimé en rose, un fil rose y disparaîtrait : peur = bleu, colère = jaune, joie = papier (réserve), apaisant = bleu léger */
-[data-theme=riso] .fil-amygdale.c3{--ink:var(--ink-bleu)} [data-theme=riso] .fil-amygdale.c2{--ink:var(--ink-jaune)}
-[data-theme=riso] .fil-amygdale.c1{--ink:var(--papier)} [data-theme=riso] .fil-amygdale.cm2{--ink:var(--ink-bleu);opacity:.5}
+.fil-amygdale.c3{--ink:var(--amy-c3)} .fil-amygdale.c2{--ink:var(--amy-c2)}
+.fil-amygdale.c1{--ink:var(--amy-c1)} .fil-amygdale.cm2{--ink:var(--amy-cm2)}
+[data-theme=riso]{--amy-c3:var(--ink-bleu);--amy-c2:var(--ink-jaune);--amy-c1:var(--papier);--amy-cm2:var(--ink-bleu);--amy-cm2-op:.5}
 .hippo-carte{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
 /* la bulle de la boîte : cachée tant qu'elle ne parle pas */
 #bulle-boite{opacity:0;visibility:hidden;pointer-events:none;transform-box:fill-box;transform-origin:50% 100%;
@@ -776,7 +812,7 @@ body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ec
 
 /* le nuage : il n'est pas assombri par la nuit (les pièces sont en normal sur la toile) ;
    en riso, le groupe ne se multiplie pas avec la toile assombrie, sur une sous-couche de papier */
-[data-theme=riso] #scene-inner>#g-ecran{mix-blend-mode:normal}
+#scene-inner>#g-ecran{mix-blend-mode:normal}
 .sous-ecran{fill:var(--riso-papier, none)}
 #p-ecran{--encre:var(--ecran-encre);transition:fill .8s ease}
 .fil.ecran-couture{--f:var(--fil-sable);stroke-width:1.6}
@@ -850,7 +886,7 @@ body:is([data-verdict=beau],[data-verdict=rigolo],[data-verdict=finitBien]){--ec
    (RÈGLE DU <use> : la loupe reprendra la scène) : .pulse (cauchemar pas encore changé)
    sur .tc-pulse et .tc-halo, .appui sur .tc-corps et .tc-boutons. La cible transparente
    (.tc-cible, non filtrée) couvre la pièce et son étiquette. */
-[data-theme=riso] #scene-inner>#g-ui{mix-blend-mode:normal}   /* sur la toile assombrie : pas de multiply */
+#scene-inner>#g-ui{mix-blend-mode:normal}   /* sur la toile assombrie : pas de multiply */
 .sous-tc{fill:var(--riso-papier, none)}
 body[data-vue="2"]{--tc-vis:hidden}
 #telecommande{cursor:pointer;outline:none;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease, visibility 0s .35s}
@@ -2788,6 +2824,8 @@ html:not([data-pret]) *{transition:none!important}
           </g>
         </g>
       </svg>
+      <!-- La loupe (Task 14) : tabindex et aria-label posés par le script quand elle est allumée -->
+      <div id="lens" role="img" aria-label="Loupe : la scène grossie"><svg viewBox="0 0 66.7 66.7" aria-hidden="true" focusable="false"><use href="#scene-inner"/></svg></div>
       <!-- ce que disent les bulles de la boîte (« Oups, trop de choses ! »…), pour les lecteurs d'écran -->
       <p id="boite-annonce" class="sr-only" aria-live="polite"></p>
 
@@ -5378,6 +5416,96 @@ zonesBtn.addEventListener('click', () => { if(ZS) montrerZones(!scene.classList.
     requestAnimationFrame(() => majZonesDecor(slugs));
     setTimeout(() => majZonesDecor(slugs), 900);
   });
+})();
+
+/* ===== La loupe (Task 14) =====
+   #lens clone la scène par <use href="#scene-inner">. Grossissement ×2,4 RELATIF à la scène
+   affichée : la scène fait L px de large pour 900 unités (échelle = L/900 px par unité) ;
+   la lentille fait 160 px ; la fenêtre du viewBox est donc un carré de 160 / (échelle × 2,4)
+   unités (66,7 unités quand la scène fait 900 px, 184 unités à 420 px de large).
+   Suivi cadencé par rAF (un seul calcul par image, le dernier événement gagne).
+   loupe-active sur <html> : les animations d'ambiance se figent (variables --pres-play et
+   --amb-play, lues par animation-play-state, clone compris). Échap l'éteint. */
+(function(){
+  const btn = document.getElementById('loupeBtn'), lens = document.getElementById('lens');
+  const cadre = lens.parentElement, scene = document.getElementById('scene');
+  const lensSvg = lens.querySelector('svg');
+  const LENS_PX = 160, ZOOM = 2.4, PAS = 20, DECALAGE_DOIGT = 96;
+  const lim = (v, a, b) => Math.max(a, Math.min(b, v));
+  let on = false, evt = null, raf = 0, visible = false;
+  let pos = {x: 0, y: 0, doigt: false};   /* point visé, en px dans .cadre */
+
+  function dessiner(){
+    const r = scene.getBoundingClientRect(), c = cadre.getBoundingClientRect();
+    if(!r.width) return;
+    const echelle = r.width / 900;                             /* px écran par unité de viewBox */
+    const cote = LENS_PX / (echelle * ZOOM);                    /* côté de la fenêtre, en unités */
+    const x = lim(pos.x, 0, r.width), y = lim(pos.y, 0, r.height);
+    const vx = lim(x / echelle - cote / 2, 0, 900 - cote), vy = lim(y / echelle - cote / 2, 0, 560 - cote);
+    lensSvg.setAttribute('viewBox', vx.toFixed(2) + ' ' + vy.toFixed(2) + ' ' + cote.toFixed(2) + ' ' + cote.toFixed(2));
+    const hy = pos.doigt ? DECALAGE_DOIGT : 0;                  /* au doigt, la lentille se tient au-dessus */
+    const lx = lim(x - LENS_PX / 2, 0, c.width - LENS_PX), ly = lim(y - hy - LENS_PX / 2, 0, c.height - LENS_PX);
+    lens.style.transform = 'translate(' + lx.toFixed(1) + 'px,' + ly.toFixed(1) + 'px)';
+  }
+  function montrer(oui){
+    if(oui === visible) return;
+    visible = oui; lens.classList.toggle('on', oui);
+  }
+  function planifier(e){
+    if(!on) return;
+    evt = e;
+    if(raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      if(!on || !evt) return;
+      const c = cadre.getBoundingClientRect();
+      pos = {x: evt.clientX - c.left, y: evt.clientY - c.top, doigt: evt.pointerType === 'touch'};
+      evt = null;
+      montrer(true); dessiner();
+    });
+  }
+  function regler(oui, depuisClavier){
+    on = oui;
+    document.documentElement.classList.toggle('loupe-active', oui);
+    cadre.classList.toggle('lens-on', oui);
+    btn.setAttribute('aria-pressed', oui ? 'true' : 'false');
+    if(oui){
+      lens.tabIndex = 0;
+      const c = cadre.getBoundingClientRect();
+      pos = {x: c.width / 2, y: c.height / 2, doigt: false};   /* elle apparaît au milieu, puis suit */
+      montrer(true); dessiner();
+      if(depuisClavier) lens.focus({preventScroll: true});
+    } else {
+      const avait = document.activeElement === lens;
+      montrer(false); lens.removeAttribute('tabindex'); evt = null;
+      if(avait) btn.focus({preventScroll: true});
+    }
+  }
+  btn.setAttribute('aria-pressed', 'false');
+  btn.addEventListener('click', e => regler(!on, e.detail === 0));
+  cadre.addEventListener('pointerdown', planifier);
+  cadre.addEventListener('pointermove', planifier);
+  cadre.addEventListener('pointerleave', e => {
+    if(!on || document.activeElement === lens) return;
+    evt = null; montrer(false);
+  });
+  cadre.addEventListener('pointerup', e => { if(on && e.pointerType === 'touch'){ evt = null; montrer(false); } });
+  cadre.addEventListener('pointercancel', () => { if(on){ evt = null; montrer(false); } });
+  /* clavier : seulement quand la lentille a le focus (les flèches du reste de la page restent libres) */
+  lens.addEventListener('keydown', e => {
+    const d = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1]}[e.key];
+    if(!d || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    pos = {x: pos.x + d[0] * PAS, y: pos.y + d[1] * PAS, doigt: false};
+    const r = scene.getBoundingClientRect();
+    pos.x = lim(pos.x, 0, r.width); pos.y = lim(pos.y, 0, r.height);
+    montrer(true); dessiner();
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Escape' || !on || document.querySelector('dialog[open]') || infoBox.classList.contains('open')) return;
+    e.preventDefault(); regler(false);
+  }, true);   /* capture : lu AVANT que le gestionnaire global ferme le volet (un Échap = une chose) */
+  window.addEventListener('resize', () => { if(on && visible) dessiner(); });
 })();
 </script>
 </body>
