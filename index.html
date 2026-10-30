@@ -220,6 +220,16 @@ body{
 .bouton.corail{--b:var(--ui-corail);color:#fff}
 .bouton.indigo{--b:var(--ui-indigo);color:#fff}
 .bouton.vert{--b:var(--ui-vert);color:#fff}
+/* le message « Version allégée activée » (section 4 du script), en bas, au-dessus de tout */
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:20;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.4em .9em;
+  width:max-content;max-width:calc(100vw - 32px);padding:.65em 1.1em;border-radius:18px;
+  background:var(--ui-encre);color:#fff;font-family:var(--font-display);font-weight:600;font-size:1rem;
+  box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.toast[hidden]{display:none}
+.toast-lien{border:0;background:none;color:#fff;font:inherit;text-decoration:underline;text-underline-offset:3px;
+  cursor:pointer;padding:.35em .2em;min-height:var(--ui-cible)}
+.toast-lien:focus-visible{outline:3px solid #fff;outline-offset:2px;border-radius:8px}
 /* blanc sur corail (3,01:1) et sur vert (3,02:1) : seul le seuil « grand texte » de WCAG
    (3:1) s'applique, soit ≥ 18,66 px en gras. Graisse 700 ici, et 1.17rem (18,7 px) au moins
    partout où ces boutons sont posés (dock, fiche des jeux), téléphone compris (Task 18) */
@@ -3079,6 +3089,12 @@ html:not([data-pret]) *{transition:none!important}
       <button type="button" id="journee" class="bouton sable"><span class="ic" aria-hidden="true">🌅</span>Nouvelle journée</button>
     </div>
   </nav>
+  <!-- Version allégée activée pendant la visite parce que les images des gestes étaient trop
+       lentes (section 4 du script) : un petit message, et le chemin pour revenir à la laine -->
+  <div id="toastLite" class="toast" role="status" hidden>
+    <span>🪶 Version allégée activée (plus fluide)</span>
+    <button type="button" id="toastLiteReglages" class="toast-lien">Revenir à la laine (réglages)</button>
+  </div>
 
 </div>
 
@@ -3883,28 +3899,35 @@ function setLite(on){
 liteBox.addEventListener('change', () => {
   setLite(liteBox.checked);
   prefs.set('lite', liteBox.checked);
+  liteAuto = false;   /* un choix explicite : plus de bascule automatique (section 4) */
 });
 
-/* ===== 4. Détection automatique de la version allégée =====
-   Ordre de priorité : ?lite=1|0 dans l'URL, puis reves.lite enregistré
-   (true → allégé, false → jamais d'allègement automatique), puis détection :
-   mouvement réduit demandé, OU premier rendu complet trop lent.
-   « Premier rendu complet » : le 1er requestAnimationFrame tombe AVANT la
-   première peinture ; le 2e tombe après. On mesure performance.now() entre
-   l'exécution de ce script (fin du <body>, rien n'est encore peint) et ce 2e
-   rappel : c'est le coût de la mise en page + peinture des filtres de laine.
-   ⚠ Pas performance.now() brut (temps depuis le début de la navigation) : en
-   Chrome headless à froid, le script ne s'exécute qu'à ~140 ms alors que la
-   peinture elle-même coûte ~10 ms ; la valeur brute mesurait le démarrage du
-   navigateur et allégeait toutes les captures. Au-delà de LITE_SEUIL_MS de
-   rendu, la machine peine : on allège.
-   ⚠ Onglet ouvert en arrière-plan : les rAF y sont suspendus, le laps
-   compterait tout le temps passé caché. On ne mesure donc que page visible ;
-   si elle se cache pendant la mesure, on n'en conclut rien et on remesure au
-   retour au premier plan (mesure alors plus courte que le premier rendu :
-   au pire on n'allège pas, jamais d'allègement à tort). */
-const LITE_SEUIL_MS = 120;
+/* ===== 4. Détection automatique de la version allégée (refaite : Performance, 30 octobre 2026) =====
+   Ordre de priorité : ?lite=1|0 dans l'URL, puis reves.lite enregistré (true → allégé,
+   false → jamais d'allègement automatique), puis le mouvement réduit, puis la mesure.
+   La mesure : les ÉCARTS entre deux requestAnimationFrame, c'est-à-dire le vrai temps d'une
+   image, carte graphique comprise. (L'ancienne mesure, de l'exécution du script au 2e rAF,
+   ne voyait que le fil principal : ≈ 32 ms sur une machine dont les images prenaient 82 à
+   165 ms au repos, la rastérisation des filtres de laine se faisant ensuite dans le
+   processus GPU ; elle n'allégeait presque jamais, et au hasard.)
+   - Au repos, au chargement : médiane des écarts pendant ≈ 1,5 s (les 300 premières ms
+     ignorées : premier rendu, polices) ; au-delà de LITE_REPOS_MS (40 ms, moins de 25 images
+     par seconde), on allège, sans rien dire (comme avant).
+   - Pendant les gestes (html.interaction, section 5 : choix de carte, glissés, récompenses) :
+     les écarts des images des gestes sont cumulés sur une fenêtre glissante de 2 s de gestes ;
+     si leur médiane dépasse LITE_GESTE_MS (60 ms, moins de 17 images par seconde), on allège
+     et un petit message le dit (« Version allégée activée (plus fluide) »), avec un lien vers
+     la feuille de réglages, où la case « Version allégée » permet de revenir à la laine.
+   Une seule bascule par visite, jamais de retour automatique (pas de va-et-vient) ; rien n'est
+   mémorisé (la case cochée ou décochée, elle, est un choix explicite, mémorisé, et arrête
+   toute bascule automatique). Onglet caché : les rAF y sont suspendus, un écart de plus d'une
+   seconde est ignoré et la mesure du repos repart au retour. */
+const LITE_REPOS_MS = 40;
+const LITE_GESTE_MS = 60;
+const LITE_FENETRE_MS = 2000;
 const REDUIT = matchMedia('(prefers-reduced-motion: reduce)');
+let liteAuto = false;   /* une bascule automatique est encore permise pendant cette visite */
+const mediane = a => { const t = [...a].sort((x, y) => x - y); return t[Math.floor((t.length - 1) / 2)]; };
 
 (function initLite(){
   const viaUrl = Q.get('lite');
@@ -3913,7 +3936,8 @@ const REDUIT = matchMedia('(prefers-reduced-motion: reduce)');
   if(choix === true){ setLite(true); return; }
   if(choix === false) return;
   if(REDUIT.matches){ setLite(true); return; }
-  mesurerRendu();
+  liteAuto = true;
+  mesurerRepos();
 })();
 /* le mouvement réduit demandé PENDANT la visite (réglage du système) allège aussi, sauf choix
    explicite (URL, case de la feuille) ; on ne « désallège » jamais tout seul (Task 18) */
@@ -3921,21 +3945,68 @@ REDUIT.addEventListener('change', () => {
   if(REDUIT.matches && Q.get('lite') === null && prefs.get('lite', null) === null) setLite(true);
 });
 
-function mesurerRendu(){
+function basculerLite(avecMessage){
+  if(!liteAuto) return;
+  liteAuto = false;
+  setLite(true);
+  if(avecMessage) annoncerLite();
+}
+function mesurerRepos(){
   if(document.visibilityState !== 'visible'){
-    document.addEventListener('visibilitychange', mesurerRendu, { once: true });
+    document.addEventListener('visibilitychange', mesurerRepos, { once: true });
     return;
   }
-  let interrompu = false;
-  const surChangement = () => { interrompu = true; };
-  document.addEventListener('visibilitychange', surChangement, { once: true });
-  const t0 = performance.now();
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    document.removeEventListener('visibilitychange', surChangement);
-    if(interrompu){ mesurerRendu(); return; }
-    if(performance.now() - t0 > LITE_SEUIL_MS) setLite(true);
-  }));
+  let t0 = 0, avant = 0;
+  const ecarts = [];
+  const image = now => {
+    if(!liteAuto) return;
+    if(!t0) t0 = now;
+    if(avant && now - avant > 1000){   /* onglet caché entre-temps : on recommence */
+      t0 = now; ecarts.length = 0;
+    }else if(avant && now - t0 > 300){
+      ecarts.push(now - avant);
+    }
+    avant = now;
+    if(now - t0 < 1800){ requestAnimationFrame(image); return; }
+    if(ecarts.length && mediane(ecarts) > LITE_REPOS_MS) basculerLite(false);
+  };
+  requestAnimationFrame(image);
 }
+/* appelée par majOccupation (section 5) quand le premier geste commence (on) ou que le
+   dernier finit : les images ne sont comptées que pendant les gestes */
+const gestes = { raf: 0, avant: 0, ecarts: [], cumul: 0 };
+function suivreGestes(on){
+  cancelAnimationFrame(gestes.raf);
+  gestes.avant = 0;
+  if(!on || !liteAuto) return;
+  const image = now => {
+    if(!liteAuto) return;
+    const d = gestes.avant ? now - gestes.avant : 0;
+    if(d > 0 && d < 1000){
+      gestes.ecarts.push(d);
+      gestes.cumul += d;
+      while(gestes.cumul - gestes.ecarts[0] >= LITE_FENETRE_MS) gestes.cumul -= gestes.ecarts.shift();
+      if(gestes.cumul >= LITE_FENETRE_MS && mediane(gestes.ecarts) > LITE_GESTE_MS){ basculerLite(true); return; }
+    }
+    gestes.avant = now;
+    gestes.raf = requestAnimationFrame(image);
+  };
+  gestes.raf = requestAnimationFrame(image);
+}
+/* le petit message (8 s, ou jusqu'au lien) ; le lien ouvre la feuille de réglages sur la case */
+const toastLite = document.getElementById('toastLite');
+let toastMinuteur = 0;
+function annoncerLite(){
+  toastLite.hidden = false;
+  clearTimeout(toastMinuteur);
+  toastMinuteur = setTimeout(() => { toastLite.hidden = true; }, 8000);
+}
+document.getElementById('toastLiteReglages').addEventListener('click', () => {
+  clearTimeout(toastMinuteur);
+  toastLite.hidden = true;
+  ouvrirFeuille();
+  liteBox.focus();
+});
 
 /* ===== 5. Vue et temps : l'habillage suit les deux états =====
    #cut (0..200 = vue × 100) et #time (0..400 = moment × 100) restent les
@@ -3964,7 +4035,13 @@ const borne = (v, max) => Math.min(max, Math.max(0, Number(v) || 0));
    qui recommence avant d'avoir fini, ne fausse pas le compte. Sans effet en mouvement
    réduit (il n'y a déjà plus d'animation). */
 const occupations = new Map();   /* clé → minuteur de fin (0 : pas de fin prévue) */
-function majOccupation(){ root.classList.toggle('interaction', occupations.size > 0); }
+function majOccupation(){
+  const avant = root.classList.contains('interaction');
+  const maintenant = occupations.size > 0;
+  if(avant === maintenant) return;
+  root.classList.toggle('interaction', maintenant);
+  suivreGestes(maintenant);   /* l'allègement automatique mesure les images des gestes (section 4) */
+}
 function occupe(cle){
   clearTimeout(occupations.get(cle));
   occupations.set(cle, 0);
