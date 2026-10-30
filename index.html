@@ -772,6 +772,13 @@ symbol{overflow:visible}
 /* l'épingle d'une carte choisie ; plantée avec un rebond (script) */
 .epingle{opacity:0;visibility:hidden}
 .epingle.plantee{opacity:1;visibility:visible}
+/* surprise (spec §2, Task 18) : l'épingle d'une carte choisie brille quand on passe dessus
+   (un éclat de papier blanc qui tourne et s'éteint, 650 ms ; coupé en mouvement réduit) */
+.eclat{fill:var(--riso-papier, #fff);opacity:0;transform-box:fill-box;transform-origin:50% 50%;pointer-events:none}
+@media (hover:hover){.carte-corps:hover .epingle.plantee .eclat{animation:eclat .65s ease-out}}
+@keyframes eclat{0%{opacity:0;transform:scale(.2) rotate(0)}35%{opacity:1;transform:scale(1.3) rotate(45deg)}100%{opacity:0;transform:scale(.5) rotate(90deg)}}
+/* une bouloche qui se décroche (script, section 8) : une petite pièce de laine sur un <g> qui flotte */
+.bouloche{pointer-events:none}
 /* les vignettes qui voyagent et les décors qui sortent de terre */
 #g-vols,#g-hippo-cartes{pointer-events:none}
 .decor{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
@@ -4393,6 +4400,7 @@ CARTES.forEach((c, i) => {
   svgEl('use', { href: '#ic-' + c.entree, transform: 'translate(0 25)' }, corps);
   const epingle = svgEl('g', { class: 'epingle' }, corps);
   svgEl('use', { href: '#pin', style: `color:var(${EPINGLES[i % 3]})`, transform: 'translate(0 -28)' }, epingle);
+  svgEl('path', { class: 'eclat', d: 'M3.4 -35.4l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8z' }, epingle);   /* l'épingle brille au survol (Task 18) */
   cartesEls[c.slug] = { g, corps, epingle };
 });
 const nomCarte = slug => inflect(PAR_SLUG[slug].nom, root.dataset.genre);
@@ -4480,6 +4488,7 @@ boite.addEventListener('click', e => {
   const carte = e.target.closest('.carte');
   if(!carte || performance.now() - finGlisse < 80) return;
   pickCard(carte.dataset.slug);
+  bouloche();
 });
 boite.addEventListener('keydown', e => {
   const carte = e.target.closest && e.target.closest('.carte');
@@ -4488,6 +4497,7 @@ boite.addEventListener('keydown', e => {
   if(e.repeat) return;
   if(!boiteDort()){ appuyer(carte); setTimeout(relacherAppui, 110); }
   pickCard(carte.dataset.slug);
+  bouloche();
 });
 
 /* --- la nuit : la boîte se grise (moment arrondi ≥ 2 : nuits et matin).
@@ -4779,6 +4789,28 @@ function volDedans(c, x0, y0, mini){
 
 /* --- la journée --- */
 function emettreJournee(){ document.dispatchEvent(new CustomEvent('journee', { detail: [...journee] })); }
+
+/* --- une surprise (spec §2 « une bouloche se décroche parfois et flotte », Task 18) : une fois
+   par visite, quand l'enfant pose sa deuxième carte (de jour, Dehors ou Dedans ; pas les cartes
+   posées par l'URL ni par l'histoire du pouce), une bouloche se
+   décroche du col du pyjama et monte en se dandinant, puis s'efface. Une seule petite pièce .w.lite,
+   dans #g-ui, mue par animer() sur son <g> (jamais de transform sur une .w) ; rien en mouvement
+   réduit (animer ne joue pas : la pièce est retirée tout de suite). --- */
+let boulocheVue = false;
+function bouloche(){
+  if(boulocheVue || journee.length < 2 || Math.round(cutCourant) === 2 || (phaseCourante ?? 0) !== 0) return;
+  boulocheVue = true;
+  const g = svgEl('g', { class: 'bouloche', 'aria-hidden': 'true' }, document.getElementById('g-ui'));
+  svgEl('ellipse', { class: 'w lite mini', style: '--p:var(--p-pyjama);--encre:var(--encre-bleu-pale)', 'data-ink': 'bleu', rx: 6.6, ry: 5.6 }, g);
+  const a = animer(g, [
+    { transform: 'translate(372px,452px) rotate(0deg) scale(.5)', opacity: 0 },
+    { transform: 'translate(366px,436px) rotate(-25deg) scale(1)', opacity: 1, offset: .12 },
+    { transform: 'translate(392px,390px) rotate(30deg)', offset: .4 },
+    { transform: 'translate(370px,340px) rotate(-15deg)', offset: .7 },
+    { transform: 'translate(396px,290px) rotate(28deg) scale(.9)', opacity: 0 }
+  ], { duration: 4600, easing: 'ease-in-out', fill: 'forwards' });
+  if(a) a.onfinish = () => g.remove(); else g.remove();
+}
 function retirerCarte(slug, anim){
   journee = journee.filter(s => s !== slug);
   deplanter(slug, anim);
@@ -4917,6 +4949,12 @@ function construirePose(dream){
   const ancres = dream.base.base ? ancresDe(forme) : null;
   if(!ancres){   /* une carte sans forme de base : sa vignette, en grand */
     svgEl('use', { href: '#v-' + dream.base.slug, transform: 'scale(2.6)' }, pose);
+    /* … et la phrase la dit par sa greffe (« les deux grands bras ») : une greffe qui n'est qu'un
+       corps (le câlin : deux bras) entoure la vignette, pour que l'image montre ce que dit la
+       phrase (Task 18). Les autres (visages, mots) se lisent déjà dans leur vignette. */
+    const sym = document.getElementById('g-greffe-' + forme);
+    if(sym && sym.querySelector('.a-corps') && !sym.querySelector('.a-tete'))
+      svgEl('use', { class: 'reve-greffe', href: '#g-greffe-' + forme, style: '--corps-x:0;--corps-y:6;--corps-s:1.15' }, pose);
     return pose;
   }
   if(!dream.greffe){
@@ -4949,12 +4987,6 @@ function poserReconfort(film, carte){
   return g;
 }
 function poserVerdict(v){
-    /* … et la phrase la dit par sa greffe (« les deux grands bras ») : une greffe qui n'est qu'un
-       corps (le câlin : deux bras) entoure la vignette, pour que l'image montre ce que dit la
-       phrase (Task 18). Les autres (visages, mots) se lisent déjà dans leur vignette. */
-    const sym = document.getElementById('g-greffe-' + forme);
-    if(sym && sym.querySelector('.a-corps') && !sym.querySelector('.a-tete'))
-      svgEl('use', { class: 'reve-greffe', href: '#g-greffe-' + forme, style: '--corps-x:0;--corps-y:6;--corps-s:1.15' }, pose);
   if(v) document.body.dataset.verdict = v;
   else delete document.body.dataset.verdict;
   appliquerTete();
