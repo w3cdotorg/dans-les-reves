@@ -1181,3 +1181,49 @@ La page est complète : trois vues croisées avec cinq moments, une journée de 
 - Bouloche : comportement aligné sur la note (deuxième carte acceptée posée par l'enfant), et non « la journée a deux cartes au premier geste ».
 - `#g-boite` (sans nom ni rôle) n'est plus dans le parcours Tab de Chromium (`tabindex=-1`) ; Tab : segments → ⋯ → cartes.
 - Budget `vue=1,temps=3` : 21 re-mesuré dans les deux moteurs ; l'écart avec 20 vient de la laine de la télécommande (affichée après le rêve) et du `#p-cheveux-long` en `display:none` (voir le tableau).
+
+## Clôture (30 octobre 2026)
+
+La page est finie, documentée (`README.md`) et prête à être publiée ; la publication sur GitHub Pages attend le feu vert du propriétaire (rien n'est poussé ni mis en ligne à ce stade).
+
+**Ce qui a marché.**
+- **Une page, zéro build.** `index.html` seul, données et fonctions pures dans un bloc `PURE-BEGIN/END` que `node --test test/` exécute dans un `vm` : 69 tests, dont les 253 paires de cartes, l'absence de tout son et l'unicité des `id`. Ce qui se vérifie par un test ne casse plus en silence.
+- **Les paramètres d'URL** (`?vue=&temps=&theme=&lite=&cartes=&info=&reglages=`) et `test/shot.sh` : n'importe quel état se capture en une commande, donc les 15 combinaisons × 3 rendus ont pu être relues à chaque tâche.
+- **Un dessin, deux thèmes**, par variables CSS posées sur `<html>` : le thème, l'allègement et le genre traversent les clones `<use>`, ce qu'aucun sélecteur d'ancêtre ne fait. Le riso et la feutrine partagent la même géométrie sans la dupliquer.
+- **Les générateurs shapely** (`tools/`) : courbes de Catmull-Rom bornées, lobes découpés par les sillons, tubes effilés par enveloppes convexes ; les tracés sont figés dans le HTML et les scripts le reproduisent à l'octet (vérifié par md5), donc on a pu retoucher une pièce sans tout redessiner.
+- **Les règles du rêve** simples et lisibles (greffe = carte la plus chargée, base = la plus concrète, un modificateur nommé) plutôt qu'un « générateur intelligent » : l'histoire du pouce sort exactement comme dans l'anecdote et chaque paire donne une phrase correcte.
+- **Le fil de relecture** : spec relue par un constructeur neutre (cinq questions, cinq décisions), puis une revue par tâche avec tours de correction. Les décisions du propriétaire (style, tête, interface « Plein ciel », « il faut que ce soit fun », aucun son) ont toutes été inscrites ici avant d'être codées.
+- **Le registre des mineurs** de Task 18 : chaque petit défaut reporté a fini corrigé, ou laissé avec sa raison écrite.
+
+**Ce qui a raté (et ce qu'on en a gardé).**
+- **La tête de l'enfant, quatre tours** (Task 3b). Un œuf avec une bosse pour nez, puis un casque de cheveux en chenille, puis des proportions « rattrapées » ancre par ancre : chaque passe ne bougeait qu'un repère et la tête restait une boîte. Ce qui a marché : repartir de la silhouette entière tracée comme un illustrateur, puis poser le cerveau dedans, et **mesurer sur photo** (rapports verticaux : œil à 60 %, nez à 73 %, bouche à 86 %…). Les photos (`refs/photos/`, privées) n'ont servi qu'à mesurer. Écart connu qui reste : front en retrait du nez de 3 % au lieu de 17 %, imposé par la boîte du cerveau.
+- **Les clones `<use>`** (Task 4) : Chrome applique les règles du document au clone dans son arbre fantôme, un combinateur descendant ne voit plus ses ancêtres. Première version : l'enfant repris Dehors n'avait ni laine, ni riso, ni cheveux longs. Corrigé par des variables CSS ; la discipline « jamais de sélecteur d'ancêtre pour ce qui est dans la tête » est écrite plus haut et vaut pour la loupe aussi.
+- **La nuit riso** (Task 7 puis 18) : les groupes se multipliaient avec la toile assombrie, d'où une nuit gris-mauve terne plafonnée à .4, des visages olive, une alarme invisible. Résolu seulement en Task 18 : groupes isolés et posés en normal, nuit en encre bleue à .65.
+- **Le dock** (Task 18, tour 1) : sur les portables courants (1280 × 800, 1366 × 768…), la deuxième rangée d'outils sortait de la fenêtre ; `--hors-scene` supposait un dock d'une rangée. Résolu en calculant la hauteur hors scène pour une et deux rangées, sans dépendre de l'état présent (la police de repli, plus large, faussait la mesure directe).
+- **Un remplacement trop large** (Task 12 : commit `07df629`, « revert de trois valeurs 1,6 px touchées par erreur » : encre jaune riso, REM, halo). Une valeur remplacée partout a touché trois endroits qui n'avaient rien à voir. Leçon : un remplacement global se relit au diff, valeur par valeur.
+- **Les captures « téléphone » de Chrome headless mentent** : `--window-size=420,…` donne 500 px de large, rognés à 420. Les captures de téléphone se font avec Playwright (viewport réel). De même, `--virtual-time-budget` avec des animations infinies ne rend jamais la main.
+- **La détection de l'allègement** : la valeur brute de `performance.now()` mesure le démarrage du navigateur (~140 ms), pas la peinture ; toutes les captures sortaient allégées. Mesure retenue : entre l'exécution du script et le 2e rAF, seuil 120 ms.
+- **Le filtre de laine et les petites choses** : bouloches calibrées pour de petites pièces qui deviennent de la poussière sur un grand fond (le fond de Tout près est donc `.lite`) ; un trait parfaitement droit a une boîte de largeur nulle donc un filtre vide ; spéculaire et bombé trop forts donnent de la pâte d'amande. La laine est mate, fine, régulière ; la matière se lit au bord.
+- **Les phrases du rêve** : un gabarit figé sur le papier casse sur « la piscine », « les copains », « une glace tout petit ». Il a fallu un post-traitement d'accords (défini, genre, pluriel, élisions) et des tests sur toutes les paires, graines et genres.
+
+**Budget de filtres réel (mesuré).** `.w:not(.lite)` visibles, feutrine `lite=0`, Playwright, Chromium et Firefox : Dehors 4 à 16, Dedans 19 à 21, Tout près 7 à 8 (le tableau complet est dans « Task 18 »). Pire cas : 21, pour un plafond fixé à 40. Dehors, la tête reprise par `<use>` ajoute 4 ou 5 pièces qu'un `querySelectorAll` ne voit pas : 20 au plus. 43 pièces `.w:not(.lite)` dans tout le document. **La loupe allumée double ce coût** : en Chromium logiciel, ~148 ms par image en feutrine complète à Dedans (p90 166), ~80 ms Dehors, ~145 ms en riso, 17 ms en allégé ; non basculée en allégé automatiquement (décision du contrôleur).
+
+**Limites connues, acceptées ou mises de côté.**
+- Riso de nuit : le grain du filtre `#riso` laisse un **fantôme du cou sous la couverture** (très léger). Il faudrait une sous-couche de papier sous `#p-couverture` dans `gen-dehors.py`, qui demande shapely.
+- **Le chien pirate qui passe dans un coin après la chanson** (surprise du spec §2) n'existe pas ; la danse des chiens pirates de la télécommande en tient lieu.
+- La loupe n'a ni le volet `#info`, ni l'étiquette, ni le rail, ni les états `:hover` (le clone ne reprend que le SVG).
+- Ouvert en `file://`, YouTube n'a pas de référent : le lecteur n'est donc pas créé (prédicat `videoPossible`), et la page chante à la place. GitHub Pages n'a pas ce problème.
+- Les étapes de l'histoire peuvent arriver avant la fin d'un glissé sur une machine lente ; les images de la boîte de cartes sont lentes en Firefox au premier choix.
+- Zones de vagues et de fuseaux mesurées au chargement (elles glissent), zones qui ne suivent pas la respiration ×1,01 de Dedans : écarts de quelques unités, absorbés par les marges de 6 à 10 px.
+- La fiche du jeu 1 couvre la moitié basse de la scène sur téléphone (non mesuré zone par zone).
+- Chrome a servi aux captures, mais les parcours interactifs ont été faits sous Firefox (le navigateur de Playwright) ; pas de test sur une vraie tablette ni un vrai téléphone.
+- Le refrain exact « Hey, ho, les chiens pirates ! » n'a pas pu être vérifié en ligne (recherche, « trous restants »).
+- **Licence** : le README annonce MIT comme les aînés, mais aucun fichier `LICENSE` n'existe encore dans le dépôt ; à ajouter avant la publication.
+
+**Idées pour plus tard.**
+- **Un bonus Three.js « tourne le cerveau »** : un cerveau 3D à faire pivoter, en `vendor/`, sans rien redessiner (déjà prévu au premier jour du projet).
+- Plus de cartes (les saisons, les animaux de la ferme, des cartes dessinées par l'enfant ou ses parents), et un rêve à deux greffes.
+- **Une planche à imprimer** : les cartes-souvenirs et la télécommande à découper (une feuille A4), pour jouer la journée sans écran, de jour, à la table.
+- La carte « chien pirate » qui passe dans un coin après la chanson, et un fantôme-du-cou corrigé en riso.
+- Un mode « le lendemain matin » : dessiner le rêve et lui changer la fin, avec une feuille à imprimer (le « changer le film » des psychologues, version papier).
+- Tester sur une vraie tablette d'enfant et noter ce qu'il touche en premier.
