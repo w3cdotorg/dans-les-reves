@@ -772,7 +772,11 @@ symbol{overflow:visible}
 #g-boite.dort{--boite-op:.45;--boite-filtre:saturate(.2)}
 .boite-grise{opacity:var(--boite-op,1);filter:var(--boite-filtre,none);transition:opacity .4s, filter .4s}
 #g-boite{touch-action:pan-y pinch-zoom}
-#boite-rail{transform-box:view-box}
+/* la bande de cartes a son propre calque (Performance, 30 octobre 2026) : son défilement
+   (transform posée par poserDefil) ne fait que déplacer ce calque, sans redessiner la scène
+   ni refaire les ≈ 170 filtres de laine des cartes ; le grain du bruit de laine y est pris
+   dans le repère du calque (décalé de quelques pixels, invisible) */
+#boite-rail{transform-box:view-box;will-change:transform}
 .carte{cursor:pointer;outline:none;touch-action:pan-y pinch-zoom}
 .carte[aria-disabled=true]{cursor:default}
 .carte-corps{transform-box:fill-box;transform-origin:50% 50%;transition:transform .22s var(--ui-ressort)}
