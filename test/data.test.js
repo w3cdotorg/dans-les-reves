@@ -293,3 +293,16 @@ test('parseYt : liens YouTube et identifiants', () => {
   assert.equal(parseYt('https://example.com/watch?v=jqGPppvVmBc'), null);
   assert.equal(parseYt('https://www.youtube.com/watch?v=x'), null);
 });
+
+test('parseYt : m.youtube.com et v= après d\'autres paramètres', () => {
+  assert.equal(parseYt('https://m.youtube.com/watch?v=jqGPppvVmBc'), 'jqGPppvVmBc');
+  assert.equal(parseYt('https://www.youtube.com/watch?list=x&v=jqGPppvVmBc'), 'jqGPppvVmBc');
+});
+
+test('index.html : aucun id en double', () => {
+  const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
+  const ids = [...html.matchAll(/\sid="([^"$+{]+)"/g)].map(m => m[1]);
+  const vus = new Set(), doubles = new Set();
+  for(const i of ids){ if(vus.has(i)) doubles.add(i); vus.add(i); }
+  assert.deepEqual([...doubles], []);
+});

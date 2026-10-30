@@ -3027,8 +3027,8 @@ html:not([data-pret]) *{transition:none!important}
       </select>
     </div>
     <div class="champ">
-      <label for="chansonTitre">Le titre de la chanson <span class="ok" id="okTitre" aria-hidden="true">✓</span></label>
-      <input type="text" id="chansonTitre" maxlength="80" autocomplete="off" enterkeyhint="done">
+      <label for="chansonTitreIn">Le titre de la chanson <span class="ok" id="okTitre" aria-hidden="true">✓</span></label>
+      <input type="text" id="chansonTitreIn" maxlength="80" autocomplete="off" enterkeyhint="done">
     </div>
     <div class="champ">
       <label for="chansonId">Lien ou identifiant YouTube</label>
@@ -3686,6 +3686,7 @@ function finir(p, genre){
 function parseYt(str){
   if(typeof str !== 'string') return null;
   const t = str.trim();
+  /* 6 à 20 caractères : volontaire, comme la validation de chansonPrefs (les id YouTube en font 11) */
   if(/^[\w-]{6,20}$/.test(t)) return t;
   /* pas d'objet URL : le bloc PURE tourne aussi dans un contexte sans DOM */
   const m = t.match(/^(?:https?:\/\/)?(?:(?:www\.|m\.|music\.)?youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/|v\/)|youtu\.be\/)([\w-]{6,20})(?![\w-])/i);
@@ -5951,7 +5952,7 @@ afficherBadge(prefs.get('badge', false) === true);   /* au chargement : on lit r
    à l'appui : aucun rechargement. */
 const prenomIn = document.getElementById('prenom');
 const reconfortSel = document.getElementById('reconfort');
-const chansonTitreIn = document.getElementById('chansonTitre');
+const chansonTitreIn = document.getElementById('chansonTitreIn');
 const chansonIdIn = document.getElementById('chansonId');
 const chansonEtat = document.getElementById('chansonEtat');
 function okPop(id){
