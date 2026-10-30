@@ -267,3 +267,29 @@ test('aucun son : ni synthèse vocale, ni bouton son, ni préférence son', () =
   assert.doesNotMatch(html, /prefs\.(get|set)\(\s*['"]son['"]/, 'préférence « son » lue ou écrite');
   assert.doesNotMatch(html, /id=['"](sound|say)['"]/, 'bouton son (guillemets simples ou doubles)');
 });
+
+/* Task 17 : parseYt (bloc PURE) lit un lien YouTube ou un identifiant. _load.js n'exporte pas
+   parseYt : on charge le bloc ici, dans un contexte vm vide. */
+const parseYt = (() => {
+  const fs = require('fs'), path = require('path'), vm = require('vm');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const m = src.match(/\/\* PURE-BEGIN \*\/([\s\S]*?)\/\* PURE-END \*\//);
+  const ctx = {};
+  vm.runInNewContext(m[1] + ';this.f = typeof parseYt === "function" ? parseYt : null', ctx);
+  return ctx.f;
+})();
+test('parseYt : liens YouTube et identifiants', () => {
+  assert.equal(typeof parseYt, 'function');
+  assert.equal(parseYt('https://www.youtube.com/watch?v=jqGPppvVmBc&list=x'), 'jqGPppvVmBc');
+  assert.equal(parseYt('https://youtu.be/jqGPppvVmBc'), 'jqGPppvVmBc');
+  assert.equal(parseYt('https://youtu.be/jqGPppvVmBc?t=4'), 'jqGPppvVmBc');
+  assert.equal(parseYt('https://www.youtube.com/shorts/jqGPppvVmBc'), 'jqGPppvVmBc');
+  assert.equal(parseYt('https://www.youtube-nocookie.com/embed/jqGPppvVmBc?autoplay=1'), 'jqGPppvVmBc');
+  assert.equal(parseYt('  jqGPppvVmBc  '), 'jqGPppvVmBc');
+  assert.equal(parseYt('jqGPppvVmBc'), 'jqGPppvVmBc');
+  assert.equal(parseYt('pas un lien'), null);
+  assert.equal(parseYt(''), null);
+  assert.equal(parseYt(null), null);
+  assert.equal(parseYt('https://example.com/watch?v=jqGPppvVmBc'), null);
+  assert.equal(parseYt('https://www.youtube.com/watch?v=x'), null);
+});

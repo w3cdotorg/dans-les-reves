@@ -1057,7 +1057,29 @@ body[data-vue="2"]{--tc-vis:hidden}
 .interrupteur input:checked{background:var(--ui-vert)}
 .interrupteur input:checked::after{transform:translateX(28px)}
 .interrupteur input:focus-visible{outline:3px solid var(--ui-indigo);outline-offset:3px}
-/* « Pour les parents » : repliée en bas, remplie par Task 17 */
+/* « Pour ton enfant » : champs de la feuille (Task 17) */
+.champ{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.champ label{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-display);font-weight:600;font-size:.95rem}
+.champ input,.champ select{
+  width:100%;min-height:var(--ui-cible);padding:0 14px;box-sizing:border-box;
+  border:2px solid var(--ui-sable);border-radius:16px;background:#fff;color:var(--ui-encre);
+  font:inherit;font-size:1rem;
+}
+.champ input:focus-visible,.champ select:focus-visible{outline:3px solid var(--ui-indigo);outline-offset:2px}
+.champ .etat{margin:2px 0 0;min-height:1.3em;font-size:.9rem;line-height:1.3;color:var(--ui-gris)}
+.champ .etat.non{color:#b3261e}
+.champ .etat.oui{color:#1c7a54}
+.ok{opacity:0;color:#1c7a54;font-weight:700;transform:scale(.4)}
+.ok.pop{animation:ok-pop .5s var(--ui-ressort)}
+@keyframes ok-pop{0%{opacity:0;transform:scale(.4)}20%{opacity:1;transform:scale(1.25)}35%{transform:scale(1)}100%{opacity:1;transform:scale(1)}}
+.ok.vu{opacity:1;transform:none}   /* sans animation (mouvement réduit) : le ✓ reste posé 1,4 s */
+.reglage .bouton.petit{display:flex;width:100%;min-height:var(--ui-cible);margin-top:8px;font-size:.95rem}
+.reglage .bouton[hidden]{display:none}
+/* « Pour les parents » : repliée en bas (Task 17) */
+.conseils{margin:4px 0 10px;padding-left:1.2em;font-size:.95rem;line-height:1.45}
+.conseils li{margin-bottom:8px;overflow-wrap:anywhere}
+.conseils-lien{margin:0 0 6px}
+.conseils-lien a{display:inline-flex;align-items:center;min-height:var(--ui-cible);color:var(--ui-indigo);font-weight:600}
 .parents{border-top:1px solid var(--ui-sable);padding-top:6px}
 .parents summary{
   min-height:var(--ui-cible);display:flex;align-items:center;gap:.5em;cursor:pointer;border-radius:12px;
@@ -2990,9 +3012,48 @@ html:not([data-pret]) *{transition:none!important}
     <label class="interrupteur"><span>🪶 Version allégée</span><input type="checkbox" id="lite"></label>
     <p class="aide">Moins de laine à dessiner : pour les tablettes et téléphones qui peinent.</p>
   </section>
-  <!-- La carte « Pour les parents » (spec §8), repliée : Task 17 la remplit. -->
+  <section class="reglage" aria-labelledby="enfantTitre">
+    <h3 id="enfantTitre">Pour ton enfant</h3>
+    <div class="champ">
+      <label for="prenom">Son prénom <span class="ok" id="okPrenom" aria-hidden="true">✓</span></label>
+      <input type="text" id="prenom" maxlength="24" placeholder="Son prénom (facultatif)" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+    </div>
+    <div class="champ">
+      <label for="reconfort">Sa carte réconfort <span class="ok" id="okReconfort" aria-hidden="true">✓</span></label>
+      <select id="reconfort">
+        <option value="chanson">🎵 La chanson</option>
+        <option value="doudou">🧸 Le doudou</option>
+        <option value="calin">🤗 Le câlin</option>
+      </select>
+    </div>
+    <div class="champ">
+      <label for="chansonTitre">Le titre de la chanson <span class="ok" id="okTitre" aria-hidden="true">✓</span></label>
+      <input type="text" id="chansonTitre" maxlength="80" autocomplete="off" enterkeyhint="done">
+    </div>
+    <div class="champ">
+      <label for="chansonId">Lien ou identifiant YouTube</label>
+      <input type="text" id="chansonId" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="youtube.com/watch?v=…" aria-describedby="chansonEtat" enterkeyhint="done">
+      <p class="etat" id="chansonEtat" aria-live="polite"></p>
+    </div>
+    <button type="button" id="chansonRaz" class="bouton sable petit">Remettre la chanson des chiens pirates</button>
+    <button type="button" id="badgeOff" class="bouton sable petit" hidden>Enlever le badge</button>
+  </section>
   <details id="parents" class="parents">
     <summary><span aria-hidden="true">👪</span> Pour les parents</summary>
+    <ul class="conseils">
+      <li><strong>De jour.</strong> Cet outil se regarde avec vous, après l'école ou le week-end, et pas au moment du coucher.</li>
+      <li><strong>La nuit.</strong> Après un cauchemar, allez le voir, restez quelques minutes et faites un câlin.</li>
+      <li>Dites simplement que c'était un rêve et que ce n'est pas réel, sans vous moquer de sa peur.</li>
+      <li>Ne proposez pas de chasser le monstre de la chambre : cela laisserait croire qu'il existe.</li>
+      <li><strong>Le lendemain.</strong> « Changez le film » avec la télécommande : dessinez le monstre avec des oreilles de lapin, ou donnez-lui une autre fin.</li>
+      <li><strong>Cauchemar ou terreur nocturne ?</strong> Après un cauchemar, l'enfant est bien réveillé, il s'en souvient et se laisse consoler.</li>
+      <li>Une terreur nocturne arrive plutôt en début de nuit : l'enfant crie, les yeux ouverts, mais il dort encore.</li>
+      <li>Dans ce cas, ne le réveillez pas, veillez à sa sécurité et laissez l'épisode passer.</li>
+      <li>Ne lui en parlez le lendemain que s'il s'en souvient.</li>
+      <li>Beaucoup de chercheurs pensent que les rêves aident le cerveau à ranger la journée, mais ils ne savent pas encore tout.</li>
+      <li><strong>Quand consulter.</strong> Parlez-en à un médecin si les cauchemars sont très fréquents, si votre enfant a peur de s'endormir ou s'il est somnolent la journée.</li>
+    </ul>
+    <p class="conseils-lien"><a href="https://github.com/w3cdotorg/dans-les-reves/blob/main/docs/recherche-cerveau-sommeil.md" target="_blank" rel="noopener">Lire la synthèse des sources</a></p>
   </details>
 </dialog>
 
@@ -3619,6 +3680,16 @@ function finir(p, genre){
     .replace(/\b([Ll])[ea] (?=[aeiouyéèêàâîôœ])/g, "$1'")
     .replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1').trim();
   return inflect(p, genre);
+}
+/* Task 17 : l'identifiant d'une vidéo YouTube, depuis un lien (watch?v=, youtu.be/, shorts/,
+   embed/ de youtube.com ou youtube-nocookie.com) ou un identifiant seul ; null sinon. */
+function parseYt(str){
+  if(typeof str !== 'string') return null;
+  const t = str.trim();
+  if(/^[\w-]{6,20}$/.test(t)) return t;
+  /* pas d'objet URL : le bloc PURE tourne aussi dans un contexte sans DOM */
+  const m = t.match(/^(?:https?:\/\/)?(?:(?:www\.|m\.|music\.)?youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/|v\/)|youtu\.be\/)([\w-]{6,20})(?![\w-])/i);
+  return m ? m[1] : null;
 }
 /* PURE-END */
 </script>
@@ -5789,6 +5860,7 @@ const finiBtn = document.getElementById('fini');
 const jeuScore = document.getElementById('jeuScore');
 const gFete = document.getElementById('g-fete');
 const badgeEl = document.getElementById('badge');
+const badgeOffBtn = document.getElementById('badgeOff');
 const jeu = { ordre: [], i: 0, score: 0, essai: true, attente: false, timer: 0, num: null, indice: null, indiceTimer: 0 };
 Object.values(jeuBtns).forEach(b => b.setAttribute('aria-pressed', 'false'));
 
@@ -5858,6 +5930,7 @@ function feter(etoiles){
 function afficherBadge(on){
   badgeEl.classList.toggle('on', on);
   badgeEl.setAttribute('aria-hidden', String(!on));
+  badgeOffBtn.hidden = !on;   /* « Enlever le badge » (réglages) n'existe que s'il y a un badge */
 }
 function setBadge(on, opts = {}){
   on = !!on;
@@ -5872,6 +5945,58 @@ function setBadge(on, opts = {}){
     { duration: 760, delay: opts.delai || 0, easing: RESSORT, fill: 'backwards' });
 }
 afficherBadge(prefs.get('badge', false) === true);   /* au chargement : on lit reves.badge, on ne le réécrit pas */
+/* ===== Réglages de l'enfant (Task 17) : prénom, carte réconfort, chanson, badge =====
+   Tout passe par prefs.set ; le texte est écrit 300 ms après la frappe (et tout de suite au
+   « change »). startStory lit reves.prenom, openSong reves.chanson, applyRemote reves.reconfort
+   à l'appui : aucun rechargement. */
+const prenomIn = document.getElementById('prenom');
+const reconfortSel = document.getElementById('reconfort');
+const chansonTitreIn = document.getElementById('chansonTitre');
+const chansonIdIn = document.getElementById('chansonId');
+const chansonEtat = document.getElementById('chansonEtat');
+function okPop(id){
+  const el = document.getElementById(id);
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop', 'vu');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('pop', 'vu'), 1400);
+}
+function champTexte(input, ecrire, okId){
+  let t = 0;
+  const go = () => { clearTimeout(t); t = 0; ecrire(); if(okId) okPop(okId); };
+  input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(go, 300); });
+  input.addEventListener('change', () => { if(t) go(); });
+}
+prenomIn.value = String(prefs.get('prenom', '') || '');
+champTexte(prenomIn, () => prefs.set('prenom', prenomIn.value.trim()), 'okPrenom');
+{
+  const r = prefs.get('reconfort', 'chanson');
+  reconfortSel.value = ['chanson', 'doudou', 'calin'].includes(r) ? r : 'chanson';
+}
+reconfortSel.addEventListener('change', () => { prefs.set('reconfort', reconfortSel.value); okPop('okReconfort'); });
+function chansonAfficher(){
+  const c = chansonPrefs();
+  chansonTitreIn.value = c.titre;
+  chansonIdIn.value = c.ytid;
+  chansonEtat.textContent = ''; chansonEtat.className = 'etat';
+}
+function chansonEcrire(patch){ prefs.set('chanson', { ...chansonPrefs(), ...patch }); }
+chansonAfficher();
+champTexte(chansonTitreIn, () => {
+  const v = chansonTitreIn.value.trim();
+  chansonEcrire({ titre: v || CHANSON.titre });
+}, 'okTitre');
+champTexte(chansonIdIn, () => {
+  const v = chansonIdIn.value.trim();
+  if(!v){ chansonEtat.textContent = ''; chansonEtat.className = 'etat'; return; }
+  const id = parseYt(v);
+  if(id){ chansonEcrire({ ytid: id }); chansonEtat.textContent = '✓ Lien reconnu'; chansonEtat.className = 'etat oui'; }
+  else { chansonEtat.textContent = 'Je ne reconnais pas ce lien'; chansonEtat.className = 'etat non'; }
+});
+document.getElementById('chansonRaz').addEventListener('click', () => {
+  prefs.set('chanson', { titre: CHANSON.titre, ytid: CHANSON.ytid });
+  chansonAfficher();
+  chansonEtat.textContent = '✓ C\'est refait'; chansonEtat.className = 'etat oui';
+});
+badgeOffBtn.addEventListener('click', () => { setBadge(false); document.getElementById('feuilleClose').focus(); });
 document.addEventListener('histoire', e => { if(e.detail && e.detail.fin) setBadge(true, { anim: true }); });
 
 /* --- la fiche du jeu --- */
