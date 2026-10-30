@@ -108,7 +108,7 @@ node --test test/
 
 ## Licence
 
-Licence MIT (fichier à ajouter).
+Licence MIT (voir `LICENSE`).
 
 ## Crédits
 
