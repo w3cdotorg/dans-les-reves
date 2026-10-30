@@ -26,7 +26,7 @@
 - **Paramètres d'URL de test** (lus au chargement, Task 1) : `?vue=0..2&temps=0..4&theme=feutrine|riso&lite=1&cartes=pouce,ogre,copains` — chaque tâche s'en sert pour ses captures.
 - **Vérification de chaque tâche** : `node --test test/` (quand un test existe) + ouverture de la page : Playwright MCP (`browser_navigate` sur `file:///Users/willow/Sites/dans-les-reves/index.html?…`, `browser_console_messages` **zéro erreur**, `browser_take_screenshot`) ou, à défaut, `test/shot.sh "<query>" <sortie.png>` puis lecture de l'image.
 - **Commit à la fin de chaque tâche**, message en français, suffixé `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`. **`NOTES.md`** reçoit une entrée à chaque décision ou découverte (réglage qui a raté, astuce), pas seulement à la fin.
-- Clés `localStorage` (préfixe `reves.`) : `theme`, `lite`, `son`, `prenom`, `chanson` (JSON `{titre, ytid}`), `reconfort` (`chanson|doudou|calin`), `avatar` (JSON `{genre, skin, hair}`).
+- Clés `localStorage` (préfixe `reves.`) : `theme`, `lite`, `son`, `prenom`, `chanson` (JSON `{titre, ytid}`), `reconfort` (`chanson|doudou|calin`), `avatar` (JSON `{genre, skin, hair}`), `badge` (`true` quand le badge « Je connais mon cerveau » a été gagné ; décision Task 16).
 - Palette feutrine (variables dans `:root`) :
   ```css
   --toile:#e8ddc7; --toile-trame:#d8cbb0;

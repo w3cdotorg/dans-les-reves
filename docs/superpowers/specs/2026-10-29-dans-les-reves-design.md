@@ -75,7 +75,7 @@ peut vivre tout le cycle jour → nuit → matin.
 **Non-objectifs (YAGNI)**
 - Pas de backend, pas de compte, pas de sauvegarde autre que les préférences locales
   (thème, version allégée, prénom, chanson, carte réconfort, avatar : garçon/fille,
-  carnation, cheveux).
+  carnation, cheveux, badge « Je connais mon cerveau » gagné).
 - Pas d'autre langue que le français.
 - **Aucun son** produit par la page (pas de synthèse vocale, pas de bruitages, pas de
   musique) ; la seule exception est la vidéo YouTube de la chanson, créée sur appui.
