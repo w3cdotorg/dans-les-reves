@@ -469,7 +469,10 @@ ressort ; le « ⋯ » tourne d'un quart de tour en s'ouvrant.
   vrai, c'est une statue ; « un ogre gigantesque » → rêve ; « un chien qui mange une
   glace » → pour de vrai ; « un chien en glace qui fond » → rêve…). 3 questions, même
   récompense.
-- Animations d'ambiance (coupées par `prefers-reduced-motion`) : clignement, respiration,
+- Animations d'ambiance (coupées par `prefers-reduced-motion`, figées pendant un geste) :
+  clignement, ~~respiration~~ (retirée le 30 octobre 2026 pour la performance : l'échelle
+  ×1,01 de toute la tête refaisait ses filtres de laine à chaque image, 82 à 165 ms par image
+  au repos, pour un mouvement presque invisible ; NOTES.md, « Performance »),
   yeux qui bougent sous les paupières la nuit des rêves, vagues lentes, rafales, rinçage,
   lueur de l'amygdale, pulsation de la pinéale au soir, « zzz » du lobe frontal, fils qui
   frémissent, épingles qui brillent.
