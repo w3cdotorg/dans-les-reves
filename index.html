@@ -975,6 +975,29 @@ body[data-vue="2"]{--tc-vis:hidden}
 #stop{font-size:1.2rem}
 #stop[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.recit-puces i{transition:none}}
+/* mini-jeux (Task 16) : la fiche du jeu, dans le volet. Le score (région live à part), puis les
+   boutons de l'étape : #vrai / #reve (jeu 2), « Suite », et à la fin « Encore ! » / « Fini ».
+   Rien n'est visible sans la classe « jeu » ; « jeu2 » agrandit l'image (l'émoji) de l'énoncé. */
+.jeu-score,.jeu-bt{display:none}
+.volet.jeu .jeu-score{display:block;margin:.4em 0 0;font-family:var(--font-display);font-weight:600;font-size:1.05rem;color:var(--ui-gris-fonce)}
+.volet.jeu .jeu-bt{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+.jeu-bt .bouton{font-size:1.15rem;padding:.7em 1.4em}
+.jeu-bt .bouton[hidden]{display:none}
+.volet.jeu2{padding-left:110px}
+.volet.jeu2 .volet-ic{width:76px;height:76px;border-radius:20px;font-size:2.8rem}
+.volet-ic.pop{animation:jeu-pop .45s var(--ui-ressort)}
+@keyframes jeu-pop{from{transform:scale(.4)}}
+/* zone touchée qui n'est pas la bonne : un liseré corail qui se dandine (animer, section 13) */
+.hs.non,.hs.non:hover,.hs.non:focus-visible{stroke:var(--ui-corail);stroke-width:2.6;stroke-dasharray:var(--fil-dash-couture, 3.2 1.3);filter:var(--fil-filter, none)}
+/* récompenses dans la scène (#g-ui) : étoiles de feutre, confettis de laine, « Bravo ! » brodé ;
+   les mouvements passent par animer() (rien en mouvement réduit : étoiles posées, pas de confettis) */
+#g-fete{pointer-events:none}
+.fete-pop,.badge-in{transform-box:fill-box;transform-origin:50% 50%}
+.fete-texte{font-family:var(--font-display);font-weight:700;font-size:27px;text-anchor:middle;dominant-baseline:central;fill:var(--fil-encre, var(--fil-rouge))}
+.badge{display:none;pointer-events:none}
+.badge.on{display:inline}
+.badge-emoji{font-size:23px;text-anchor:middle;dominant-baseline:central}
+.badge-texte{font-family:var(--font-display);font-weight:600;font-size:10.5px;text-anchor:middle;fill:var(--riso-papier, var(--fil-blanc))}
 
 /* ===== 9. Dock : trois gros boutons d'activité, trois outils sable ===== */
 .dock{
@@ -1090,6 +1113,16 @@ body[data-vue="2"]{--tc-vis:hidden}
   .volet.histoire .recit-bt{margin-top:4px}
   .volet.histoire p{font-size:.94rem;line-height:1.28}
   .volet.histoire h2{margin:0}
+  /* mini-jeux : comme l'histoire, la fiche se resserre pour tenir dans la scène ; l'image du jeu 2
+     passe à gauche du texte, les deux réponses côte à côte */
+  .volet.jeu{padding:8px 52px 8px 14px}
+  .volet.jeu .volet-ic{display:none}
+  .volet.jeu2 .volet-ic{display:grid;position:static;float:left;width:50px;height:50px;margin:2px 10px 2px 0;border-radius:14px;font-size:1.9rem}
+  .volet.jeu h2{margin:0}
+  .volet.jeu p{font-size:.94rem;line-height:1.28}
+  .volet.jeu .jeu-score{margin-top:.15em;font-size:.9rem}
+  .volet.jeu .jeu-bt{clear:both;flex-wrap:nowrap;margin-top:6px;gap:8px}
+  .jeu-bt .bouton{flex:1 1 0;min-width:0;font-size:1.0625rem;padding:.5em .4em;gap:.35em}
 
   .dock{flex-direction:column;align-items:stretch;padding:14px 0 18px}
   .dock-jeux,.dock-outils{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -2838,6 +2871,26 @@ html:not([data-pret]) *{transition:none!important}
               <rect class="tc-cible" x="756" y="268" width="104" height="196" rx="18"/>
             </g>
             <!-- TELECOMMANDE-END -->
+            <!-- Récompenses des mini-jeux (Task 16) : étoiles, confettis de laine, « Bravo ! » brodé.
+                 Générées par le script (section 13), retirées après ; jamais de clic. -->
+            <g id="g-fete" aria-hidden="true"></g>
+            <!-- Le badge « Je connais mon cerveau » (Task 16) : en haut à droite (le soleil et la lune
+                 occupent le haut à gauche de la vue Dehors), affiché par setBadge(true), mémorisé
+                 (reves.badge). Rond de feutre cousu, ruban, épinglé. -->
+            <g id="badge" class="badge" role="img" aria-label="Badge : je connais mon cerveau">
+              <g transform="translate(792 56)">
+                <g class="badge-in">
+                  <circle class="w lite" style="--p:var(--p-soleil)" data-ink="jaune" r="34"/>
+                  <circle class="fil couture" style="--f:var(--fil-brun)" r="29"/>
+                  <text class="badge-emoji" y="-9">🧠</text>
+                  <path class="w lite" style="--p:var(--p-drapeau)" data-ink="rose" d="M-48 6H48L41 21L48 36H-48L-41 21Z"/>
+                  <path class="fil couture" style="--f:var(--fil-blanc)" d="M-41 10H41M-41 32H41"/>
+                  <text class="badge-texte" y="19">Je connais</text>
+                  <text class="badge-texte" y="30">mon cerveau</text>
+                  <g transform="translate(3 -31) rotate(12)"><use href="#pin" style="color:var(--glass-blue)"/></g>
+                </g>
+              </g>
+            </g>
           </g>
         </g>
       </svg>
@@ -2857,6 +2910,16 @@ html:not([data-pret]) *{transition:none!important}
         <div class="recit-bt">
           <button type="button" id="suite" class="bouton indigo">Et après&nbsp;?</button>
           <button type="button" id="stop" class="bouton sable rond" aria-label="Arrêter l'histoire"><span class="ic" aria-hidden="true">✖</span></button>
+        </div>
+        <!-- Mini-jeux (Task 16) : visibles seulement avec la classe « jeu » sur #info ; le script
+             montre les boutons de l'étape (hidden). Le score est une région live à part. -->
+        <p id="jeuScore" class="jeu-score" aria-live="polite"></p>
+        <div class="jeu-bt">
+          <button type="button" id="vrai" class="bouton corail" hidden><span class="ic" aria-hidden="true">👀</span>Pour de vrai</button>
+          <button type="button" id="reve" class="bouton indigo" hidden><span class="ic" aria-hidden="true">💭</span>C'est un rêve</button>
+          <button type="button" id="jeuSuite" class="bouton indigo" hidden>Suite</button>
+          <button type="button" id="rejouer" class="bouton corail" hidden><span class="ic" aria-hidden="true">🔁</span>Encore&nbsp;!</button>
+          <button type="button" id="fini" class="bouton sable" hidden><span class="ic" aria-hidden="true">👋</span>Fini</button>
         </div>
         <button type="button" id="infoClose" class="croix" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
       </section>
@@ -3250,7 +3313,8 @@ const ZONE_DECOR = { forme:'ellipse', marge:8 };
 
 /* ===== F. Mini-jeux =====
    JEU_PARTIES : « Trouve la bonne partie ! » — cible = id de zone (vue 1).
-   JEU_REVE    : « Rêve ou pour de vrai ? » — quatre vrais, quatre rêves. */
+   JEU_REVE    : « Rêve ou pour de vrai ? » — quatre vrais, quatre rêves ; explication =
+                 la ligne lue après la réponse (Task 16). */
 const JEU_PARTIES = [
   { q:'Où est le chef qui vérifie tout ?',                   cible:'frontal' },
   { q:"Où est l'alarme de la peur ?",                        cible:'amygdale' },
@@ -3262,15 +3326,40 @@ const JEU_PARTIES = [
   { q:'Où est le gardien qui fait respirer, même la nuit ?', cible:'tronc' }
 ];
 const JEU_REVE = [
-  { q:'Devant une expo, il y a un pouce de 12 mètres, en bronze.',              emoji:'👍', reponse:'vrai' },
-  { q:'Sur un toboggan, un ogre gigantesque qui a un pouce à la place du nez.', emoji:'👹', reponse:'reve' },
-  { q:"Un chien qui fait du vélo en chantant à tue-tête.",                       emoji:'🐶', reponse:'reve' },
-  { q:'Ton cœur continue de battre pendant que tu dors.',                       emoji:'❤️', reponse:'vrai' },
-  { q:'Une glace géante qui parle et qui connaît ton prénom.',                  emoji:'🍦', reponse:'reve' },
-  { q:'Pendant les rêves, tes yeux bougent sous tes paupières.',               emoji:'👀', reponse:'vrai' },
-  { q:"La maîtresse qui vole au-dessus de l'école sur un tracteur.",            emoji:'🚜', reponse:'reve' },
-  { q:'Pendant que tu dors, ton cerveau range les souvenirs de ta journée.',    emoji:'🧠', reponse:'vrai' }
+  { q:'Devant une expo, il y a un pouce de 12 mètres, en bronze.',              emoji:'👍', reponse:'vrai',
+    explication:'Pour de vrai : c\'est une statue, un pouce géant grand comme une maison.' },
+  { q:'Sur un toboggan, un ogre gigantesque qui a un pouce à la place du nez.', emoji:'👹', reponse:'reve',
+    explication:'C\'est un rêve : les ogres, ça n\'existe pas. Ton cerveau a mélangé ta journée.' },
+  { q:"Un chien qui fait du vélo en chantant à tue-tête.",                       emoji:'🐶', reponse:'reve',
+    explication:'C\'est un rêve : un chien ne sait ni pédaler ni chanter !' },
+  { q:'Ton cœur continue de battre pendant que tu dors.',                       emoji:'❤️', reponse:'vrai',
+    explication:'Pour de vrai : ton cœur bat toute la nuit, même quand tu dors très fort.' },
+  { q:'Une glace géante qui parle et qui connaît ton prénom.',                  emoji:'🍦', reponse:'reve',
+    explication:'C\'est un rêve : une glace, ça ne parle pas… ça se mange !' },
+  { q:'Pendant les rêves, tes yeux bougent sous tes paupières.',               emoji:'👀', reponse:'vrai',
+    explication:'Pour de vrai : dans le sommeil des rêves, tes yeux bougent tout seuls.' },
+  { q:"La maîtresse qui vole au-dessus de l'école sur un tracteur.",            emoji:'🚜', reponse:'reve',
+    explication:'C\'est un rêve : un tracteur roule dans les champs, il ne vole pas !' },
+  { q:'Pendant que tu dors, ton cerveau range les souvenirs de ta journée.',    emoji:'🧠', reponse:'vrai',
+    explication:'Pour de vrai : la nuit, ton cerveau travaille, il range ta journée.' }
 ];
+
+/* tirer3(seed, n = 8) : trois indices différents de 0 à n-1, tirés sans remise par un
+   générateur à graine (mulberry32) ; même graine → même tirage. L'appelant passe Date.now(). */
+function tirer3(seed, n = 8){
+  let a = (Math.floor(Number(seed) || 0) % 4294967296) >>> 0;
+  const alea = () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const sac = Array.from({ length: n }, (_, i) => i);
+  const pris = [];
+  for(let k = 0; k < Math.min(3, n); k++) pris.push(sac.splice(Math.floor(alea() * sac.length), 1)[0]);
+  return pris;
+}
 
 /* ===== G. L'histoire du pouce (spec §4.7) =====
    { vue, temps, texte, action? } — action : 'reve' (rendre le rêve),
@@ -4026,8 +4115,10 @@ const infoTitle = document.getElementById('infoTitle');
 const infoText = document.getElementById('infoText');
 let infoOpener = null;
 var recitActif = false, recitOuvre = false, finirRecit = null;   /* Task 15 : var, openInfo peut s'exécuter avant la section « mode guidé » */
+var jeuActif = 0, jeuOuvre = false, finirJeu = null;   /* Task 16 : même schéma pour les mini-jeux (jeuActif = 1 ou 2) */
 function openInfo(opener, contenu){
   if(recitActif && !recitOuvre && finirRecit) finirRecit();   /* une zone ouvre le volet : l'histoire s'arrête, la scène reste */
+  if(jeuActif && !jeuOuvre && finirJeu) finirJeu();   /* une zone (hors jeu 1) ou l'histoire prend le volet : le jeu s'arrête */
   infoOpener = opener instanceof HTMLElement || opener instanceof SVGElement ? opener : null;
   marquerZone(infoOpener);   /* Task 12 : le liseré brodé suit la zone qui ouvre le volet */
   infoBox.classList.add('open');
@@ -4039,6 +4130,7 @@ function openInfo(opener, contenu){
 }
 function closeInfo(){
   if(recitActif && finirRecit) finirRecit();
+  if(jeuActif && finirJeu) finirJeu();
   if(!infoBox.classList.contains('open')) return;
   const focusDedans = infoBox.contains(document.activeElement);
   infoBox.classList.remove('open');
@@ -5382,15 +5474,18 @@ function dessinerPastilles(){
       }
     }
   }
-  pts.forEach((p, i) => {
-    const x = Math.min(850, Math.max(16, p.x)), y = Math.min(544, Math.max(16, p.y));
-    const dot = svgEl('g', { transform: 'translate(' + x + ' ' + y + ')' }, g);
-    const inner = svgEl('g', { class: 'hdot-in', style: '--d:' + (i * 30) + 'ms' }, dot);
-    const bat = svgEl('g', { class: 'hdot-i', style: '--d:' + (i * 30) + 'ms' }, inner);
-    svgEl('circle', { class: 'w lite reserve', r: 14, style: '--p:var(--riso-papier, var(--p-carte))' }, bat);
-    svgEl('circle', { class: 'fil couture', r: 11, style: '--f:var(--fil-sable)' }, bat);
-    svgEl('text', { class: 'hdot-t' }, bat).textContent = INFO[p.id].emoji;
-  });
+  pts.forEach((p, i) => poserPastille(g, p.x, p.y, p.id, i));
+}
+/* une pastille de feutre (emoji de la zone) ; aussi l'indice du jeu « Trouve la partie ! » (Task 16) */
+function poserPastille(g, px, py, id, i){
+  const x = Math.min(850, Math.max(16, px)), y = Math.min(544, Math.max(16, py));
+  const dot = svgEl('g', { transform: 'translate(' + x + ' ' + y + ')' }, g);
+  const inner = svgEl('g', { class: 'hdot-in', style: '--d:' + (i * 30) + 'ms' }, dot);
+  const bat = svgEl('g', { class: 'hdot-i', style: '--d:' + (i * 30) + 'ms' }, inner);
+  svgEl('circle', { class: 'w lite reserve', r: 14, style: '--p:var(--riso-papier, var(--p-carte))' }, bat);
+  svgEl('circle', { class: 'fil couture', r: 11, style: '--f:var(--fil-sable)' }, bat);
+  svgEl('text', { class: 'hdot-t' }, bat).textContent = INFO[id].emoji;
+  return dot;
 }
 let zonesTimer = 0;
 function montrerZones(on){
@@ -5412,10 +5507,11 @@ zonesBtn.addEventListener('click', () => { if(ZS) montrerZones(!scene.classList.
   label.setAttribute('aria-hidden', 'true');
   scene.parentNode.appendChild(label);
   const zoneDe = e => e.target.closest && e.target.closest('.hs');
-  gHs.addEventListener('click', e => { const z = zoneDe(e); if(z) showInfo(z.dataset.id, e); });
+  /* pendant « Trouve la partie ! » (Task 16), le jeu prend le toucher : pas de volet de zone */
+  gHs.addEventListener('click', e => { const z = zoneDe(e); if(z && !jeuToucheZone(z)) showInfo(z.dataset.id, e); });
   gHs.addEventListener('keydown', e => {
     const z = zoneDe(e);
-    if(z && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); showInfo(z.dataset.id); }
+    if(z && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); if(!jeuToucheZone(z)) showInfo(z.dataset.id); }
   });
   /* la pilule « Encore un rêve » (dessous) prime sur le nuage quand elle est visible */
   const encore = document.getElementById('encore');
@@ -5652,6 +5748,302 @@ suiteBtn.addEventListener('click', () => {
   if(HISTOIRE[recit.etape].action === 'fin'){ stopStory(); return; }
   allerEtape(recit.etape + 1);
 });
+
+/* ===== 13. Les mini-jeux et leurs récompenses (Task 16, spec §7 et §2 « des récompenses ») =====
+   Les deux jeux vivent dans le volet (#info, classes « jeu » et « jeu2 ») : trois questions tirées
+   sans remise des huit (tirer3(Date.now()), bloc PURE), score « n / 3 » (#jeuScore, live).
+   Jeu 1 « Trouve la partie ! » : l'enfant touche une zone de la scène. Tant qu'il est actif, les
+   zones ne montrent pas leur volet (jeuToucheZone, appelée par la section 11) : bonne zone →
+   étoile, confettis, « Bravo ! », la pièce cousue d'indigo, question suivante après 1,8 s ;
+   mauvaise → la zone se dandine (liseré corail), « Presque ! Cherche encore… » et la pastille
+   de la bonne zone bat 2 s (la vue glisse d'abord vers la sienne si besoin). Seul le premier
+   essai compte au score ; on cherche jusqu'à trouver.
+   Jeu 2 « Rêve ou pour de vrai ? » : #vrai / #reve, puis « Bravo ! » ou « Presque ! » et
+   l'explication d'une ligne, « Suite ».
+   Fin : 1 à 3 étoiles (au moins une : on ne gronde jamais), confettis, « Bravo, tu connais ton
+   cerveau ! », « Encore ! » / « Fini ». 3 sur 3 → le badge.
+   Arrêt : « Fini », ✕, Échap, second appui sur le bouton du jeu, une zone ou l'histoire qui prend
+   le volet (hooks jeuActif dans openInfo / closeInfo). Lancer un jeu arrête l'histoire.
+   Récompenses (#g-fete, dans #g-ui) : pièces .w.lite, mouvements par animer() sur des <g>
+   (jamais de transform sur une .w) ; mouvement réduit : étoiles et « Bravo ! » posés, pas de
+   confettis. Badge (#badge) : setBadge(on) (mémorisé : reves.badge) ; gagné à la fin de
+   l'histoire du pouce (événement « histoire », fin:true) ou à un 3 sur 3. */
+const JEU_N = 3;
+const JEUX = { 1: { emoji: '🎯', titre: 'Trouve la partie !' }, 2: { emoji: '💭', titre: 'Rêve ou pour de vrai ?' } };
+const jeuBtns = { 1: document.getElementById('jeu1'), 2: document.getElementById('jeu2') };
+const vraiBtn = document.getElementById('vrai');
+const reveBtn = document.getElementById('reve');
+const jeuSuiteBtn = document.getElementById('jeuSuite');
+const rejouerBtn = document.getElementById('rejouer');
+const finiBtn = document.getElementById('fini');
+const jeuScore = document.getElementById('jeuScore');
+const gFete = document.getElementById('g-fete');
+const badgeEl = document.getElementById('badge');
+const jeu = { ordre: [], i: 0, score: 0, essai: true, attente: false, timer: 0, num: null, indice: null, indiceTimer: 0 };
+Object.values(jeuBtns).forEach(b => b.setAttribute('aria-pressed', 'false'));
+
+/* --- les récompenses --- */
+function viderFete(){
+  gFete.getAnimations({ subtree: true }).forEach(a => a.cancel());
+  gFete.replaceChildren();
+}
+function cheminEtoile(r){
+  const pts = [];
+  for(let k = 0; k < 10; k++){
+    const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * .48 : r;
+    pts.push((rr * Math.cos(a)).toFixed(1) + ' ' + (rr * Math.sin(a)).toFixed(1));
+  }
+  return 'M' + pts.join('L') + 'Z';
+}
+function etoileFeutre(parent, x, y, r, delai){
+  const g = svgEl('g', { transform: `translate(${x} ${y})` }, parent);
+  const pop = svgEl('g', { class: 'fete-pop' }, g);
+  svgEl('path', { class: 'w lite', style: '--p:var(--p-soleil)', 'data-ink': 'jaune', d: cheminEtoile(r) }, pop);
+  svgEl('path', { class: 'fil couture', style: '--f:var(--fil-brun)', d: cheminEtoile(r * .7) }, pop);
+  svgEl('circle', { r: 2.6, fill: 'url(#knot)' }, pop);
+  animer(pop, [{ transform: 'scale(0) rotate(-50deg)', opacity: 0 }, { transform: 'scale(1) rotate(0deg)', opacity: 1 }],
+    { duration: 560, delay: delai, easing: RESSORT, fill: 'backwards' });
+}
+function etiquetteBravo(parent){
+  const g = svgEl('g', { transform: 'translate(450 136)' }, parent);
+  const pop = svgEl('g', { class: 'fete-pop' }, g);
+  svgEl('path', { class: 'w lite reserve', style: '--p:var(--riso-papier, var(--p-carte))', d: rrD(-82, -26, 164, 52, 18) }, pop);
+  svgEl('path', { class: 'fil couture', style: '--f:var(--fil-rouge)', d: rrD(-76, -20, 152, 40, 13) }, pop);
+  svgEl('text', { class: 'fete-texte', y: 1 }, pop).textContent = 'Bravo !';
+  const pin = svgEl('g', { transform: 'translate(-64 -20) rotate(-14)' }, pop);
+  svgEl('use', { href: '#pin', style: 'color:var(--glass-red)' }, pin);
+  animer(pop, [{ transform: 'translateY(-70px) rotate(-8deg)', opacity: 0 }, { transform: 'translateY(0) rotate(0deg)', opacity: 1 }],
+    { duration: 620, delay: 140, easing: RESSORT, fill: 'backwards' });
+}
+const LAINES = [['--p-soleil', 'jaune'], ['--p-drapeau', 'rose'], ['--p-couverture', 'bleu'], ['--p-pyjama', 'bleu']];
+function confettis(parent, n){
+  if(REDUIT.matches) return;   /* mouvement réduit : pas de confettis */
+  const g = svgEl('g', {}, parent);
+  for(let k = 0; k < n; k++){
+    const [p, encre] = LAINES[k % LAINES.length];
+    const x = 30 + Math.random() * 820, y = -14 - Math.random() * 40;
+    const w = svgEl('g', { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` }, g);
+    const chute = svgEl('g', { class: 'fete-pop' }, w);
+    svgEl('ellipse', { class: 'w lite mini', style: `--p:var(${p})`, 'data-ink': encre, rx: 6.5, ry: 4.4 }, chute);
+    const a0 = Math.random() * 180, a1 = a0 + (Math.random() < .5 ? -1 : 1) * (25 + Math.random() * 45);
+    const dx = (Math.random() - .5) * 90, dy = 470 + Math.random() * 110;
+    animer(chute, [
+      { transform: `translate(0px,0px) rotate(${a0}deg)`, opacity: 1 },
+      { transform: `translate(${(dx * .8).toFixed(1)}px,${(dy * .8).toFixed(1)}px) rotate(${(a0 + (a1 - a0) * .8).toFixed(1)}deg)`, opacity: 1, offset: .8 },
+      { transform: `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) rotate(${a1.toFixed(1)}deg)`, opacity: 0 }
+    ], { duration: 1500, delay: Math.random() * 280, easing: 'cubic-bezier(.4,.05,.75,.95)', fill: 'both' });
+  }
+  setTimeout(() => g.remove(), 1900);
+}
+/* une fête : `etoiles` étoiles en rang en haut de la scène, le « Bravo ! » épinglé, 24 confettis */
+function feter(etoiles){
+  viderFete();
+  const pas = 64, x0 = 450 - (etoiles - 1) * pas / 2;
+  for(let k = 0; k < etoiles; k++) etoileFeutre(gFete, x0 + k * pas, 64, 26, k * 170);
+  etiquetteBravo(gFete);
+  confettis(gFete, 24);
+}
+
+/* --- le badge « Je connais mon cerveau » --- */
+function setBadge(on, opts = {}){
+  on = !!on;
+  const deja = badgeEl.classList.contains('on');
+  badgeEl.classList.toggle('on', on);
+  badgeEl.setAttribute('aria-hidden', String(!on));
+  prefs.set('badge', on);
+  if(!on || !opts.anim) return;
+  const pop = badgeEl.querySelector('.badge-in');
+  if(deja) animer(pop, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-8deg) scale(1.08)' }, { transform: 'rotate(6deg)' }, { transform: 'rotate(0deg)' }],
+    { duration: 600, easing: 'ease-in-out' });   /* déjà gagné : il frétille */
+  else animer(pop, [{ transform: 'translateY(-40px) scale(.2) rotate(-30deg)', opacity: 0 }, { transform: 'translateY(0) scale(1) rotate(0deg)', opacity: 1 }],
+    { duration: 760, delay: opts.delai || 0, easing: RESSORT, fill: 'backwards' });
+}
+if(prefs.get('badge', false) === true) setBadge(true); else badgeEl.setAttribute('aria-hidden', 'true');
+document.addEventListener('histoire', e => { if(e.detail && e.detail.fin) setBadge(true, { anim: true }); });
+
+/* --- la fiche du jeu --- */
+function majJeuBoutons(etape){   /* 'cherche' (jeu 1) | 'choix' (jeu 2) | 'reponse' | 'fin' */
+  vraiBtn.hidden = reveBtn.hidden = etape !== 'choix';
+  jeuSuiteBtn.hidden = etape !== 'reponse';
+  rejouerBtn.hidden = finiBtn.hidden = etape !== 'fin';
+}
+function majScore(){
+  const vu = document.createElement('span'), lu = document.createElement('span');
+  vu.setAttribute('aria-hidden', 'true');
+  vu.textContent = `⭐ ${jeu.score} / ${JEU_N}`;
+  lu.className = 'sr-only';
+  lu.textContent = `${jeu.score} sur ${JEU_N}`;
+  jeuScore.replaceChildren(vu, lu);
+}
+function majTitre(titre, compteur){
+  infoTitle.textContent = titre;
+  if(!compteur) return;
+  if(!jeu.num){ jeu.num = document.createElement('span'); jeu.num.className = 'recit-num'; }
+  jeu.num.textContent = compteur;
+  infoTitle.appendChild(jeu.num);
+}
+function emojiJeu(e){
+  infoEmoji.textContent = e;
+  infoEmoji.classList.remove('pop');
+  void infoEmoji.offsetWidth;   /* relance l'animation */
+  infoEmoji.classList.add('pop');
+}
+const vueDe = id => [].concat(INFO[id].vue)[0];
+function enleverIndice(){
+  clearTimeout(jeu.indiceTimer);
+  if(jeu.indice) jeu.indice.remove();
+  jeu.indice = null;
+}
+/* la pastille de la bonne zone bat deux secondes (mécanisme des pastilles de Task 12) */
+function indiceZone(id){
+  enleverIndice();
+  if(!ZS) return;
+  let best = null;
+  ZS.gHs.querySelectorAll('.hsg.active .hs:not(.off)').forEach(z => {
+    if(z.dataset.id !== id) return;
+    const b = z.getBBox();
+    if(!best || b.width * b.height > best.width * best.height) best = b;
+  });
+  if(!best) return;
+  jeu.indice = poserPastille(ZS.hint, best.x + best.width / 2, best.y + best.height / 2, id, 0);
+  jeu.indiceTimer = setTimeout(enleverIndice, 2000);
+}
+function dandiner(z){
+  z.classList.add('non');
+  animer(z, [0, -6, 5, -4, 2, 0].map(a => ({ transform: `rotate(${a}deg)` })), { duration: 560, easing: 'ease-in-out' });
+  setTimeout(() => z.classList.remove('non'), 900);
+}
+function poserQuestion(){
+  clearTimeout(jeu.timer);
+  jeu.attente = false; jeu.essai = true;
+  viderFete(); enleverIndice(); marquerZone(null);
+  const k = jeu.ordre[jeu.i], compteur = `Question ${jeu.i + 1} / ${JEU_N}`;
+  majScore();
+  if(jeuActif === 1){
+    const q = JEU_PARTIES[k];
+    emojiJeu(JEUX[1].emoji);
+    majTitre(JEUX[1].titre, compteur);
+    infoText.textContent = `${q.q} Touche la bonne partie !`;
+    majJeuBoutons('cherche');
+    const v = vueDe(q.cible);
+    if(Math.round(cutCourant) !== v || Math.abs(cutCourant - v) > .001) animateCut(v);
+  }else{
+    const q = JEU_REVE[k];
+    emojiJeu(q.emoji);
+    majTitre(JEUX[2].titre, compteur);
+    infoText.textContent = q.q;
+    majJeuBoutons('choix');
+  }
+}
+function suivante(){
+  jeu.i++;
+  if(jeu.i >= JEU_N) finDuJeu(); else poserQuestion();
+}
+function finDuJeu(){
+  clearTimeout(jeu.timer);
+  jeu.attente = false;
+  enleverIndice(); marquerZone(null);
+  const etoiles = Math.max(1, jeu.score);
+  emojiJeu('🏆');
+  majTitre('Bravo, tu connais ton cerveau !');
+  infoText.textContent = jeu.score === JEU_N ? '3 sur 3 ! Regarde : tu as gagné un badge, en haut.'
+    : jeu.score ? `Tu en as trouvé ${jeu.score} sur ${JEU_N}. On rejoue ?`
+    : 'Tu as bien cherché ! On rejoue ?';
+  majScore();
+  majJeuBoutons('fin');
+  feter(etoiles);
+  if(jeu.score === JEU_N) setBadge(true, { anim: true, delai: 700 });   /* gagné tout de suite, il arrive après les étoiles */
+  rejouerBtn.focus({ preventScroll: true });
+}
+
+/* jeu 1 : la zone touchée (clic ou Entrée). Renvoie true si le jeu a pris le toucher. */
+function jeuToucheZone(z){
+  if(jeuActif !== 1 || jeu.i >= JEU_N) return false;
+  if(jeu.attente) return true;   /* pendant la fête : on attend la question suivante */
+  const q = JEU_PARTIES[jeu.ordre[jeu.i]];
+  if(z.dataset.id === q.cible){
+    if(jeu.essai) jeu.score++;
+    jeu.attente = true;
+    enleverIndice();
+    marquerZone(z);   /* la bonne pièce, cousue d'indigo */
+    infoText.textContent = `Bravo ! ${INFO[q.cible].emoji} ${INFO[q.cible].titre}.`;
+    majScore();
+    feter(1);
+    jeu.timer = setTimeout(suivante, 1800);
+  }else{
+    jeu.essai = false;
+    dandiner(z);
+    infoText.textContent = `Presque ! Cherche encore… ${q.q}`;
+    const v = vueDe(q.cible);
+    if(Math.round(cutCourant) !== v){
+      animateCut(v);
+      jeu.timer = setTimeout(() => { if(jeuActif === 1) indiceZone(q.cible); }, REDUIT.matches ? 0 : 560);
+    }else indiceZone(q.cible);
+  }
+  return true;
+}
+/* jeu 2 : une réponse */
+function repondre(rep){
+  if(jeuActif !== 2 || jeu.attente || jeu.i >= JEU_N) return;
+  const q = JEU_REVE[jeu.ordre[jeu.i]];
+  const bon = rep === q.reponse;
+  if(bon) jeu.score++;
+  jeu.attente = true;
+  infoText.textContent = (bon ? 'Bravo ! ' : 'Presque ! ') + q.explication;
+  majScore();
+  majJeuBoutons('reponse');
+  jeuSuiteBtn.textContent = jeu.i + 1 < JEU_N ? 'Suite' : 'Fin du jeu';
+  if(bon) feter(1);
+  jeuSuiteBtn.focus({ preventScroll: true });
+}
+
+function lancerJeu(n){
+  if(recitActif) stopStory();   /* un jeu arrête l'histoire */
+  if(jeuActif) finirJeu();
+  annulerAnimations();
+  jeu.ordre = tirer3(Date.now(), n === 1 ? JEU_PARTIES.length : JEU_REVE.length);
+  jeu.i = 0; jeu.score = 0;
+  jeuActif = n;
+  infoBox.classList.add('jeu');
+  infoBox.classList.toggle('jeu2', n === 2);
+  jeuBtns[n].setAttribute('aria-pressed', 'true');
+  jeuOuvre = true;
+  openInfo(jeuBtns[n], { emoji: JEUX[n].emoji, titre: JEUX[n].titre });
+  jeuOuvre = false;
+  poserQuestion();
+  /* le texte arrive une image après l'ouverture : sinon la région live, encore cachée, ne le lit pas */
+  const texte = infoText.textContent;
+  infoText.textContent = '';
+  requestAnimationFrame(() => { if(jeuActif === n && !infoText.textContent) infoText.textContent = texte; });
+  if(n === 2) vraiBtn.focus({ preventScroll: true });
+}
+finirJeu = function(){
+  jeuActif = 0;
+  clearTimeout(jeu.timer); jeu.timer = 0; jeu.attente = false;
+  enleverIndice(); viderFete();
+  infoBox.classList.remove('jeu', 'jeu2');
+  infoEmoji.classList.remove('pop');
+  majJeuBoutons('');
+  jeuScore.replaceChildren();
+  if(jeu.num) jeu.num.remove();
+  Object.values(jeuBtns).forEach(b => b.setAttribute('aria-pressed', 'false'));
+};
+function stopJeu(){
+  if(!jeuActif) return;
+  finirJeu();
+  closeInfo();
+}
+function startQuiz(n){
+  if(jeuActif === n){ stopJeu(); return; }   /* second appui : le jeu s'arrête */
+  lancerJeu(n);
+}
+jeuBtns[1].addEventListener('click', () => startQuiz(1));
+jeuBtns[2].addEventListener('click', () => startQuiz(2));
+vraiBtn.addEventListener('click', () => repondre('vrai'));
+reveBtn.addEventListener('click', () => repondre('reve'));
+jeuSuiteBtn.addEventListener('click', () => { if(jeuActif === 2 && jeu.attente) suivante(); if(jeuActif === 2 && !vraiBtn.hidden) vraiBtn.focus({ preventScroll: true }); });
+rejouerBtn.addEventListener('click', () => { const n = jeuActif; if(n) lancerJeu(n); });
+finiBtn.addEventListener('click', stopJeu);
 </script>
 </body>
 </html>
