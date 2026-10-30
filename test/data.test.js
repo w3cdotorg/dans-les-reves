@@ -27,7 +27,7 @@ function tousLesTextes(){
     ...JEU_PARTIES.map(q => q.q),
     ...JEU_REVE.map(q => q.q),
     ...HISTOIRE.map(h => h.texte),
-    ...TRANSFOS.map(t => t.texte),
+    ...TRANSFOS.flatMap(t => [t.texte, t.statue || '']),
     ...Object.values(PHRASES)
   ];
 }

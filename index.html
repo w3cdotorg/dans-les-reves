@@ -377,8 +377,13 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    (#scene-inner>g et non #scene>g : tous les groupes vivent dans #scene-inner,
    pour que la loupe clone la scène d'un seul <use>.) Ces groupes ne sont jamais
    repris par <use> : le sélecteur d'ancêtre est permis ici. */
-#scene-inner>g{mix-blend-mode:var(--grp-blend,normal)}
-[data-theme=riso]{--grp-blend:multiply}   /* variable : le clone <use> de la loupe la reçoit de <html> */
+/* Task 18 : en riso, chaque groupe est un passage d'encre ISOLÉ (ses pièces se multiplient entre
+   elles), posé en normal sur la toile. Avant, les groupes se multipliaient avec la toile : la nuit
+   assombrissait aussi les pièces, d'où un plafond de .4 et une nuit gris-mauve terne. Maintenant
+   la nuit est une encre bleue sur le papier, et les pièces restent « en réserve » par-dessus,
+   franches (de jour, sur le papier presque blanc, la différence ne se voit pas). */
+#scene-inner>g{mix-blend-mode:var(--grp-blend,normal);isolation:var(--grp-iso,auto)}
+[data-theme=riso]{--grp-blend:normal;--grp-iso:isolate}   /* variables : le clone <use> de la loupe les reçoit de <html> */
 
 /* Contours brodés .fil : fil blanc au point de tige par défaut ; --f change le fil. */
 .fil{fill:none;stroke:var(--fil-encre, var(--f, var(--fil-blanc)));stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;
@@ -467,8 +472,9 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 #g-enfant-dehors{transform-box:view-box;transform-origin:359px 440px}
 .fil.herbe{--f:color-mix(in srgb, color-mix(in srgb, var(--p-sol) 55%, #2f4a1e), var(--nuit-3) calc(var(--nuit,0) * var(--sol-nuit, 40%)));stroke-width:1.5}
 /* le sol s'assombrit avec la nuit (Task 7, fix 1) : la laine garde sa matière, sa couleur
-   tire vers --nuit-3 (pas de multiply). En riso, le sol se multiplie déjà avec la toile
-   assombrie : le mélange y est plus léger (--sol-nuit). */
+   tire vers --nuit-3 (pas de multiply). En riso, le sol est imprimé en vert sur le papier,
+   par-dessus la nuit bleue (groupes isolés, Task 18) : le mélange y est un peu plus léger
+   (--sol-nuit 30 %), le sol reste lisible sous le lit. */
 #p-sol{fill:color-mix(in srgb, var(--sol-base, var(--p-sol)), var(--nuit-3) calc(var(--nuit,0) * var(--sol-nuit, 40%)))}
 .fil.graffiti{--f:var(--fil-rouge);stroke-width:2.2}
 .fil.etoile{stroke-width:1.1}
@@ -488,7 +494,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 .w.teinte[data-ink]{fill:color-mix(in srgb, var(--encre, var(--p)) var(--teinte-mix,100%), var(--papier))}
 [data-theme=riso]{--pale-mix:35%;--teinte-mix:60%}
 .w.reserve{mix-blend-mode:normal}
-[data-theme=riso]{--sol-base:color-mix(in srgb, color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-bleu)) 62%, var(--papier));--sol-nuit:20%}
+[data-theme=riso]{--sol-base:color-mix(in srgb, color-mix(in srgb, var(--ink-jaune) 55%, var(--ink-bleu)) 62%, var(--papier));--sol-nuit:30%}
 #g-enfant-dehors{isolation:var(--enfant-iso, auto)}
 [data-theme=riso]{--enfant-iso:isolate}
 
@@ -503,11 +509,11 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 [data-theme=riso]{--toile-lin:var(--papier);--toile-grain:url(#paperGrain)}
 /* La nuit tombe sur la toile (Task 7) : un aplat uniforme --nuit-3 multiplié, la trame
    reste visible dessous. --nuit (0..1) vient de la table du temps ; --nuit-max plafonne
-   l'assombrissement pour garder la trame et les contrastes (NOTES.md, Task 7). En riso,
-   tous les groupes de la scène se multiplient avec la toile : la nuit assombrit aussi
-   les pièces, d'où un plafond plus bas. */
+   l'assombrissement pour garder la trame et les contrastes (NOTES.md, Task 7). En riso
+   (Task 18), la nuit est un bleu d'impression (encre bleue mêlée au bleu de nuit) à .65 :
+   les groupes sont isolés (section 7), elle ne salit plus les pièces. */
 .nuit{fill:var(--nuit-couleur, var(--nuit-3));mix-blend-mode:multiply;opacity:calc(var(--nuit,0) * var(--nuit-max,.8));transition:fill 1.2s ease}
-[data-theme=riso]{--nuit-max:.4}
+[data-theme=riso]{--nuit-max:.65;--nuit-couleur:color-mix(in srgb, var(--ink-bleu) 45%, var(--nuit-3))}
 
 /* ===== 7 quinquies. Vue « Tout près » : à hauteur de neurones (Task 5) =====
    Un fond de laine rose pâle plein cadre (opaque : les autres vues ne transparaissent
@@ -771,9 +777,12 @@ symbol{overflow:visible}
 .decor{transition:transform .35s var(--ui-ressort);isolation:var(--decor-iso, auto)}
 [data-theme=riso]{--decor-iso:isolate}   /* riso : un décor ne se multiplie pas avec l'expo derrière lui */
 .decor-pop{transform-box:fill-box;transform-origin:50% 100%}
-.grandis{opacity:var(--grandis, 0);font-family:var(--font-display);font-weight:600;font-size:10.5px;text-anchor:middle;letter-spacing:.3px;
-  fill:var(--fil-encre, var(--fil-brun));stroke:var(--riso-papier, var(--fil-blanc));stroke-width:2.6;stroke-linejoin:round;paint-order:stroke;
-  filter:var(--fil-filter);pointer-events:none}
+/* riso (Task 18) : le grain du filtre #riso mangeait ce petit texte bleu posé sur les cheveux bleus ;
+   il est imprimé net (--grandis-filtre), en gras, sur un halo de papier plus large */
+.grandis{opacity:var(--grandis, 0);font-family:var(--font-display);font-weight:var(--grandis-graisse, 600);font-size:10.5px;text-anchor:middle;letter-spacing:.3px;
+  fill:var(--fil-encre, var(--fil-brun));stroke:var(--riso-papier, var(--fil-blanc));stroke-width:var(--grandis-halo, 2.6);stroke-linejoin:round;paint-order:stroke;
+  filter:var(--grandis-filtre, var(--fil-filter));pointer-events:none}
+[data-theme=riso]{--grandis-filtre:none;--grandis-graisse:700;--grandis-halo:3.4}
 .hippo-carte .points{opacity:0;filter:var(--fil-filter)}
 .points .fil{filter:none;stroke-width:.9}   /* le filtre sur le groupe : un trait droit n'a pas de boîte pour le sien */
 .hippo-carte.range .points{opacity:1}
@@ -802,7 +811,8 @@ symbol{overflow:visible}
    pose QUE des variables, qui traversent les clones (Dehors, la loupe de Task 14).
    Les effets de la nuit (toile plus profonde, alarme) ne valent que la nuit des rêves
    (data-temps 3) ; au matin, le rêve reste à l'écran, sa teinte aussi. */
-body[data-temps="3"][data-verdict=cauchemar]{--nuit-couleur:var(--nuit-4)}
+body[data-temps="3"][data-verdict=cauchemar]{--nuit-couleur:var(--nuit-cauchemar, var(--nuit-4))}
+[data-theme=riso]{--nuit-cauchemar:color-mix(in srgb, var(--ink-bleu) 30%, var(--nuit-4))}   /* riso : un bleu d'encre plus profond, pas un gris (Task 18) */
 body[data-temps="3"][data-verdict=bizarre]{
   --p-amygdale:var(--p-amygdale-bizarre);--amygdale-rouge:var(--amygdale-orange);--amygdale-halo:var(--amygdale-orange);
   --amygdale-encre:var(--encre-orange)}   /* riso : orange d'impression (en feutrine, --encre-orange n'existe pas : la laine) */
@@ -3190,7 +3200,7 @@ const CARTES = [
     texte:"Tu as tellement ri que tu en avais mal au ventre ! Les souvenirs où l'on rit, ton cerveau les garde bien précieusement." },
   { slug:'peur', nom:"j'ai eu peur", nomPhrase:'le moment où tu as eu peur', g:'m', emoji:'😱', cat:'ressenti', charge:3, entree:'oreille', base:false,
     greffe:{ nom:'de grands yeux tout ronds', forme:'peur', g:'mp' },
-    texte:"Avoir peur, ça arrive à tout le monde, même aux grands ! Ton alarme de la peur a sonné, et cette nuit, ton cerveau va s'en occuper." },
+    texte:"Avoir peur, ça arrive à tout le monde, même aux grands ! Ton alarme de la peur a sonné, et cette nuit, ton cerveau va ranger ce souvenir avec les autres." },
   { slug:'fache', nom:'je me suis {fâché|fâchée}', nomPhrase:"le moment où tu t'es {fâché|fâchée}", g:'m', emoji:'😠', cat:'ressenti', charge:2, entree:'oreille', base:false,
     greffe:{ nom:'des sourcils fâchés', forme:'fache', g:'mp' },
     texte:"Grrr, tu t'es {fâché|fâchée} tout rouge, ça arrive ! La colère aussi entre dans le sac à souvenirs, et la nuit, ton cerveau la range." },
@@ -3251,7 +3261,7 @@ const INFO = {
   'hippocampe':{ vue:1, emoji:'🎒', titre:"L'hippocampe, le sac à souvenirs tout neufs",
     texte:"Ce petit cheval de mer couché, c'est le sac à souvenirs tout neufs : toute ta journée tombe dedans. Le soir, il est plein à craquer, alors la nuit, il rejoue tes souvenirs pour les ranger dans la couverture plissée." },
   'amygdale':{ vue:1, emoji:'🚨', titre:"L'amygdale, l'alarme de la peur",
-    texte:"Cette petite amande sonne l'alarme quand tu as peur : « attention ! ». Elle reste allumée pendant les rêves, et beaucoup de chercheurs pensent que les rêves aident à ranger les peurs de la journée." },
+    texte:"Cette petite amande, juste devant le sac à souvenirs, sonne l'alarme quand tu as peur : « attention ! ». Elle reste allumée pendant les rêves, et beaucoup de chercheurs pensent que les rêves aident à ranger les peurs de la journée." },
   'thalamus':{ vue:1, emoji:'🚉', titre:'Le thalamus, la gare de triage',
     texte:"Tout ce que voient tes yeux et entendent tes oreilles passe par cette gare, au milieu de ta tête : chaque image et chaque son y prend son billet. Puis tchou-tchou, la gare l'envoie vers le bon coin du cerveau !" },
   'horloge':{ vue:1, emoji:'⏰', titre:"L'horloge de la tête (hypothalamus)",
@@ -3273,7 +3283,7 @@ const INFO = {
   'oreille':{ vue:1, emoji:'🐌', titre:"L'oreille et le petit escargot",
     texte:"Au fond de ton oreille, il y a un tout petit escargot plein d'eau : la cochlée. Il change les sons en messages pour ton cerveau, et il écoute même la nuit : c'est pour ça qu'un gros bruit peut te réveiller !" },
   'crane':{ vue:1, emoji:'⛑️', titre:"Le crâne, le casque d'os",
-    texte:"Ton cerveau est bien à l'abri dans un casque en os : le crâne. Et la nuit, pendant le grand sommeil calme, tout ton corps grandit un peu, tes os aussi !" },
+    texte:"Ton cerveau est bien à l'abri dans un casque en os : le crâne. Et pendant le grand sommeil calme, ton corps fabrique une hormone qui aide tes os à grandir, un tout petit peu chaque nuit !" },
   'liquide':{ vue:1, emoji:'💧', titre:"Le coussin d'eau",
     texte:"Ton cerveau flotte dans un coussin d'eau qui le protège des chocs, comme un œuf dans une boîte. Pendant le grand sommeil calme, cette eau passe entre les plis et ton cerveau se rince, comme sous une petite douche !" },
 
@@ -3452,9 +3462,9 @@ const HISTOIRE = [
   { vue:0, temps:1,
     texte:"Le soir, quand il a fait noir, la petite glande de la nuit a envoyé son message : « c'est la nuit ». Après un câlin et une chanson, {PRENOM} s'est {endormi|endormie} avec son doudou." },
   { vue:1, temps:2,
-    texte:"D'abord, il y a eu le sommeil profond, le grand sommeil calme du début de la nuit. Son cerveau a travaillé dur : il a rejoué la journée, il a rangé les souvenirs dans la couverture plissée, et il s'est rincé." },
+    texte:"D'abord est venu le sommeil profond, le grand sommeil calme. Son cerveau a travaillé dur : il a rejoué la journée, rangé les souvenirs dans la couverture plissée, et il s'est rincé." },
   { vue:1, temps:3, action:'reve',
-    texte:"Ensuite est venu le sommeil paradoxal, le sommeil des rêves : le chef qui vérifie dormait, et l'alarme de la peur était allumée. Alors son cerveau a mélangé le pouce géant avec le mot « ogre »… et ça a fait un ogre gigantesque !" },
+    texte:"Puis est venu le sommeil paradoxal, le sommeil des rêves. Le chef qui vérifie dormait, alors son cerveau a mélangé le pouce géant avec le mot « ogre »… et ça a fait un ogre gigantesque !" },
   { vue:0, temps:3,
     texte:"Cette nuit-là, {PRENOM} s'est {réveillé|réveillée} plusieurs fois, {terrorisé|terrorisée} par un ogre gigantesque. C'était un cauchemar : ça fait très peur, mais ce n'est pas pour de vrai." },
   { vue:1, temps:3, action:'telecommande',
@@ -3473,7 +3483,10 @@ const HISTOIRE = [
    l'ogre. Les grandes formes : « bronze » ramène la base comme dans la journée. */
 const TRANSFOS = [
   { id:'bronze',
-    texte:"Pfffuiiit ! Ce qui faisait peur se dégonfle comme un vieux ballon, et tout redevient comme dans ta journée : tout sage, et ça ne bouge plus." },
+    texte:"Pfffuiiit ! Ce qui faisait peur se dégonfle comme un vieux ballon, et tout redevient comme dans ta journée : tout sage, et ça ne bouge plus.",
+    /* quand le rêve n'est pas fait sur le pouce (statue dans la journée), la base devient une
+       statue de bronze (teinte sépia) : elle ne « redevient » pas comme dans la journée (Task 18) */
+    statue:"Pfffuiiit ! Ce qui faisait peur se dégonfle comme un vieux ballon, et tout devient une statue de bronze : toute sage, et qui ne bouge plus." },
   { id:'lapin',
     texte:"Pop, pop ! Ce qui faisait peur se retrouve avec deux grandes oreilles de lapin toutes roses, et grignote une carotte en remuant le nez." },
   { id:'danse',
@@ -4936,6 +4949,12 @@ function poserReconfort(film, carte){
   return g;
 }
 function poserVerdict(v){
+    /* … et la phrase la dit par sa greffe (« les deux grands bras ») : une greffe qui n'est qu'un
+       corps (le câlin : deux bras) entoure la vignette, pour que l'image montre ce que dit la
+       phrase (Task 18). Les autres (visages, mots) se lisent déjà dans leur vignette. */
+    const sym = document.getElementById('g-greffe-' + forme);
+    if(sym && sym.querySelector('.a-corps') && !sym.querySelector('.a-tete'))
+      svgEl('use', { class: 'reve-greffe', href: '#g-greffe-' + forme, style: '--corps-x:0;--corps-y:6;--corps-s:1.15' }, pose);
   if(v) document.body.dataset.verdict = v;
   else delete document.body.dataset.verdict;
   appliquerTete();
@@ -5343,7 +5362,8 @@ function applyRemote(){
     if(!film || !film.isConnected || reveCourant !== reve) return;   /* un autre rêve entre-temps */
     if(!reve){ direPhrase(PHRASES.flou); return; }                   /* journée vide : rien à changer */
     transformer(id, true);                                           /* 2 */
-    direTransfo(TRANSFOS.find(t => t.id === id).texte);              /* 4 */
+    const tr = TRANSFOS.find(t => t.id === id);
+    direTransfo(tr.statue && reve.base.slug !== 'pouce' ? tr.statue : tr.texte);   /* 4 (la base devenue statue : bronze-teinte) */
   });
 }
 const appui = on => { tcCorps.classList.toggle('appui', on); tcBoutons.classList.toggle('appui', on); };
