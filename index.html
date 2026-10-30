@@ -140,7 +140,11 @@ body{
    la fenêtre (--hors-scene = bandeau + dock), sa largeur en est déduite au
    ratio 900:560 (= 45/28) du viewBox ; jamais moins de 480 px de haut.
    --marge : 28 px sur bureau, car le bouton du rail (64 px sur un rail de 52 px
-   posé à right:-20px) dépasse de 26 px la scène ; la gouttière sur téléphone. */
+   posé à right:-20px) dépasse de 26 px la scène ; la gouttière sur téléphone.
+   Task 18, fix 1 : 206 px n'est que la valeur de départ (bandeau + dock d'UNE rangée) ; le
+   script (fin de la section 7) mesure la vraie hauteur hors scène et la pose en style sur
+   .app : quand le dock passe sur deux rangées (sous ≈ 1310 px de large), la scène rétrécit
+   d'autant et le dock entier reste dans la fenêtre (1366 × 768, 1440 × 900…). */
 .app{
   --hors-scene:206px;
   --marge:28px;
@@ -381,7 +385,8 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
    elles), posé en normal sur la toile. Avant, les groupes se multipliaient avec la toile : la nuit
    assombrissait aussi les pièces, d'où un plafond de .4 et une nuit gris-mauve terne. Maintenant
    la nuit est une encre bleue sur le papier, et les pièces restent « en réserve » par-dessus,
-   franches (de jour, sur le papier presque blanc, la différence ne se voit pas). */
+   franches. De jour, c'est un peu plus clair qu'avant (le papier et son grain ne se multiplient
+   plus sous les pièces : en moyenne 6,5 niveaux sur 255 à v0-t0) : changement voulu, assumé. */
 #scene-inner>g{mix-blend-mode:var(--grp-blend,normal);isolation:var(--grp-iso,auto)}
 [data-theme=riso]{--grp-blend:normal;--grp-iso:isolate}   /* variables : le clone <use> de la loupe les reçoit de <html> */
 
@@ -4293,6 +4298,42 @@ fermerSurFond(feuille, fermerFeuille);
 if(Q.get('reglages') === '1') ouvrirFeuille();
 requestAnimationFrame(() => requestAnimationFrame(() => { root.dataset.pret = '1'; }));
 
+/* Hauteur hors scène (Task 18, fix 1), bureau seulement (≥ 900 px ; sur téléphone .app n'a pas
+   de largeur maximale). La largeur de .app se déduit de --hors-scene (section 2 du CSS) ; le
+   dock tient sur UNE rangée seulement si .app est assez large. On calcule donc les deux cas,
+   sans dépendre de l'état présent (sinon une police de repli plus large, au chargement, faisait
+   passer le dock sur deux rangées pour de bon) :
+     autre = hauteur de .app − SVG − dock (bandeau, rail, marges) ;
+     une   = autre + dock d'une rangée ; deux = autre + dock de deux rangées ;
+     largeur du dock sur une rangée = boutons + écarts (elle ne dépend pas du conteneur) ;
+   si .app, calculée avec « une », laisse cette largeur au dock : une rangée, sinon deux.
+   Recalcul à chaque changement de taille (ResizeObserver, avant la peinture : pas de saut
+   visible) et quand les polices arrivent ; la valeur n'est réécrite que si elle change d'au
+   moins 2 px (pas de va-et-vient d'arrondi). */
+(function(){
+  const app = document.querySelector('.app'), dessin = document.getElementById('scene');
+  const dock = document.querySelector('.dock'), jeux = dock.querySelector('.dock-jeux'), outils = dock.querySelector('.dock-outils');
+  const bureau = matchMedia('(min-width: 900px)');
+  let pose = 0;
+  const px = v => parseFloat(v) || 0;
+  const rangee = g => [...g.children].reduce((s, b) => s + b.getBoundingClientRect().width, 0) + px(getComputedStyle(g).columnGap) * (g.children.length - 1);
+  function mesurer(){
+    if(!bureau.matches) return;
+    const cs = getComputedStyle(dock), as = getComputedStyle(app);
+    const pad = px(cs.paddingTop) + px(cs.paddingBottom);
+    const hJ = jeux.getBoundingClientRect().height, hO = outils.getBoundingClientRect().height;
+    const autre = app.getBoundingClientRect().height - dessin.getBoundingClientRect().height - dock.getBoundingClientRect().height;
+    const une = autre + pad + Math.max(hJ, hO), deux = autre + pad + hJ + px(cs.rowGap) + hO;
+    const marges = px(as.paddingLeft) + px(as.paddingRight);
+    const largeur = Math.min(document.documentElement.clientWidth, Math.max(480, innerHeight - une) * 45 / 28 + marges) - marges;   /* clientWidth : sans la barre de défilement */
+    const hors = Math.ceil(largeur >= rangee(jeux) + px(cs.columnGap) + rangee(outils) + 1 ? une : deux);
+    if(hors > 0 && Math.abs(hors - pose) >= 2){ pose = hors; app.style.setProperty('--hors-scene', hors + 'px'); }
+  }
+  new ResizeObserver(mesurer).observe(app);
+  if(document.fonts) document.fonts.ready.then(mesurer);
+  mesurer();
+})();
+
 /* Clavier (le seul gestionnaire) : ←→ le temps (pas 0,25, puis le moment voisin
    après un répit : pasTemps), ↑↓ la vue (pas 0,5, puis la vue voisine : pasCut ;
    ↓ = on entre plus profond), Échap ferme le volet. Partout sauf dans un champ de
@@ -4377,6 +4418,9 @@ const cortexFils = document.getElementById('g-fils-amygdale');
 const PAR_SLUG = Object.fromEntries(CARTES.map((c, i) => [c.slug, { ...c, i }]));
 let journee = [];
 const boite = document.getElementById('g-boite');
+/* Chromium mettait le groupe de la boîte (sans nom ni rôle) dans le parcours Tab, juste après
+   « ⋯ » (Task 18, fix 1) : on l'en sort ; ses cartes, elles, restent focalisables. */
+boite.setAttribute('tabindex', '-1');
 const boiteRail = document.getElementById('boite-rail');
 const vols = document.getElementById('g-vols');
 const hippoCartes = document.getElementById('g-hippo-cartes');
@@ -4487,8 +4531,7 @@ boite.addEventListener('click', e => {
   if(e.target.closest('#bulle-boite')){ cacherBulle(); return; }
   const carte = e.target.closest('.carte');
   if(!carte || performance.now() - finGlisse < 80) return;
-  pickCard(carte.dataset.slug);
-  bouloche();
+  if(pickCard(carte.dataset.slug)) bouloche();
 });
 boite.addEventListener('keydown', e => {
   const carte = e.target.closest && e.target.closest('.carte');
@@ -4496,8 +4539,7 @@ boite.addEventListener('keydown', e => {
   e.preventDefault();
   if(e.repeat) return;
   if(!boiteDort()){ appuyer(carte); setTimeout(relacherAppui, 110); }
-  pickCard(carte.dataset.slug);
-  bouloche();
+  if(pickCard(carte.dataset.slug)) bouloche();
 });
 
 /* --- la nuit : la boîte se grise (moment arrondi ≥ 2 : nuits et matin).
@@ -4791,15 +4833,15 @@ function volDedans(c, x0, y0, mini){
 function emettreJournee(){ document.dispatchEvent(new CustomEvent('journee', { detail: [...journee] })); }
 
 /* --- une surprise (spec §2 « une bouloche se décroche parfois et flotte », Task 18) : une fois
-   par visite, quand l'enfant pose sa deuxième carte (de jour, Dehors ou Dedans ; pas les cartes
-   posées par l'URL ni par l'histoire du pouce), une bouloche se
+   par visite, quand l'enfant pose SA deuxième carte (compteur des cartes acceptées posées par
+   son geste, clic ou clavier : ni l'URL, ni l'histoire du pouce, ni un refus ne comptent ; si
+   ce moment tombe la nuit ou Tout près, plus de bouloche pour cette visite), une bouloche se
    décroche du col du pyjama et monte en se dandinant, puis s'efface. Une seule petite pièce .w.lite,
    dans #g-ui, mue par animer() sur son <g> (jamais de transform sur une .w) ; rien en mouvement
    réduit (animer ne joue pas : la pièce est retirée tout de suite). --- */
-let boulocheVue = false;
+let cartesPosees = 0;
 function bouloche(){
-  if(boulocheVue || journee.length < 2 || Math.round(cutCourant) === 2 || (phaseCourante ?? 0) !== 0) return;
-  boulocheVue = true;
+  if(++cartesPosees !== 2 || Math.round(cutCourant) === 2 || (phaseCourante ?? 0) !== 0) return;
   const g = svgEl('g', { class: 'bouloche', 'aria-hidden': 'true' }, document.getElementById('g-ui'));
   svgEl('ellipse', { class: 'w lite mini', style: '--p:var(--p-pyjama);--encre:var(--encre-bleu-pale)', 'data-ink': 'bleu', rx: 6.6, ry: 5.6 }, g);
   const a = animer(g, [
