@@ -264,8 +264,8 @@ refaire « sa » nuit), avec une part de variation visuelle sur « Encore un rê
    une routine apaisante réduit les cauchemars.
 5. **La phrase** (affichée et lue) suit toujours le même gabarit :
    « Dans le rêve, *[base]* est devenu *[greffe + modificateur]*, parce que ton cerveau a
-   mélangé *[carte 1]* avec *[carte 2]*. Le chef qui vérifie dormait, alors personne n'a
-   dit "mais non, c'est une statue !" »
+   mélangé *[carte 1]* avec *[carte 2]*. La partie de devant, celle qui réfléchit et qui
+   dit "mais non", dormait. Alors personne n'a dit : "mais non, c'est une statue !" »
    Exemples : pouce géant + ogre → « le pouce est devenu un ogre gigantesque » ; glace +
    chien → « le chien est devenu un chien en glace, tout petit, qui fond » ; copains +
    pirate → « les copains sont devenus des pirates multipliés, il y en avait partout ».

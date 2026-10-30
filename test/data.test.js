@@ -206,7 +206,7 @@ test('télécommande : trois transformations gentilles', () => {
 
 test('PHRASES : gabarits exacts', () => {
   assert.deepEqual(plain(PHRASES), {
-    reve: 'Dans le rêve, {BASE} est devenu {GREFFE} {MODIF}, parce que ton cerveau a mélangé {C1} avec {C2}. Le chef qui vérifie dormait, alors personne n\'a dit « mais non, c\'est {VRAI} ! »',
+    reve: 'Dans le rêve, {BASE} est devenu {GREFFE} {MODIF}, parce que ton cerveau a mélangé {C1} avec {C2}. La partie de devant, celle qui réfléchit et qui dit « mais non », dormait. Alors personne n\'a dit : « mais non, c\'est {VRAI} ! »',
     seul: 'Dans le rêve, {BASE} était {MODIF}, parce que ton cerveau l\'a rejoué.',
     flou: 'Tu n\'as rien mis dans ta journée : cette nuit, ton cerveau range et se rince, et le rêve est tout flou.',
     finitBien: '… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul.',
