@@ -1139,19 +1139,16 @@ body[data-vue="2"]{--tc-vis:hidden}
   .volet h2{font-size:1.1rem}
   .volet p{font-size:1rem;line-height:1.38}
   .volet .croix{right:0;top:0}
-  .volet.histoire{padding:8px 52px 8px 14px}
-  .volet.histoire .volet-ic{display:none}
+  /* l'histoire et les mini-jeux : la fiche se resserre pour tenir dans la scène (sans émoji) */
+  .volet:is(.histoire,.jeu){padding:8px 52px 8px 14px}
+  .volet:is(.histoire,.jeu) .volet-ic{display:none}
+  .volet:is(.histoire,.jeu) h2{margin:0}
+  .volet:is(.histoire,.jeu) p{font-size:.94rem;line-height:1.28}
   .volet.histoire .recit-puces{margin:.2em 0 .3em}
   .volet.histoire .recit-bt{margin-top:4px}
-  .volet.histoire p{font-size:.94rem;line-height:1.28}
-  .volet.histoire h2{margin:0}
-  /* mini-jeux : comme l'histoire, la fiche se resserre pour tenir dans la scène ; l'image du jeu 2
-     passe à gauche du texte, les deux réponses côte à côte */
-  .volet.jeu{padding:8px 52px 8px 14px}
-  .volet.jeu .volet-ic{display:none}
+  /* mini-jeux : l'image du jeu 2 passe à gauche du texte (après la règle qui cache l'émoji,
+     même poids), les deux réponses côte à côte */
   .volet.jeu2 .volet-ic{display:grid;position:static;float:left;width:50px;height:50px;margin:2px 10px 2px 0;border-radius:14px;font-size:1.9rem}
-  .volet.jeu h2{margin:0}
-  .volet.jeu p{font-size:.94rem;line-height:1.28}
   .volet.jeu .jeu-score{margin-top:.15em;font-size:.9rem}
   .volet.jeu .jeu-bt{clear:both;flex-wrap:nowrap;margin-top:6px;gap:8px}
   .jeu-bt .bouton{flex:1 1 0;min-width:0;font-size:1.0625rem;padding:.5em .4em;gap:.35em}
@@ -2926,7 +2923,9 @@ html:not([data-pret]) *{transition:none!important}
           </g>
         </g>
       </svg>
-      <!-- La loupe (Task 14) : tabindex et aria-label posés par le script quand elle est allumée -->
+      <!-- La loupe (Task 14) : le script lui donne tabindex=0 quand elle est allumée (et le retire
+           à l'extinction) ; son aria-label est fixe. Éteinte, elle est display:none : hors de
+           l'arbre d'accessibilité. -->
       <div id="lens" role="img" aria-label="Loupe : la scène grossie"><svg viewBox="0 0 66.7 66.7" aria-hidden="true" focusable="false"><use href="#scene-inner"/></svg></div>
       <!-- ce que disent les bulles de la boîte (« Oups, trop de choses ! »…), pour les lecteurs d'écran -->
       <p id="boite-annonce" class="sr-only" aria-live="polite"></p>
@@ -3859,7 +3858,6 @@ function uiCut(c){
 const VUES = ['g-dehors', 'g-dedans', 'g-pres'].map(id => document.getElementById(id));
 const FONDS = ['g-ecran', 'g-boite'].map(id => document.getElementById(id));
 let cutCourant = 0;
-let animCut = 0;
 function setCut(c){
   c = borne(c, 2);
   cutCourant = c;
@@ -3888,28 +3886,43 @@ function setCut(c){
   cutRange.value = Math.round(c * 100);
   uiCut(c);
 }
-/* Glisse jusqu'à la vue `cible` (≈ 500 ms, ralentie en fin) ; immédiat en mouvement réduit. */
-function animateCut(cible, ms = 500){
-  cible = borne(cible, 2);
-  cancelAnimationFrame(animCut);
-  clearTimeout(posCut);   /* un clic sur un segment annule l'aimantation ↑↓ en attente */
-  const c0 = cutCourant;
-  if(REDUIT.matches || c0 === cible || ms <= 0){ setCut(cible); return; }
-  const t0 = performance.now();
-  const pas = now => {
-    const x = Math.min(1, (now - t0) / ms);
-    setCut(c0 + (cible - c0) * (1 - (1 - x) ** 3));
-    if(x < 1) animCut = requestAnimationFrame(pas);
-  };
-  animCut = requestAnimationFrame(pas);
+/* Un glissé d'un état continu, la vue ou le temps : le même mécanisme pour les deux axes
+   (Tasks 6 et 7, réunis en Task 18). glisser({ max, lire, poser, annuler }) renvoie :
+     anime(cible, ms) : glisse en requestAnimationFrame jusqu'à `cible` (ralenti en fin,
+                        ease-out cubique) ; immédiat en mouvement réduit ;
+     pas(d)           : un pas tout de suite puis, après 450 ms de répit, le cran voisin
+                        DANS LE SENS du pas (ceil vers le haut, floor vers le bas), en 250 ms ;
+     stop()           : annule le glissé en cours et le pas en attente.
+   anime et pas annulent aussi ce que donne `annuler` (le temps : l'aimant du rail) ; stop
+   non, car l'aimant passe lui-même par l'événement input du rail, qui appelle stop. */
+function glisser({ max, lire, poser, annuler = () => {} }){
+  let raf = 0, attente = 0;
+  function stop(){ cancelAnimationFrame(raf); clearTimeout(attente); }
+  function anime(cible, ms){
+    cible = borne(cible, max);
+    stop(); annuler();
+    const v0 = lire();
+    if(REDUIT.matches || v0 === cible || ms <= 0){ poser(cible); return; }
+    const t0 = performance.now();
+    const image = now => {
+      const x = Math.min(1, (now - t0) / ms);
+      poser(v0 + (cible - v0) * (1 - (1 - x) ** 3));
+      if(x < 1) raf = requestAnimationFrame(image);
+    };
+    raf = requestAnimationFrame(image);
+  }
+  function pas(d){
+    stop(); annuler();
+    poser(lire() + d);
+    attente = setTimeout(() => anime(d > 0 ? Math.ceil(lire()) : Math.floor(lire()), 250), 450);
+  }
+  return { anime, pas, stop };
 }
-let posCut = 0;   /* ↑↓ : un pas de 0,5 puis, après un court répit, le segment le plus proche */
-function pasCut(d){
-  cancelAnimationFrame(animCut);
-  clearTimeout(posCut);
-  setCut(cutCourant + d);
-  posCut = setTimeout(() => animateCut(d > 0 ? Math.ceil(cutCourant) : Math.floor(cutCourant), 250), 450);   /* vers la vue voisine, dans le sens de la touche */
-}
+const glisseVue = glisser({ max: 2, lire: () => cutCourant, poser: setCut });
+/* Glisse jusqu'à la vue `cible` (≈ 500 ms) ; un clic sur un segment annule aussi l'aimantation ↑↓ en attente. */
+function animateCut(cible, ms = 500){ glisseVue.anime(cible, ms); }
+/* ↑↓ : un pas de 0,5 puis, après un court répit, la vue voisine dans le sens de la touche */
+function pasCut(d){ glisseVue.pas(d); }
 
 let momentAffiche = -1;
 function uiTime(t){
@@ -4033,43 +4046,21 @@ function surprises(avant, n){
   }
   if(n === 4 && avant === 3) rejouer([tete['p-bouche']], 'baille', 1900);
 }
-/* Glisse jusqu'au moment `cible` (≈ 600 ms, ralentie en fin) ; immédiat en mouvement
-   réduit ; annule un glissé en cours, l'aimant du rail et l'aimantation ←→ en attente. */
-let animTemps = 0;
-let posTemps = 0;
-function animateTime(cible, ms = 600){
-  cible = borne(cible, 4);
-  cancelAnimationFrame(animTemps);
-  cancelAnimationFrame(aimant);
-  clearTimeout(posTemps);
-  const t0v = tempsCourant;
-  if(REDUIT.matches || t0v === cible || ms <= 0){ setTime(cible); return; }
-  const t0 = performance.now();
-  const pas = now => {
-    const x = Math.min(1, (now - t0) / ms);
-    setTime(t0v + (cible - t0v) * (1 - (1 - x) ** 3));
-    if(x < 1) animTemps = requestAnimationFrame(pas);
-  };
-  animTemps = requestAnimationFrame(pas);
-}
+/* Glisse jusqu'au moment `cible` (≈ 600 ms) ; annule un glissé en cours, l'aimant du rail
+   et l'aimantation ←→ en attente (même mécanisme que la vue : glisser, plus haut). */
+const glisseTemps = glisser({ max: 4, lire: () => tempsCourant, poser: setTime, annuler: () => cancelAnimationFrame(aimant) });
+function animateTime(cible, ms = 600){ glisseTemps.anime(cible, ms); }
 /* ←→ : un pas de 0,25 puis, après un court répit, le moment voisin dans le sens de la touche */
-function pasTemps(d){
-  cancelAnimationFrame(animTemps);
-  cancelAnimationFrame(aimant);
-  clearTimeout(posTemps);
-  setTime(tempsCourant + d);
-  posTemps = setTimeout(() => animateTime(d > 0 ? Math.ceil(tempsCourant) : Math.floor(tempsCourant), 250), 450);
-}
+function pasTemps(d){ glisseTemps.pas(d); }
 
 function poserCurseur(range, v){
   range.value = v;
   range.dispatchEvent(new Event('input'));
 }
-cutRange.addEventListener('input', () => { cancelAnimationFrame(animCut); clearTimeout(posCut); setCut(Number(cutRange.value) / 100); });
+cutRange.addEventListener('input', () => { glisseVue.stop(); setCut(Number(cutRange.value) / 100); });
 /* le rail (glissé, aimant, clavier natif) : la main l'emporte sur un glissé ou une aimantation en attente */
 timeRange.addEventListener('input', () => {
-  cancelAnimationFrame(animTemps);
-  clearTimeout(posTemps);
+  glisseTemps.stop();
   setTime(Number(timeRange.value) / 100);
 });
 segs.forEach(b => b.addEventListener('click', () => animateCut(Number(b.dataset.cut))));
@@ -4096,8 +4087,7 @@ function aimanter(){
 let tire = false;
 timeRange.addEventListener('pointerdown', () => {
   cancelAnimationFrame(aimant);
-  cancelAnimationFrame(animTemps);
-  clearTimeout(posTemps);
+  glisseTemps.stop();
   tire = true;
   rail.classList.add('tire');
 });
@@ -4190,17 +4180,28 @@ setAvatar(prefs.get('avatar', null));
    l'icône sont écrits tout de suite, le texte UNE IMAGE PLUS TARD, quand le
    volet est visible : une région aria-live cachée (visibility:hidden) n'est
    pas annoncée, et le texte doit changer APRÈS qu'elle est rendue.
-   closeInfo() referme. Task 12 (zones), le récit et les jeux passent par là. */
+   closeInfo() referme. Task 12 (zones), le récit et les jeux passent par là.
+   Propriétaire du volet (Task 18 : un seul mécanisme pour le récit et les jeux) : une
+   activité qui fait du volet SA fiche l'ouvre par openInfo(opener, contenu, fin), où fin()
+   remet son état à zéro. Toute autre ouverture (une zone, l'autre activité) et toute
+   fermeture (✕, Échap, closeInfo) appellent cette fin, une fois ; la même activité qui
+   rouvre sa fiche (« Encore ! ») la garde. */
 const infoBox = document.getElementById('info');
 const infoEmoji = document.getElementById('infoEmoji');
 const infoTitle = document.getElementById('infoTitle');
 const infoText = document.getElementById('infoText');
 let infoOpener = null;
-var recitActif = false, recitOuvre = false, finirRecit = null;   /* Task 15 : var, openInfo peut s'exécuter avant la section « mode guidé » */
-var jeuActif = 0, jeuOuvre = false, finirJeu = null;   /* Task 16 : même schéma pour les mini-jeux (jeuActif = 1 ou 2) */
-function openInfo(opener, contenu){
-  if(recitActif && !recitOuvre && finirRecit) finirRecit();   /* une zone ouvre le volet : l'histoire s'arrête, la scène reste */
-  if(jeuActif && !jeuOuvre && finirJeu) finirJeu();   /* une zone (hors jeu 1) ou l'histoire prend le volet : le jeu s'arrête */
+var recitActif = false;   /* Task 15 : lu par d'autres sections (la chanson) ; var, la section « mode guidé » vient plus bas */
+var jeuActif = 0;         /* Task 16 : le jeu en cours (1 ou 2), lu par les zones (section 11) */
+let finVolet = null;      /* la fin du propriétaire du volet (récit, jeu), ou null */
+function lacherVolet(){
+  const fin = finVolet;
+  finVolet = null;
+  if(fin) fin();
+}
+function openInfo(opener, contenu, fin = null){
+  if(finVolet !== fin) lacherVolet();   /* une zone ou l'autre activité prend le volet : l'activité s'arrête, la scène reste */
+  finVolet = fin;
   infoOpener = opener instanceof HTMLElement || opener instanceof SVGElement ? opener : null;
   marquerZone(infoOpener);   /* Task 12 : le liseré brodé suit la zone qui ouvre le volet */
   infoBox.classList.add('open');
@@ -4211,8 +4212,7 @@ function openInfo(opener, contenu){
   }
 }
 function closeInfo(){
-  if(recitActif && finirRecit) finirRecit();
-  if(jeuActif && finirJeu) finirJeu();
+  lacherVolet();
   if(!infoBox.classList.contains('open')) return;
   const focusDedans = infoBox.contains(document.activeElement);
   infoBox.classList.remove('open');
@@ -5627,7 +5627,8 @@ zonesBtn.addEventListener('click', () => { if(ZS) montrerZones(!scene.classList.
    #lens clone la scène par <use href="#scene-inner">. Grossissement ×2,4 RELATIF à la scène
    affichée : la scène fait L px de large pour 900 unités (échelle = L/900 px par unité) ;
    la lentille fait 160 px ; la fenêtre du viewBox est donc un carré de 160 / (échelle × 2,4)
-   unités (66,7 unités quand la scène fait 900 px, 184 unités à 420 px de large).
+   unités (66,7 unités quand la scène fait 900 px, 142,9 quand elle fait 420 px ; sur un
+   téléphone de 420 px, la scène fait 388 px : 154,6 unités).
    Suivi cadencé par rAF (un seul calcul par image, le dernier événement gagne).
    loupe-active sur <html> : les animations d'ambiance se figent (variables --pres-play et
    --amb-play, lues par animation-play-state, clone compris). Échap l'éteint. */
@@ -5762,22 +5763,20 @@ function tournerPage(){
     { duration: 200, easing: 'cubic-bezier(.34,1.56,.64,1)' });
 }
 function annulerAnimations(){
-  cancelAnimationFrame(animCut); clearTimeout(posCut);
-  cancelAnimationFrame(animTemps); cancelAnimationFrame(aimant); clearTimeout(posTemps);
+  glisseVue.stop();
+  glisseTemps.stop(); cancelAnimationFrame(aimant);
 }
-/* l'histoire s'arrête : la scène ne bouge pas */
-finirRecit = function(){
+/* l'histoire s'arrête : la scène ne bouge pas (la fin du propriétaire du volet, section 7) */
+function finirRecit(){
   recitActif = false;
   clearTimeout(recit.timer); recit.timer = 0; recit.fini = null; recit.etape = -1;
   infoBox.classList.remove('histoire');
   if(recit.num) recit.num.remove();
   stopBtn.hidden = false;
   majBoutonHistoire(false);
-};
+}
 function stopStory(){
-  if(!recitActif) return;
-  finirRecit();
-  closeInfo();
+  if(recitActif) closeInfo();   /* closeInfo appelle finirRecit (propriétaire du volet) */
 }
 function allerEtape(i){
   if(recit.fini) recit.fini();   /* un appui pendant le glissé : l'étape en attente s'achève tout de suite */
@@ -5815,9 +5814,7 @@ function startStory(){
   majBoutonHistoire(true);
   recit.etape = 0;
   majPuces(0);
-  recitOuvre = true;
-  openInfo(histoireBtn, { emoji: '📖', titre: "L'histoire du pouce", texte: texteEtape(0) });
-  recitOuvre = false;
+  openInfo(histoireBtn, { emoji: '📖', titre: "L'histoire du pouce", texte: texteEtape(0) }, finirRecit);   /* un jeu en cours s'arrête */
   majPuces(0);   /* openInfo a réécrit le titre : le compteur y revient */
   document.dispatchEvent(new CustomEvent('histoire', { detail: { etape: 0, fin: false } }));
   suiteBtn.focus({ preventScroll: true });
@@ -5845,7 +5842,8 @@ suiteBtn.addEventListener('click', () => {
    Fin : 1 à 3 étoiles (au moins une : on ne gronde jamais), confettis, « Bravo, tu connais ton
    cerveau ! », « Encore ! » / « Fini ». 3 sur 3 → le badge.
    Arrêt : « Fini », ✕, Échap, second appui sur le bouton du jeu, une zone ou l'histoire qui prend
-   le volet (hooks jeuActif dans openInfo / closeInfo). Lancer un jeu arrête l'histoire.
+   le volet (le jeu est le propriétaire du volet : openInfo(…, finirJeu), section 7). Lancer un
+   jeu arrête l'histoire, et l'inverse.
    Récompenses (#g-fete, dans #g-ui) : pièces .w.lite, mouvements par animer() sur des <g>
    (jamais de transform sur une .w) ; mouvement réduit : étoiles et « Bravo ! » posés, pas de
    confettis. Badge (#badge) : setBadge(on) (mémorisé : reves.badge) ; gagné à la fin de
@@ -6140,8 +6138,7 @@ function repondre(rep){
 }
 
 function lancerJeu(n){
-  if(recitActif) stopStory();   /* un jeu arrête l'histoire */
-  if(jeuActif) finirJeu();
+  if(jeuActif) finirJeu();   /* « Encore ! » ou l'autre jeu : la fiche reste au jeu, son état repart de zéro */
   annulerAnimations();
   jeu.ordre = tirer3(Date.now(), n === 1 ? JEU_PARTIES.length : JEU_REVE.length);
   jeu.i = 0; jeu.score = 0;
@@ -6149,9 +6146,7 @@ function lancerJeu(n){
   infoBox.classList.add('jeu');
   infoBox.classList.toggle('jeu2', n === 2);
   jeuBtns[n].setAttribute('aria-pressed', 'true');
-  jeuOuvre = true;
-  openInfo(jeuBtns[n], { emoji: JEUX[n].emoji, titre: JEUX[n].titre });
-  jeuOuvre = false;
+  openInfo(jeuBtns[n], { emoji: JEUX[n].emoji, titre: JEUX[n].titre }, finirJeu);   /* l'histoire en cours s'arrête */
   poserQuestion();
   /* le texte arrive une image après l'ouverture : sinon la région live, encore cachée, ne le lit pas */
   const texte = infoText.textContent;
@@ -6163,7 +6158,7 @@ function lancerJeu(n){
   });
   if(n === 2) vraiBtn.focus({ preventScroll: true });
 }
-finirJeu = function(){
+function finirJeu(){
   jeuActif = 0;
   clearTimeout(jeu.timer); jeu.timer = 0; jeu.attente = false;
   enleverIndice(); viderFete();
@@ -6174,11 +6169,9 @@ finirJeu = function(){
   delete jeuScore.dataset.score;
   if(jeu.num) jeu.num.remove();
   Object.values(jeuBtns).forEach(b => b.setAttribute('aria-pressed', 'false'));
-};
+}
 function stopJeu(){
-  if(!jeuActif) return;
-  finirJeu();
-  closeInfo();
+  if(jeuActif) closeInfo();   /* closeInfo appelle finirJeu (propriétaire du volet) */
 }
 function startQuiz(n){
   if(jeuActif === n){ stopJeu(); return; }   /* second appui : le jeu s'arrête */
