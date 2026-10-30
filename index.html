@@ -933,6 +933,19 @@ body[data-vue="2"]{--tc-vis:hidden}
 @keyframes tc-halo{45%{opacity:.35}}
 .tc-focus{fill:none;stroke:var(--ui-indigo);stroke-width:3;opacity:0}
 #telecommande:focus-visible .tc-focus{opacity:1}
+/* téléphone (scène à ~0,43) : « Encore un rêve » et la télécommande grossissent comme le badge
+   (×1,45, une transform CSS sur le bouton <g> lui-même, qui n'en a pas : jamais sur une .w).
+   « Encore » : ancré à gauche, 20 unités plus à gauche, au-dessus de l'ogre et à droite de la
+   phrase de la vue Dehors (x ≤ 518) ; sa cible transparente (.encore-cible, posée par le script)
+   lui donne 45 px de haut (≥ 44). La télécommande : ancrée en haut à droite, poussée vers le bord droit
+   (x ≤ 893) et un peu plus haut ; son corps reste à droite de la phrase de la vue Dedans (x ≤ 772),
+   elle déborde vers le bas sur la boîte, grise et fermée quand elle est là (nuit des rêves, matin). */
+.encore-cible{display:none;fill:transparent}
+@media (max-width:899.98px){
+  .encore-cible{display:inline}
+  #encore{transform-box:fill-box;transform-origin:0 50%;transform:translate(-20px,0) scale(1.45)}
+  #telecommande{transform-box:fill-box;transform-origin:100% 0;transform:translate(33px,-28px) scale(1.45)}
+}
 .fil.tc-onde{--f:var(--glass-yellow);stroke-width:2.8;stroke-dasharray:none;opacity:0}
 /* la carte réconfort épinglée sur l'écran */
 #g-reconfort{pointer-events:none}
@@ -1129,6 +1142,14 @@ body[data-vue="2"]{--tc-vis:hidden}
 /* sous la fenêtre, toujours : quoi qu'il arrive au lecteur, on peut chanter avec elle */
 .chanson-avec{margin:12px 4px 0;font-family:var(--font-display);font-weight:600;font-size:1.1rem;line-height:1.3;color:var(--ui-indigo)}
 .chanson-avec small{font-family:var(--font-texte);font-weight:600;font-size:.95rem;color:var(--ui-gris-fonce)}
+
+/* la phrase du rêve recopiée sous la scène : téléphone seulement, pas en vue Tout près (l'écran n'y est pas) */
+.phrase-tel{display:none}
+@media (max-width:899.98px){
+  .phrase-tel:not([hidden]){display:block;margin:10px 6px 0;font-family:"Baloo 2",var(--font-display);font-weight:600;
+    font-size:1rem;line-height:1.3;color:var(--ui-encre);text-wrap:pretty}
+  body[data-vue="2"] .phrase-tel{display:none}
+}
 
 /* ===== 12. Téléphone (< 900 px) =====
    Bandeau sur deux lignes, rail horizontal SOUS la scène (même dégradé, même
@@ -2534,7 +2555,7 @@ html:not([data-pret]) *{transition:none!important}
               <g id="g-cartes-rangees"></g>
             </g>
 
-            <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui se repose la nuit
+            <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui dort la nuit
                  (Task 7 : opacité par le temps, ils montent doucement) -->
             <g id="g-zzz" style="--f:var(--nuit-2)">
               <path class="fil z z-1" d="M368 134h9l-9 9h9"/>
@@ -2983,6 +3004,10 @@ html:not([data-pret]) *{transition:none!important}
         <button type="button" id="infoClose" class="croix" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
       </section>
     </div>
+    <!-- Téléphone : la phrase du rêve (et la phrase-clé) recopiée en HTML sous la scène, où elle se
+         lit (dans la scène, elle fait ~8 px) ; jamais affichée au-dessus de 900 px. aria-hidden :
+         #t-phrase et #t-cle sont déjà lus. Remplie par direPhrase (section 9). -->
+    <p id="phraseTel" class="phrase-tel" aria-hidden="true" hidden></p>
 
     <!-- Rail du temps : #time est le vrai curseur (0..400 = moment × 100),
          #railBtn le bouton blanc qui le suit (uiTime). -->
@@ -3216,8 +3241,8 @@ const CARTES = [
   { slug:'fache', nom:'je me suis {fâché|fâchée}', nomPhrase:"le moment où tu t'es {fâché|fâchée}", g:'m', emoji:'😠', cat:'ressenti', charge:2, entree:'oreille', base:false,
     greffe:{ nom:'des sourcils fâchés', forme:'fache', g:'mp' },
     texte:"Grrr, tu t'es {fâché|fâchée} tout rouge, ça arrive ! La colère aussi entre dans le sac à souvenirs, et la nuit, ton cerveau la range." },
-  /* Ledger : le câlin est un ressenti (joie), qui peut servir de réconfort
-     quand le parent le choisit dans les réglages (il passe alors à −2). */
+  /* Le câlin est un ressenti (joie, charge 1) ; choisi comme carte réconfort dans les
+     réglages, composeDream le compte apaisant (−2) : composeDream(…, { reconfort:'calin' }). */
   { slug:'calin', nom:'un câlin', g:'m', emoji:'🤗', cat:'ressenti', charge:1, entree:'oreille', base:false,
     greffe:{ nom:'deux grands bras', forme:'calin', g:'mp' }, ton:'un câlin',
     texte:"Un gros câlin bien serré, ça réchauffe de partout ! Ton cerveau adore ce souvenir-là, et il le garde au chaud pour la nuit." },
@@ -3530,10 +3555,12 @@ const COURTES = {
   seul: "Ton cerveau a rejoué {C1}… mais {RECONFORT} était dans ta tête, alors le film a changé tout seul."
 };
 /* ===== J. Le générateur de rêve (spec §4.5, Task 10) =====
-   composeDream(slugs, { seed, genre }) → null (journée vide : l'appelant affiche
+   composeDream(slugs, { seed, genre, reconfort }) → null (journée vide : l'appelant affiche
    PHRASES.flou) ou { mode, base, greffe, contexte, oublies, reconfort, modif,
    verdict, phrase }. Déterministe : même journée et même graine, même rêve ;
    « Encore un rêve » change la graine (le modificateur, pas les rôles).
+   reconfort : la carte réconfort des réglages ; 'calin' fait du câlin une carte apaisante
+   (charge −2, spec §4.3 / §4.5-4) ; la chanson et le doudou le sont déjà par leurs données.
 
    1. Les rôles (slugs du plus ancien au plus récent ; « ex æquo » = le plus récent) :
       - une carte apaisante (charge < 0) n'est jamais greffe. Si la greffe fait peur
@@ -3596,7 +3623,8 @@ function composeDream(slugs, opts = {}){
   const vus = new Set();
   const jour = [];
   for(const s of Array.isArray(slugs) ? slugs : []){
-    const c = CARTES.find(x => x.slug === s);
+    let c = CARTES.find(x => x.slug === s);
+    if(c && c.slug === 'calin' && opts.reconfort === 'calin') c = { ...c, charge: -2 };   /* une copie : CARTES ne change pas */
     if(c && !vus.has(s)){ vus.add(s); jour.push(c); }
   }
   if(!jour.length) return null;
@@ -3997,7 +4025,7 @@ const TEMPS = {
   pineale:    [0, 1, .6, .4, 0],    /* la glande de la nuit */
   rem:        [0, 0, 0, 1, 0],      /* les yeux bougent sous les paupières */
   grandis:    [0, 0, 1, .3, 0],     /* l'étiquette « je grandis » sur le crâne : la nuit profonde seulement */
-  zzz:        [0, 0, 1, 1, 0],      /* le lobe frontal se repose */
+  zzz:        [0, 0, 1, 1, 0],      /* le lobe frontal dort */
   amygdale:   [0, 0, .3, 1, 0],     /* l'amygdale s'allume en rêve */
   ecran:      [0, .3, 1, 1, 1],     /* le nuage-écran du rêve (Task 10) : il n'est pas là le jour */
   phaseNuit:  [0, 0, 1, .2, 0],     /* Tout près : vagues, fuseaux, rinçage, cellule */
@@ -4051,7 +4079,7 @@ function setTime(t){
   enfantDehors.style.transform = lit > 0 || k > 0
     ? `translate(${COUCHE.x * lit}px, ${COUCHE.y * lit}px) rotate(${COUCHE.rot * k}deg) scale(${1 + (COUCHE.echelle - 1) * lit})`
     : '';
-  /* Dedans : le frontal se repose */
+  /* Dedans : le frontal dort */
   montrer(zzz, v.zzz);
   /* le nuage-écran du rêve (Task 10), Dehors comme Dedans */
   montrer(ecranCorps, v.ecran);
@@ -4070,6 +4098,7 @@ function setTime(t){
       document.dispatchEvent(new CustomEvent('temps', { detail: { t, phase: n } }));
     }
   }
+  if(t === n) planifierZones();   /* fin d'un glissé ou de l'aimant : les zones revues, décor posé */
 }
 /* Petites surprises au changement de moment (spec §2 « fun »), coupées en mouvement
    réduit : la lune fait un clin d'œil une fois sur dix quand le soir arrive, l'enfant
@@ -4903,6 +4932,7 @@ function resetDay(){
   emettreJournee();
 }
 document.getElementById('journee').addEventListener('click', () => {
+  stopStory();   /* l'histoire a besoin de ses cartes : une nouvelle journée la ferme */
   resetDay();
   cancelAnimationFrame(elan);   /* un élan de glissé en cours ne doit pas repousser la boîte */
   poserDefil(0);
@@ -4940,8 +4970,11 @@ const legendeFond = legende.querySelector('.legende-fond');
 const legendeBord = legende.querySelector('.legende-bord');
 const tPhrase = document.getElementById('t-phrase');
 const tCle = document.getElementById('t-cle');
+const phraseTel = document.getElementById('phraseTel');
 const encore = document.getElementById('encore');
 const encoreCorps = encore.querySelector('.encore-corps');
+/* téléphone : la cible du doigt, 72 unités de haut (× 1,45 × 0,43 ≈ 45 px ; CSS .encore-cible) */
+encore.insertBefore(svgEl('rect', { class: 'encore-cible', x: 540, y: 20, width: 172, height: 72, rx: 22 }), encoreCorps);
 const sourcil = document.getElementById('p-sourcil');
 /* le fond de la phrase, à sa place de la vue Dehors (le mur, à gauche du nuage) ; en vue Dedans
    elle glisse de DX vers la droite (CSS) et son bas se pose sur la boîte (BAS) : une phrase longue
@@ -4965,6 +4998,8 @@ function direPhrase(texte, cle){
   tCle.hidden = !cle;
   tPhrase.classList.toggle('avec-cle', !!cle);
   legende.classList.toggle('vide', !texte);
+  phraseTel.textContent = [texte, cle].filter(Boolean).map(typo).join(' ');   /* téléphone (CSS .phrase-tel) */
+  phraseTel.hidden = !texte;
   ajusterLegende();
 }
 function ajusterLegende(){
@@ -5116,7 +5151,7 @@ function effacerReve(){
 }
 /* événement « reve » (detail : { anim }) : le film vient d'être dessiné ou effacé (Task 11) */
 function annoncerReve(anim){ document.dispatchEvent(new CustomEvent('reve', { detail: { anim: !!anim } })); }
-const reveDuJour = () => composeDream(journee, { seed, genre: root.dataset.genre });
+const reveDuJour = () => composeDream(journee, { seed, genre: root.dataset.genre, reconfort: prefs.get('reconfort', 'chanson') });
 /* phase 3 : le rêve ; phase 4 : il reste (refait sans animation s'il manque : on a sauté
    la nuit des rêves) ; les autres moments : rien à l'écran */
 function majReve(anim, refaire){
@@ -5515,10 +5550,22 @@ var nZones = -1;   /* la vue pour laquelle les groupes sont posés */
 function majZones(){
   if(!ZS) return;
   const n = Math.round(cutCourant);
-  if(n === nZones) return;
+  if(n === nZones){
+    if(cutCourant === n) planifierZones();   /* fin du glissé : on revoit les zones, vue posée */
+    return;
+  }
   nZones = n;
   ZS.groupes.forEach((g, i) => g.classList.toggle('active', i === n));
   evaluerZones();
+}
+/* l'opacité visée d'un nœud : les vues et les fonds valent celle de la vue entière nZones
+   (majZones passe au milieu du fondu, où leur opacité calculée est ≈ .5) ; une opacité posée
+   par le script (montrer, setTime) est sa cible, même si une transition CSS la suit */
+function opaciteCible(n){
+  const v = VUES.indexOf(n);
+  if(v >= 0) return v === nZones ? 1 : 0;
+  if(FONDS.includes(n)) return nZones === 2 ? 0 : 1;
+  return parseFloat(n.style.opacity || getComputedStyle(n).opacity);
 }
 /* une pièce est visible si elle n'est pas visibility:hidden et si l'opacité cumulée de ses parents ≥ .3
    (la chambre de jour, l'écran de jour, le décor éteint la nuit… : pas de zone fantôme) */
@@ -5526,7 +5573,7 @@ function visibleZone(el){
   if(!el.isConnected || getComputedStyle(el).visibility === 'hidden') return false;
   let o = 1;
   for(let n = el; n && n.nodeType === 1 && n !== scene; n = n.parentNode){
-    o *= parseFloat(getComputedStyle(n).opacity);
+    o *= opaciteCible(n);
     if(o < .3) return false;
   }
   return true;
@@ -5851,8 +5898,14 @@ for(let i = 0; i < HISTOIRE.length; i++) recitPuces.appendChild(document.createE
 
 /* le texte de l'étape : prénom (ou « il/elle » à défaut, avec majuscule en début de phrase), puis accord */
 function texteEtape(i){
-  const prenom = String(prefs.get('prenom', '') || '').replace(/[{}|]/g, '').trim();
-  const t = HISTOIRE[i].texte.replace(/\{PRENOM\}/g, (m, off, tout) =>
+  const p = prefs.get('prenom', '');
+  const prenom = (typeof p === 'string' ? p : '').replace(/[{}|]/g, '').trim();
+  /* l'étape de la télécommande finit par la phrase-clé : dans la scène, le volet de l'histoire
+     en cache le bas (vue Dedans), et c'est elle que le parent lit à voix haute. Pas sur
+     téléphone : la fiche (qui couvre déjà la scène) déborderait de 3 px et défilerait */
+  const cle = HISTOIRE[i].action === 'telecommande' && matchMedia('(min-width:900px)').matches;
+  const texte = HISTOIRE[i].texte + (cle ? ' « ' + PHRASES.cle + ' »' : '');
+  const t = texte.replace(/\{PRENOM\}/g, (m, off, tout) =>
     prenom || (off === 0 || /[.!?…»]\s*$/.test(tout.slice(0, off)) ? '{Il|Elle}' : '{il|elle}'));
   return inflect(t, root.dataset.genre);
 }
@@ -5906,6 +5959,10 @@ function allerEtape(i){
   const montrer = () => {
     clearTimeout(recit.timer); recit.timer = 0; recit.fini = null;
     if(!recitActif || recit.etape !== i) return;
+    /* la scène arrive à l'étape avant son action (une machine lente n'a pas fini de glisser :
+       applyRemote ne doit pas tomber hors de la nuit des rêves, le rêve doit être dessiné) */
+    glisseVue.stop(); glisseTemps.stop();
+    setCut(st.vue); setTime(st.temps);
     infoText.textContent = texteEtape(i);
     tournerPage();
     if(st.action === 'reve' && phaseCourante === 3 && (dejaReve || !reveCourant)) renderDream(reveDuJour(), { anim: !dejaReve && !REDUIT.matches });
@@ -6078,7 +6135,10 @@ function champTexte(input, ecrire, okId){
   input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(go, 300); });
   input.addEventListener('change', () => { if(t) go(); });
 }
-prenomIn.value = String(prefs.get('prenom', '') || '');
+{
+  const p = prefs.get('prenom', '');
+  prenomIn.value = typeof p === 'string' ? p : '';
+}
 champTexte(prenomIn, () => prefs.set('prenom', prenomIn.value.trim()), 'okPrenom');
 {
   const r = prefs.get('reconfort', 'chanson');

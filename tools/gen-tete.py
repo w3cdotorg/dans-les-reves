@@ -386,7 +386,7 @@ GABARIT = r"""
               </g>
             </g>
 
-            <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui se repose la nuit
+            <!-- « zzz » : trois z brodés au-dessus du lobe frontal, qui dort la nuit
                  (Task 7 : opacité par le temps, ils montent doucement) -->
             <g id="g-zzz" style="--f:var(--nuit-2)">
               <path class="fil z z-1" d="M368 134h9l-9 9h9"/>

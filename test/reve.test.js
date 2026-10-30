@@ -96,6 +96,25 @@ test('le doudou réconforte un cauchemar, il ne devient pas l\'ogre', () => {
   propre(r.phrase, 'doudou/ogre');
 });
 
+/* spec §4.3 / §4.5-4 : le câlin choisi comme carte réconfort dans les réglages est apaisant (−2) */
+test('le câlin choisi comme réconfort finit bien un cauchemar ; sinon, cauchemar', () => {
+  const r = composeDream(['pouce', 'ogre', 'calin'], { reconfort: 'calin' });
+  assert.equal(r.verdict, 'finitBien');
+  assert.equal(r.reconfort.slug, 'calin');
+  assert.equal(r.greffe.slug, 'ogre');
+  assert.ok(r.phrase.includes('un câlin était dans ta tête'), r.phrase);
+  assert.ok(r.courte.includes('le câlin était dans ta tête'), r.courte);
+  propre(r.phrase, 'pouce/ogre/calin (réconfort)');
+  propre(r.courte, 'pouce/ogre/calin (réconfort, courte)');
+  const sans = composeDream(['pouce', 'ogre', 'calin']);
+  assert.equal(sans.verdict, 'cauchemar');
+  assert.equal(sans.reconfort, null);
+  assert.equal(composeDream(['pouce', 'ogre', 'calin'], { reconfort: 'chanson' }).verdict, 'cauchemar');
+  assert.equal(composeDream(['pouce', 'ogre', 'chanson'], { reconfort: 'calin' }).reconfort.slug, 'chanson', 'la chanson reste apaisante');
+  assert.equal(load().CARTES.find(c => c.slug === 'calin').charge, 1, 'CARTES ne change pas');
+  assert.equal(CARTES.find(c => c.slug === 'calin').charge, 1);
+});
+
 test('une carte apaisante seule : beau rêve', () => {
   const r = composeDream(['chanson']);
   assert.equal(r.verdict, 'beau');
@@ -182,6 +201,25 @@ test('toutes les paires de cartes font un rêve lisible et une phrase correcte',
   }
   assert.equal(paires.size, 253);
   assert.equal(n, 253 * 2 * 9);
+});
+
+/* Les mêmes paires, le câlin choisi comme carte réconfort (il n'est alors jamais greffe). */
+test('toutes les paires, câlin réconfort : un rêve lisible et des phrases correctes', () => {
+  let n = 0;
+  for(const a of CARTES) for(const b of CARTES){
+    if(a === b) continue;
+    for(const genre of ['garcon', 'fille']) for(const seed of [0, 1]){
+      const r = composeDream([a.slug, b.slug], { seed, genre, reconfort: 'calin' });
+      const ctx = `${a.slug}+${b.slug} (câlin réconfort, ${genre}, ${seed})`;
+      assert.ok(r && r.base, ctx);
+      if(r.greffe) assert.ok(r.greffe.charge >= 0 && r.greffe.slug !== 'calin', ctx + ' : le câlin n\'est jamais greffe');
+      if(r.verdict === 'finitBien') assert.ok(r.reconfort && r.reconfort.charge < 0, ctx);
+      propre(r.phrase, ctx);
+      if(r.courte) propre(r.courte, ctx + ' (courte)');
+      n++;
+    }
+  }
+  assert.equal(n, 253 * 2 * 4);
 });
 
 test('toutes les journées de 3 et 4 cartes tirées au hasard (graine fixe) restent correctes', () => {
