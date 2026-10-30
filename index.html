@@ -618,8 +618,9 @@ html.loupe-active,#scene.loupe-active{--pres-play:paused}
 :is(.glisse,.clignote,.influx,.rafale,.descend,.anneau){animation-play-state:var(--pres-play, running)}
 
 /* ===== 7 sexies. Le temps : la journée, le soir, les deux nuits, le matin (Task 7) =====
-   setTime(t) pose sur :root les variables interpolées (--nuit, --paupiere-op,
-   --pineale-lueur, --amygdale-lueur) et des classes sur les éléments eux-mêmes
+   setTime(t) pose les variables interpolées (--nuit, --paupiere-op, --pineale-lueur,
+   --amygdale-lueur, --grandis) sur les pièces qui les lisent (jamais sur :root ni sur un
+   groupe : voir LECTEURS, section 5) et des classes sur les éléments eux-mêmes
    (.allume, .lueur, .pulse, .cligne, .rem) : la tête reprise par <use> dans Dehors
    suit (RÈGLE DU <use>, section 7). Le décor de Dehors, #g-zzz et les métiers de
    Tout près reçoivent leur opacité en style (groupes et pièces jamais clonés seuls).
@@ -637,6 +638,40 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
    refait les filtres de laine de ce qu'elle touche, et la carte graphique doit être libre
    pour le geste. html.interaction est posée par occupe() / libere() (section 5). */
 html.interaction{--amb-play:paused;--pres-play:paused}
+
+/* Performance (30 octobre 2026) : ce que le temps fait varier à chaque image d'un glissé
+   (les familles du décor de Dehors, la nuit de la toile, les zzz, le nuage-écran, les métiers
+   de Tout près, l'œil et la paupière : leur opacité ; l'enfant de Dehors : sa transform ; les
+   deux glandes et « je grandis » : leur lueur) a son propre calque. Le compositeur change alors
+   leur opacité ou leur position sans rien redessiner ni refaire les filtres de laine dessous ;
+   une lueur qui change ne redessine que sa glande. Feutrine seulement, sauf l'enfant : un calque
+   isole son contenu, et en riso les pièces doivent se multiplier avec ce qui est dessous
+   (--calque-temps et --calque-lueur:auto). */
+:root{--calque-temps:opacity;--calque-lueur:transform}
+[data-theme=riso]{--calque-temps:auto;--calque-lueur:auto}
+[data-jour="1"],[data-chambre="1"],[data-nuit="1"],[data-decor="1"],.nuit,#g-zzz,#ecran-corps,#g-pres [data-phase],
+#p-paupiere,#fil-oeil-ferme,#p-oeil,#p-oeil~.trou,#p-oeil~.bord-bouton,#p-oeil+.trou+.trou+.fil{will-change:var(--calque-temps)}
+#p-pineale,#p-amygdale,.grandis{will-change:var(--calque-lueur)}
+#g-enfant-dehors{will-change:transform}
+/* Un changement de moment par clic, clavier, aimant ou récit (html.temps-fondu, posée par
+   fondreTemps, section 5 ; .fondu-court pour les pas de 250 ms) : la scène est posée une fois au
+   cran visé, ces transitions la font glisser (ease-out cubique, comme le glissé image par image
+   d'avant). Opacités et transform : jouées par le compositeur. visibility suit (elle reste
+   visible jusqu'au bout d'un fondu vers 0). */
+html.temps-fondu :is([data-jour="1"],[data-chambre="1"],[data-nuit="1"],#g-zzz,#ecran-corps,#g-pres [data-phase],.grandis,
+  #p-paupiere,#fil-oeil-ferme,#p-oeil,#p-oeil~.trou,#p-oeil~.bord-bouton,#p-oeil+.trou+.trou+.fil){
+  transition:opacity .6s cubic-bezier(.33,1,.68,1),visibility .6s}
+html.temps-fondu .decor[data-decor]{transition:transform .35s var(--ui-ressort),opacity .6s cubic-bezier(.33,1,.68,1),visibility .6s}
+html.temps-fondu .nuit{transition:fill 1.2s ease,opacity .6s cubic-bezier(.33,1,.68,1)}
+html.temps-fondu #g-enfant-dehors{transition:transform .6s cubic-bezier(.33,1,.68,1)}
+html.temps-fondu #p-sol{transition:fill .6s cubic-bezier(.33,1,.68,1)}
+html.temps-fondu .fil.herbe{transition:stroke .6s cubic-bezier(.33,1,.68,1)}
+html.temps-fondu :is(#p-pineale,#p-amygdale){transition:opacity .4s,filter .6s cubic-bezier(.33,1,.68,1)}
+html.temps-fondu.fondu-court :is([data-jour="1"],[data-chambre="1"],[data-nuit="1"],#g-zzz,#ecran-corps,#g-pres [data-phase],.grandis,
+  #p-paupiere,#fil-oeil-ferme,#p-oeil,#p-oeil~.trou,#p-oeil~.bord-bouton,#p-oeil+.trou+.trou+.fil,#g-enfant-dehors,#p-sol,.fil.herbe){transition-duration:.26s}
+html.temps-fondu.fondu-court .decor[data-decor]{transition-duration:.35s,.26s,.26s}
+html.temps-fondu.fondu-court .nuit{transition-duration:1.2s,.26s}
+html.temps-fondu.fondu-court :is(#p-pineale,#p-amygdale){transition-duration:.4s,.26s}
 
 /* l'amygdale s'allume en rêve (--amygdale-lueur) et bat doucement (.pulse) :
    --amygdale-pouls est une propriété enregistrée, donc interpolée par l'animation */
@@ -3963,6 +3998,8 @@ function uiCut(c){
    vue qui s'efface grossit de 2 % (1 → 1,02) ; coupé en mouvement réduit. */
 const VUES = ['g-dehors', 'g-dedans', 'g-pres'].map(id => document.getElementById(id));
 const FONDS = ['g-ecran', 'g-boite'].map(id => document.getElementById(id));
+/* --vue est posée sur ses lecteurs (.legende, qui la transmet à .t-phrase et .t-cle ; #telecommande) */
+const PORTEURS_VUE = [document.getElementById('g-legende'), document.getElementById('telecommande')];
 let cutCourant = 0;
 function setCut(c){
   c = borne(c, 2);
@@ -3988,7 +4025,10 @@ function setCut(c){
     g.style.visibility = opFond > 0 ? 'visible' : 'hidden';
   });
   document.body.dataset.vue = n;
-  root.style.setProperty('--vue', c);   /* la phrase du rêve glisse avec le fondu (Task 10) */
+  /* la phrase du rêve glisse avec le fondu (Task 10), la télécommande s'efface Tout près : --vue
+     est posée sur ces pièces, pas sur :root (Performance : une variable de :root qui change
+     restyle tout le document et redessine la boîte de cartes à chaque image du glissé) */
+  for(const g of PORTEURS_VUE) g.style.setProperty('--vue', c);
   cutRange.value = Math.round(c * 100);
   uiCut(c);
 }
@@ -4000,23 +4040,40 @@ function setCut(c){
                         DANS LE SENS du pas (ceil vers le haut, floor vers le bas), en 250 ms ;
      stop()           : annule le glissé en cours et le pas en attente.
    anime et pas annulent aussi ce que donne `annuler` (le temps : l'aimant du rail) ; stop
-   non, car l'aimant passe lui-même par l'événement input du rail, qui appelle stop. */
-function glisser({ cle, max, lire, poser, annuler = () => {} }){
-  let raf = 0, attente = 0;
+   non, car l'aimant passe lui-même par l'événement input du rail, qui appelle stop.
+   anime(cible, ms, courbe) : `courbe` (x ∈ [0,1] → avancée) vaut l'ease-out cubique par défaut.
+   `fondre(cible, ms)` (le temps seulement, Performance) : si elle est donnée, anime pose la
+   scène une fois au cran visé et la laisse glisser par des transitions CSS ; elle renvoie
+   { suivre(v), finir(), interrompre() } : suivre remplace poser image par image (l'état seul),
+   finir est appelé à la dernière image (avant poser(cible)), interrompre par stop. */
+const easeOut = x => 1 - (1 - x) ** 3;
+function glisser({ cle, max, lire, poser, annuler = () => {}, fondre = null }){
+  let raf = 0, attente = 0, fondu = null;
   /* le glissé fige l'ambiance (occupe) jusqu'à 300 ms après sa dernière image */
-  function stop(){ cancelAnimationFrame(raf); clearTimeout(attente); libere(cle, FIN_GESTE_MS); }
-  function anime(cible, ms){
+  function stop(){
+    cancelAnimationFrame(raf); clearTimeout(attente);
+    if(fondu){ const f = fondu; fondu = null; f.interrompre(); }
+    libere(cle, FIN_GESTE_MS);
+  }
+  function anime(cible, ms, courbe = easeOut){
     cible = borne(cible, max);
     stop(); annuler();
     const v0 = lire();
     if(REDUIT.matches || v0 === cible || ms <= 0){ poser(cible); return; }
     occupe(cle);
+    fondu = fondre ? fondre(cible, ms) : null;
+    const suivre = fondu ? fondu.suivre : poser;
     const t0 = performance.now();
     const image = now => {
       const x = Math.min(1, (now - t0) / ms);
-      poser(v0 + (cible - v0) * (1 - (1 - x) ** 3));
-      if(x < 1) raf = requestAnimationFrame(image);
-      else libere(cle, FIN_GESTE_MS);
+      if(x < 1){
+        suivre(v0 + (cible - v0) * courbe(x));
+        raf = requestAnimationFrame(image);
+        return;
+      }
+      if(fondu){ fondu.finir(); fondu = null; }
+      poser(cible);
+      libere(cle, FIN_GESTE_MS);
     };
     raf = requestAnimationFrame(image);
   }
@@ -4054,8 +4111,9 @@ function uiTime(t){
    setTime(t), t ∈ [0,4] (0 la journée, 1 le soir, 2 la nuit profonde, 3 la nuit
    des rêves, 4 le matin), est le seul point d'entrée : chaque table ci-dessous
    donne la valeur aux cinq moments, lerpArr interpole entre eux.
-   Têtes (Dedans et l'enfant de Dehors, reprise par <use>) : variables sur :root
-   et classes sur les éléments eux-mêmes, jamais d'état posé sur un ancêtre. */
+   Têtes (Dedans et l'enfant de Dehors, reprise par <use>) : variables et classes sur les
+   pièces elles-mêmes (le <use> et le clone de la loupe recopient leur style), jamais
+   d'état posé sur un ancêtre. */
 const TEMPS = {
   nuit:       [0, .55, 1, 1, .1],   /* .nuit de la toile (× --nuit-max, plafond CSS) */
   jour:       [1, .3, 0, 0, .8],    /* [data-jour] : le soleil dans le ciel */
@@ -4086,6 +4144,28 @@ const DECOR = [['jour', 'jour'], ['chambre', 'chambre'], ['nuit', 'nuitDecor'], 
 const DECOR_ID = { 'p-expo': 'expo' };   /* une pièce dont la table n'est pas celle de sa famille */
 const PHASES_PRES = { nuit: 'phaseNuit', synapses: 'synapses' };
 const dehors = VUES[0], pres = VUES[2];
+/* Les variables du temps sont posées sur les SEULES pièces qui les lisent (mêmes sélecteurs
+   que les règles CSS), jamais sur :root ni sur un groupe (Performance, 30 octobre 2026) :
+   une variable héritée qui change fait redessiner tout ce qui est dessous, filtres de laine
+   compris (sur :root : les 2 400 éléments, dont la boîte de cartes ; sur #g-dedans : toute
+   la tête), à chaque image d'un glissé. Posée sur la pièce, elle ne touche qu'elle ; le
+   <use> de l'enfant de Dehors et le clone de la loupe recopient le style de la pièce.
+   Une valeur inchangée n'est pas réécrite. */
+const LECTEURS = {
+  '--nuit': '.nuit, #p-sol, .fil.herbe',
+  '--paupiere-op': '#p-paupiere, #fil-oeil-ferme, #p-oeil, #p-oeil~.trou, #p-oeil~.bord-bouton, #p-oeil+.trou+.trou+.fil',
+  '--pineale-lueur': '#p-pineale',
+  '--amygdale-lueur': '#p-amygdale',
+  '--grandis': '.grandis'
+};
+const lecteurs = Object.fromEntries(Object.entries(LECTEURS).map(([v, sel]) => [v, [...document.querySelectorAll(sel)]]));
+const ecrits = {};
+function poserVar(nom, valeur){
+  const texte = String(valeur);
+  if(ecrits[nom] === texte) return;
+  ecrits[nom] = texte;
+  for(const el of lecteurs[nom]) el.style.setProperty(nom, texte);
+}
 const enfantDehors = document.getElementById('g-enfant-dehors');
 const zzz = document.getElementById('g-zzz');
 const ecranCorps = document.getElementById('ecran-corps');
@@ -4099,14 +4179,23 @@ let tempsCourant = 0;
 let phaseCourante = null;
 function setTime(t){
   t = borne(t, 4);
-  tempsCourant = t;
+  poserScene(t);
+  poserEtat(t);
+}
+/* setTime en deux moitiés (Performance, 30 octobre 2026) : poserScene(t) dessine le moment t
+   (variables, classes, opacités, l'enfant) ; poserEtat(t) tient l'état (tempsCourant, le moment
+   arrondi, l'événement « temps », le curseur et son habillage, les zones). Un glissé par clic,
+   clavier ou aimant (fondreTemps, plus bas) pose la scène UNE fois au cran visé et laisse les
+   transitions CSS la faire glisser, pendant que poserEtat suit image par image. */
+function poserScene(t){
+  t = borne(t, 4);
   const v = Object.fromEntries(Object.entries(TEMPS).map(([k, arr]) => [k, lerpArr(arr, t)]));
   /* la toile, et l'état de la tête (lu par des règles posées sur les pièces) */
-  root.style.setProperty('--nuit', v.nuit);
-  root.style.setProperty('--paupiere-op', v.paupiere);
-  root.style.setProperty('--pineale-lueur', v.pineale);
-  root.style.setProperty('--amygdale-lueur', v.amygdale);
-  root.style.setProperty('--grandis', v.grandis);
+  poserVar('--nuit', v.nuit);
+  poserVar('--paupiere-op', v.paupiere);
+  poserVar('--pineale-lueur', v.pineale);
+  poserVar('--amygdale-lueur', v.amygdale);
+  poserVar('--grandis', v.grandis);
   tete['p-pineale'].classList.toggle('allume', v.pineale > .02);
   tete['p-amygdale'].classList.toggle('lueur', v.amygdale > .02);
   tete['p-amygdale'].classList.toggle('pulse', v.amygdale > .5);
@@ -4128,6 +4217,10 @@ function setTime(t){
   montrer(ecranCorps, v.ecran);
   /* Tout près : les métiers de la nuit et les étincelles */
   pres.querySelectorAll('[data-phase]').forEach(el => montrer(el, v[PHASES_PRES[el.dataset.phase]] ?? 1));
+}
+function poserEtat(t){
+  t = borne(t, 4);
+  tempsCourant = t;
   /* l'état lisible, l'habillage, le curseur */
   const n = Math.round(t);
   document.body.dataset.temps = n;
@@ -4157,9 +4250,24 @@ function surprises(avant, n){
   }
   if(n === 4 && avant === 3) rejouer([tete['p-bouche']], 'baille', 1900);
 }
+/* Un changement de moment par clic, clavier, aimant ou récit (Performance, 30 octobre 2026) :
+   la scène est posée UNE fois au cran visé, sous html.temps-fondu (+ .fondu-court sous 450 ms),
+   dont les transitions CSS (section 7 sexies : opacités, transform de l'enfant, couleurs du sol,
+   lueurs) la font glisser en 600 ms (ou 260) ; le compositeur anime les opacités et la
+   transform sans rien redessiner. Image par image, seul l'état suit (poserEtat : curseur,
+   moment, événement « temps » au même instant qu'avant). Interrompu (la main reprend le rail,
+   un autre glissé), la scène est reposée là où en est l'état. Le glissé du rail au doigt, lui,
+   reste image par image (setTime), la scène suit le doigt. */
+function fondreTemps(cible, ms){
+  root.classList.add('temps-fondu');
+  root.classList.toggle('fondu-court', ms < 450);
+  poserScene(cible);
+  const finir = () => root.classList.remove('temps-fondu', 'fondu-court');
+  return { suivre: poserEtat, finir, interrompre(){ finir(); poserScene(tempsCourant); } };
+}
 /* Glisse jusqu'au moment `cible` (≈ 600 ms) ; annule un glissé en cours, l'aimant du rail
    et l'aimantation ←→ en attente (même mécanisme que la vue : glisser, plus haut). */
-const glisseTemps = glisser({ cle: 'temps', max: 4, lire: () => tempsCourant, poser: setTime, annuler: () => cancelAnimationFrame(aimant) });
+const glisseTemps = glisser({ cle: 'temps', max: 4, lire: () => tempsCourant, poser: setTime, annuler: () => cancelAnimationFrame(aimant), fondre: fondreTemps });
 function animateTime(cible, ms = 600){ glisseTemps.anime(cible, ms); }
 /* ←→ : un pas de 0,25 puis, après un court répit, le moment voisin dans le sens de la touche */
 function pasTemps(d){ glisseTemps.pas(d); }
@@ -4174,10 +4282,23 @@ cutRange.addEventListener('input', () => {
   setCut(Number(cutRange.value) / 100);
 });
 /* le rail (glissé, aimant, clavier natif) : la main l'emporte sur un glissé ou une aimantation en attente */
+/* Le rail au doigt (ou au clavier natif) : l'état et le bouton suivent chaque événement ; la scène,
+   elle, est redessinée une image sur deux pendant que le doigt glisse (Performance : une image de
+   scène coûte plus qu'une image d'écran), et tout de suite sur un cran (fin d'un pas, zones). */
+let sceneDemandee = 0;
+function sceneUneImageSurDeux(){
+  if(sceneDemandee) return;
+  sceneDemandee = requestAnimationFrame(() => {
+    sceneDemandee = requestAnimationFrame(() => { sceneDemandee = 0; poserScene(tempsCourant); });
+  });
+}
 timeRange.addEventListener('input', () => {
   glisseTemps.stop();
-  occupe('temps'); libere('temps', FIN_GESTE_MS);   /* le glissé du rail, son aimant, le clavier natif */
-  setTime(Number(timeRange.value) / 100);
+  occupe('temps'); libere('temps', FIN_GESTE_MS);   /* le glissé du rail, le clavier natif */
+  const t = borne(Number(timeRange.value) / 100, 4);
+  if(t === Math.round(t)){ cancelAnimationFrame(sceneDemandee); sceneDemandee = 0; setTime(t); return; }
+  poserEtat(t);
+  sceneUneImageSurDeux();
 });
 segs.forEach(b => b.addEventListener('click', () => animateCut(Number(b.dataset.cut))));
 
@@ -4192,13 +4313,10 @@ function aimanter(){
   cancelAnimationFrame(aimant);
   if(v0 === cible) return;
   if(REDUIT.matches){ poserCurseur(timeRange, cible); return; }
-  const t0 = performance.now();
-  const pas = now => {
-    const x = Math.min(1, (now - t0) / AIMANT_MS);
-    poserCurseur(timeRange, Math.round(v0 + (cible - v0) * ressort(x)));
-    if(x < 1) aimant = requestAnimationFrame(pas);
-  };
-  aimant = requestAnimationFrame(pas);
+  /* Performance : l'aimant est un glissé du temps comme un autre (la scène en transitions CSS,
+     le bouton du rail suit le ressort) ; avant, il passait par l'événement input du rail */
+  setTime(v0 / 100);   /* la scène rejoint le dernier point du doigt (le glissé au doigt peut en sauter) */
+  glisseTemps.anime(cible / 100, AIMANT_MS, ressort);
 }
 let tire = false;
 timeRange.addEventListener('pointerdown', () => {
