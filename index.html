@@ -964,6 +964,17 @@ body[data-vue="2"]{--tc-vis:hidden}
 .volet h2{margin:0 0 .2em;font-family:var(--font-display);font-weight:600;font-size:1.35rem;line-height:1.15}
 .volet p{margin:0;max-width:62ch;font-size:1.1rem;line-height:1.45;font-weight:500}
 .volet .croix{position:absolute;right:6px;top:4px}
+/* mode guidé (Task 15) : onze petites pastilles de feutre sous le titre, deux gros boutons en bas */
+.recit-puces,.recit-bt{display:none}
+.volet.histoire .recit-puces{display:flex;flex-wrap:wrap;gap:6px;margin:.1em 0 .55em}
+.volet.histoire .recit-bt{display:flex;align-items:center;gap:12px;margin-top:12px}
+.recit-puces i{width:12px;height:12px;border-radius:50%;background:var(--ui-sable);box-shadow:inset 0 -2px 0 rgba(0,0,0,.14);transition:transform .3s var(--ui-ressort), background-color .2s}
+.recit-puces i.now{background:var(--ui-indigo);transform:scale(1.35)}
+.recit-num{margin-left:.5em;font-size:.8em;font-weight:500;opacity:.7;white-space:nowrap}
+#suite{min-height:var(--ui-cible);font-size:1.15rem;padding:.7em 1.6em}
+#stop{font-size:1.2rem}
+#stop[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.recit-puces i{transition:none}}
 
 /* ===== 9. Dock : trois gros boutons d'activité, trois outils sable ===== */
 .dock{
@@ -1073,6 +1084,12 @@ body[data-vue="2"]{--tc-vis:hidden}
   .volet h2{font-size:1.1rem}
   .volet p{font-size:1rem;line-height:1.38}
   .volet .croix{right:0;top:0}
+  .volet.histoire{padding:8px 52px 8px 14px}
+  .volet.histoire .volet-ic{display:none}
+  .volet.histoire .recit-puces{margin:.2em 0 .3em}
+  .volet.histoire .recit-bt{margin-top:4px}
+  .volet.histoire p{font-size:.94rem;line-height:1.28}
+  .volet.histoire h2{margin:0}
 
   .dock{flex-direction:column;align-items:stretch;padding:14px 0 18px}
   .dock-jeux,.dock-outils{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -2835,6 +2852,12 @@ html:not([data-pret]) *{transition:none!important}
         <div class="volet-ic" id="infoEmoji" aria-hidden="true">🧠</div>
         <h2 id="infoTitle">Touche la tête&nbsp;!</h2>
         <p id="infoText" aria-live="polite">Appuie sur ce que tu veux découvrir, puis fais glisser le soleil vers la nuit.</p>
+        <!-- Mode guidé (Task 15) : visible seulement avec la classe « histoire » sur #info -->
+        <div class="recit-puces" id="recitPuces" aria-hidden="true"></div>
+        <div class="recit-bt">
+          <button type="button" id="suite" class="bouton indigo">Et après&nbsp;?</button>
+          <button type="button" id="stop" class="bouton sable rond" aria-label="Arrêter l'histoire"><span class="ic" aria-hidden="true">✖</span></button>
+        </div>
         <button type="button" id="infoClose" class="croix" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
       </section>
     </div>
@@ -2855,7 +2878,7 @@ html:not([data-pret]) *{transition:none!important}
     <div class="dock-jeux">
       <button type="button" id="jeu1" class="bouton corail"><span class="ic" aria-hidden="true">🎯</span>Trouve la partie</button>
       <button type="button" id="jeu2" class="bouton indigo"><span class="ic" aria-hidden="true">💭</span>Rêve ou pour de vrai&nbsp;?</button>
-      <button type="button" id="histoire" class="bouton vert"><span class="ic" aria-hidden="true">📖</span>L'histoire du pouce</button>
+      <button type="button" id="histoire" class="bouton vert" aria-pressed="false"><span class="ic" id="histoireIc" aria-hidden="true">📖</span><span id="histoireLib">L'histoire du pouce</span></button>
     </div>
     <div class="dock-outils">
       <button type="button" id="zones" class="bouton sable"><span class="ic" aria-hidden="true">✨</span>Montrer les zones</button>
@@ -3270,7 +3293,7 @@ const HISTOIRE = [
   { vue:0, temps:3,
     texte:"Cette nuit-là, {PRENOM} s'est {réveillé|réveillée} plusieurs fois, {terrorisé|terrorisée} par un ogre gigantesque. C'était un cauchemar : ça fait très peur, mais ce n'est pas pour de vrai." },
   { vue:1, temps:3, action:'telecommande',
-    texte:"Alors ses parents sont venus et ils ont chanté « Hey, ho, les chiens pirates ! ». La chanson est entrée dans sa tête, et le film a changé de chaîne." },
+    texte:"Mais on a une télécommande ! Alors ses parents sont venus et ils ont chanté « Hey, ho, les chiens pirates ! ». La chanson est entrée dans sa tête, et le film a changé de chaîne." },
   { vue:1, temps:4,
     texte:"Au matin, le film s'est arrêté. L'ogre gigantesque, c'était le pouce de bronze et la blague des copains, mélangés par son cerveau pendant la nuit." },
   { vue:0, temps:4,
@@ -4002,7 +4025,9 @@ const infoEmoji = document.getElementById('infoEmoji');
 const infoTitle = document.getElementById('infoTitle');
 const infoText = document.getElementById('infoText');
 let infoOpener = null;
+var recitActif = false, recitOuvre = false, finirRecit = null;   /* Task 15 : var, openInfo peut s'exécuter avant la section « mode guidé » */
 function openInfo(opener, contenu){
+  if(recitActif && !recitOuvre && finirRecit) finirRecit();   /* une zone ouvre le volet : l'histoire s'arrête, la scène reste */
   infoOpener = opener instanceof HTMLElement || opener instanceof SVGElement ? opener : null;
   marquerZone(infoOpener);   /* Task 12 : le liseré brodé suit la zone qui ouvre le volet */
   infoBox.classList.add('open');
@@ -4013,6 +4038,7 @@ function openInfo(opener, contenu){
   }
 }
 function closeInfo(){
+  if(recitActif && finirRecit) finirRecit();
   if(!infoBox.classList.contains('open')) return;
   const focusDedans = infoBox.contains(document.activeElement);
   infoBox.classList.remove('open');
@@ -5019,6 +5045,7 @@ chanson.addEventListener('close', () => {
   chanson.classList.remove('sort');
   clearTimeout(tc.attente);
   chansonFenetre.replaceChildren();
+  if(recitActif){ document.getElementById('suite').focus({ preventScroll: true }); return; }   /* Task 15 : l'histoire continue */
   if(tcVisible() && (document.activeElement === document.body || !document.activeElement)) telecommande.focus({ preventScroll: true });
 });
 fermerSurFond(chanson, () => closeSong());
@@ -5507,6 +5534,124 @@ zonesBtn.addEventListener('click', () => { if(ZS) montrerZones(!scene.classList.
   }, true);   /* capture : lu AVANT que le gestionnaire global ferme le volet (un Échap = une chose) */
   window.addEventListener('resize', () => { if(on && visible) dessiner(); });
 })();
+
+/* ===== 12. Le mode guidé : « L'histoire du pouce » (Task 15, spec §4.7) =====
+   #info EST la fiche de l'histoire : la classe « histoire » y montre onze pastilles, le bouton
+   #suite « Et après ? » et #stop ✖. startStory() : journée neuve, nuit 0, vue Dehors, graine 0, les
+   quatre cartes posées sans geste (même la nuit : forcer), étape 0. #suite : la vue et le moment
+   glissent (600 ms, en parallèle), PUIS le texte de l'étape (tourné comme une page) ; pas d'avance
+   automatique. Actions : « reve » (le rêve se dessine tout seul en phase 3, graine 0), « telecommande »
+   (applyRemote : la chanson s'ouvre, le volet reste dessous), « fin » (journée remise à zéro, la fiche
+   dit « À toi de faire ta journée ! » ; « C'est parti ! » la referme). #stop / ✕ / un second appui sur
+   #histoire / une zone qui prend le volet : l'histoire s'arrête, la scène reste comme elle est.
+   Événement « histoire » (detail : { etape, fin }) à chaque étape ; fin:true à la dernière (Task 16). */
+const histoireBtn = document.getElementById('histoire');
+const histoireLib = document.getElementById('histoireLib');
+const histoireIc = document.getElementById('histoireIc');
+const suiteBtn = document.getElementById('suite');
+const stopBtn = document.getElementById('stop');
+const recitPuces = document.getElementById('recitPuces');
+const recit = { etape: -1, timer: 0, fini: null, num: null };
+const RECIT_MS = 600;
+const RECIT_CARTES = ['pouce', 'ogre', 'copains', 'ri'];
+for(let i = 0; i < HISTOIRE.length; i++) recitPuces.appendChild(document.createElement('i'));
+
+/* le texte de l'étape : prénom (ou « il/elle » à défaut, avec majuscule en début de phrase), puis accord */
+function texteEtape(i){
+  const prenom = String(prefs.get('prenom', '') || '').replace(/[{}|]/g, '').trim();
+  const t = HISTOIRE[i].texte.replace(/\{PRENOM\}/g, (m, off, tout) =>
+    prenom || (off === 0 || /[.!?…»]\s*$/.test(tout.slice(0, off)) ? '{Il|Elle}' : '{il|elle}'));
+  return inflect(t, root.dataset.genre);
+}
+function majBoutonHistoire(on){
+  histoireBtn.setAttribute('aria-pressed', String(on));
+  histoireIc.textContent = on ? '✖' : '📖';
+  histoireLib.textContent = on ? "Arrêter l'histoire" : "L'histoire du pouce";
+}
+function majPuces(i){
+  [...recitPuces.children].forEach((p, k) => p.classList.toggle('now', k === i));
+  if(!recit.num){ recit.num = document.createElement('span'); recit.num.className = 'recit-num'; infoTitle.appendChild(recit.num); }
+  else if(!recit.num.isConnected) infoTitle.appendChild(recit.num);
+  recit.num.textContent = `${i + 1} / ${HISTOIRE.length}`;
+  const dernier = HISTOIRE[i].action === 'fin';
+  suiteBtn.textContent = dernier ? "C'est parti !" : 'Et après ?';
+  stopBtn.hidden = dernier;
+}
+/* « tourner la page » : le texte glisse et se fond en 200 ms (rien en mouvement réduit) */
+function tournerPage(){
+  if(REDUIT.matches || !infoText.animate) return;
+  infoText.animate([{ opacity: 0, transform: 'translateX(28px)' }, { opacity: 1, transform: 'none' }],
+    { duration: 200, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+}
+function annulerAnimations(){
+  cancelAnimationFrame(animCut); clearTimeout(posCut);
+  cancelAnimationFrame(animTemps); cancelAnimationFrame(aimant); clearTimeout(posTemps);
+}
+/* l'histoire s'arrête : la scène ne bouge pas */
+finirRecit = function(){
+  recitActif = false;
+  clearTimeout(recit.timer); recit.timer = 0; recit.fini = null; recit.etape = -1;
+  infoBox.classList.remove('histoire');
+  if(recit.num) recit.num.remove();
+  stopBtn.hidden = false;
+  majBoutonHistoire(false);
+};
+function stopStory(){
+  if(!recitActif) return;
+  finirRecit();
+  closeInfo();
+}
+function allerEtape(i){
+  if(recit.fini) recit.fini();   /* un appui pendant le glissé : l'étape en attente s'achève tout de suite */
+  const st = HISTOIRE[i];
+  recit.etape = i;
+  majPuces(i);
+  document.dispatchEvent(new CustomEvent('histoire', { detail: { etape: i, fin: st.action === 'fin' } }));
+  const dejaReve = phaseCourante === 3 && !!reveCourant;
+  if(st.action === 'reve') seed = 0;
+  const bouge = Math.abs(cutCourant - st.vue) > .001 || Math.abs(tempsCourant - st.temps) > .001;
+  animateCut(st.vue, RECIT_MS);
+  animateTime(st.temps, RECIT_MS);
+  const montrer = () => {
+    clearTimeout(recit.timer); recit.timer = 0; recit.fini = null;
+    if(!recitActif || recit.etape !== i) return;
+    infoText.textContent = texteEtape(i);
+    tournerPage();
+    if(st.action === 'reve' && phaseCourante === 3 && (dejaReve || !reveCourant)) renderDream(reveDuJour(), { anim: !dejaReve && !REDUIT.matches });
+    if(st.action === 'telecommande') applyRemote();
+    if(st.action === 'fin') resetDay();
+  };
+  if(!bouge || REDUIT.matches) montrer();
+  else{ recit.fini = montrer; recit.timer = setTimeout(montrer, RECIT_MS + 40); }
+}
+function startStory(){
+  if(recitActif){ stopStory(); return; }
+  annulerAnimations();
+  resetDay();
+  setTime(0);
+  setCut(0);
+  seed = 0;
+  RECIT_CARTES.forEach(s => pickCard(s, { anim: false, forcer: true }));
+  recitActif = true;
+  infoBox.classList.add('histoire');
+  majBoutonHistoire(true);
+  recit.etape = 0;
+  majPuces(0);
+  recitOuvre = true;
+  openInfo(histoireBtn, { emoji: '📖', titre: "L'histoire du pouce", texte: texteEtape(0) });
+  recitOuvre = false;
+  majPuces(0);   /* openInfo a réécrit le titre : le compteur y revient */
+  document.dispatchEvent(new CustomEvent('histoire', { detail: { etape: 0, fin: false } }));
+  suiteBtn.focus({ preventScroll: true });
+}
+histoireBtn.addEventListener('click', startStory);
+stopBtn.addEventListener('click', stopStory);
+suiteBtn.addEventListener('click', () => {
+  if(!recitActif) return;
+  if(recit.fini){ recit.fini(); return; }   /* un second appui pendant le glissé : on montre le texte tout de suite */
+  if(HISTOIRE[recit.etape].action === 'fin'){ stopStory(); return; }
+  allerEtape(recit.etape + 1);
+});
 </script>
 </body>
 </html>
