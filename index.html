@@ -632,6 +632,11 @@ html.loupe-active,#scene.loupe-active{--pres-play:paused}
    des variables, pour qu'un clone <use> (Dehors, la loupe de Task 14) suive. */
 [data-lite="1"]{--amb-anim:none}
 html.loupe-active,#scene.loupe-active{--amb-play:paused}
+/* pendant une interaction (choix d'une carte, glissé de la boîte, du temps ou de la vue,
+   récompense d'un jeu), toute l'ambiance se fige, Tout près compris : chaque image d'ambiance
+   refait les filtres de laine de ce qu'elle touche, et la carte graphique doit être libre
+   pour le geste. html.interaction est posée par occupe() / libere() (section 5). */
+html.interaction{--amb-play:paused;--pres-play:paused}
 
 /* l'amygdale s'allume en rêve (--amygdale-lueur) et bat doucement (.pulse) :
    --amygdale-pouls est une propriété enregistrée, donc interpolée par l'animation */
@@ -671,16 +676,18 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
 #fil-oeil-ferme.rem{animation:var(--amb-anim, rem) 1.3s ease-in-out infinite}
 @keyframes rem{0%,100%{transform:translateX(0)}18%{transform:translateX(-1.6px)}40%{transform:translateX(1.5px)}55%{transform:translateX(-.6px)}78%{transform:translateX(1.7px)}}
 
-/* la tête respire (×1,01) : sur les groupes (Dedans entier, l'enfant de Dehors),
-   par la propriété « scale », qui se compose avec la transform posée en style
-   (fondu de Task 6, enfant couché) au lieu de la remplacer */
-#scene-inner>#g-dedans,#g-enfant-dehors{animation:var(--amb-anim, respire) 5s ease-in-out infinite}
-@keyframes respire{50%{scale:1.01}}
+/* (la respiration ×1,01 de la tête, « respire », est retirée : Performance, 30 octobre 2026.
+   Elle redessinait toute la vue Dedans, ou l'enfant de Dehors, filtres de laine compris, à
+   chaque image, même au repos : 82 à 165 ms par image pour un mouvement quasi invisible.) */
 
 /* les fils frémissent : le point de tige des sillons et du cervelet avance et recule
    d'un rien (en riso, les fils sont pleins : rien ne bouge) */
 #fil-sillons>.fil,#fil-cervelet{animation:var(--amb-anim, fremit) 3.6s ease-in-out infinite}
 @keyframes fremit{50%{stroke-dashoffset:.9}}
+/* les fils qui frémissent ont leur propre calque (Performance, 30 octobre 2026) : sans lui, chaque
+   image du frémissement redessinait les tuiles du cerveau en dessous, et leurs ~18 filtres de laine
+   (85 ms par image au repos à Dedans) ; avec lui, seuls ces fils sont repeints */
+#fil-sillons,#fil-cervelet{will-change:transform}
 
 /* les nœuds-étoiles scintillent (on ne les voit que le soir et la nuit) */
 #g-etoiles circle{animation:var(--amb-anim, scintille) 2.8s ease-in-out infinite}
@@ -706,8 +713,8 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
 @keyframes baille{35%,62%{transform:scale(.8,2.6)}}
 
 /* après les raccourcis « animation » ci-dessus (qui remettent l'état à running) ;
-   #scene-inner>#g-dedans dans la liste donne à :is() la spécificité la plus forte */
-:is(#p-amygdale,#p-pineale,#p-paupiere,#fil-oeil-ferme,#scene-inner>#g-dedans,#g-enfant-dehors,#fil-sillons>.fil,#fil-cervelet,#g-etoiles circle,.fil.z,#fil-lune-clin,#fil-lune-oeil,#p-bouche){animation-play-state:var(--amb-play, running)}
+   #fil-sillons>.fil dans la liste donne à :is() la spécificité (1,1,0) de ces raccourcis */
+:is(#p-amygdale,#p-pineale,#p-paupiere,#fil-oeil-ferme,#fil-sillons>.fil,#fil-cervelet,#g-etoiles circle,.fil.z,#fil-lune-clin,#fil-lune-oeil,#p-bouche){animation-play-state:var(--amb-play, running)}
 
 /* ===== 7 ter. Avatar : garçon / fille, peau, cheveux (dans la feuille de réglages) =====
    Les pastilles sont des ronds plats de 56 px ; la choisie porte un anneau
@@ -3908,6 +3915,34 @@ const railBtn = document.getElementById('railBtn');
 const MOMENTS = [['☀️', 'La journée'], ['🌇', 'Le soir'], ['💤', 'La nuit profonde'], ['🌙', 'La nuit des rêves'], ['🐓', 'Le matin']];
 const borne = (v, max) => Math.min(max, Math.max(0, Number(v) || 0));
 
+/* Interactions en cours (Performance, 30 octobre 2026) : tant qu'au moins un geste tient
+   la scène, <html> porte la classe « interaction », qui fige l'ambiance (--amb-play et
+   --pres-play, section 7 sexies) ; elle repart quand le dernier geste est fini.
+     occupe(cle)       : le geste `cle` commence (ou continue) ;
+     libere(cle, ms)   : il finit, dans `ms` ms (un nouvel occupe(cle) d'ici là le prolonge).
+   Le compteur est l'ensemble des gestes en cours, un par clé (« boite », « elan »,
+   « voyage », « temps », « rail », « vue », « fete »…) : un geste qui finit deux fois, ou
+   qui recommence avant d'avoir fini, ne fausse pas le compte. Sans effet en mouvement
+   réduit (il n'y a déjà plus d'animation). */
+const occupations = new Map();   /* clé → minuteur de fin (0 : pas de fin prévue) */
+function majOccupation(){ root.classList.toggle('interaction', occupations.size > 0); }
+function occupe(cle){
+  clearTimeout(occupations.get(cle));
+  occupations.set(cle, 0);
+  majOccupation();
+}
+function libere(cle, ms = 0){
+  if(!occupations.has(cle)) return;
+  clearTimeout(occupations.get(cle));
+  if(ms > 0){
+    occupations.set(cle, setTimeout(() => { occupations.delete(cle); majOccupation(); }, ms));
+    return;
+  }
+  occupations.delete(cle);
+  majOccupation();
+}
+const FIN_GESTE_MS = 300;   /* l'ambiance repart 300 ms après la fin d'un geste */
+
 function uiCut(c){
   c = borne(c, 2);
   const n = Math.round(c);
@@ -3962,30 +3997,34 @@ function setCut(c){
      stop()           : annule le glissé en cours et le pas en attente.
    anime et pas annulent aussi ce que donne `annuler` (le temps : l'aimant du rail) ; stop
    non, car l'aimant passe lui-même par l'événement input du rail, qui appelle stop. */
-function glisser({ max, lire, poser, annuler = () => {} }){
+function glisser({ cle, max, lire, poser, annuler = () => {} }){
   let raf = 0, attente = 0;
-  function stop(){ cancelAnimationFrame(raf); clearTimeout(attente); }
+  /* le glissé fige l'ambiance (occupe) jusqu'à 300 ms après sa dernière image */
+  function stop(){ cancelAnimationFrame(raf); clearTimeout(attente); libere(cle, FIN_GESTE_MS); }
   function anime(cible, ms){
     cible = borne(cible, max);
     stop(); annuler();
     const v0 = lire();
     if(REDUIT.matches || v0 === cible || ms <= 0){ poser(cible); return; }
+    occupe(cle);
     const t0 = performance.now();
     const image = now => {
       const x = Math.min(1, (now - t0) / ms);
       poser(v0 + (cible - v0) * (1 - (1 - x) ** 3));
       if(x < 1) raf = requestAnimationFrame(image);
+      else libere(cle, FIN_GESTE_MS);
     };
     raf = requestAnimationFrame(image);
   }
   function pas(d){
     stop(); annuler();
+    occupe(cle);
     poser(lire() + d);
     attente = setTimeout(() => anime(d > 0 ? Math.ceil(lire()) : Math.floor(lire()), 250), 450);
   }
   return { anime, pas, stop };
 }
-const glisseVue = glisser({ max: 2, lire: () => cutCourant, poser: setCut });
+const glisseVue = glisser({ cle: 'vue', max: 2, lire: () => cutCourant, poser: setCut });
 /* Glisse jusqu'à la vue `cible` (≈ 500 ms) ; un clic sur un segment annule aussi l'aimantation ↑↓ en attente. */
 function animateCut(cible, ms = 500){ glisseVue.anime(cible, ms); }
 /* ↑↓ : un pas de 0,5 puis, après un court répit, la vue voisine dans le sens de la touche */
@@ -4116,7 +4155,7 @@ function surprises(avant, n){
 }
 /* Glisse jusqu'au moment `cible` (≈ 600 ms) ; annule un glissé en cours, l'aimant du rail
    et l'aimantation ←→ en attente (même mécanisme que la vue : glisser, plus haut). */
-const glisseTemps = glisser({ max: 4, lire: () => tempsCourant, poser: setTime, annuler: () => cancelAnimationFrame(aimant) });
+const glisseTemps = glisser({ cle: 'temps', max: 4, lire: () => tempsCourant, poser: setTime, annuler: () => cancelAnimationFrame(aimant) });
 function animateTime(cible, ms = 600){ glisseTemps.anime(cible, ms); }
 /* ←→ : un pas de 0,25 puis, après un court répit, le moment voisin dans le sens de la touche */
 function pasTemps(d){ glisseTemps.pas(d); }
@@ -4125,10 +4164,15 @@ function poserCurseur(range, v){
   range.value = v;
   range.dispatchEvent(new Event('input'));
 }
-cutRange.addEventListener('input', () => { glisseVue.stop(); setCut(Number(cutRange.value) / 100); });
+cutRange.addEventListener('input', () => {
+  glisseVue.stop();
+  occupe('vue'); libere('vue', FIN_GESTE_MS);
+  setCut(Number(cutRange.value) / 100);
+});
 /* le rail (glissé, aimant, clavier natif) : la main l'emporte sur un glissé ou une aimantation en attente */
 timeRange.addEventListener('input', () => {
   glisseTemps.stop();
+  occupe('temps'); libere('temps', FIN_GESTE_MS);   /* le glissé du rail, son aimant, le clavier natif */
   setTime(Number(timeRange.value) / 100);
 });
 segs.forEach(b => b.addEventListener('click', () => animateCut(Number(b.dataset.cut))));
@@ -4157,6 +4201,7 @@ timeRange.addEventListener('pointerdown', () => {
   cancelAnimationFrame(aimant);
   glisseTemps.stop();
   tire = true;
+  occupe('rail');   /* le doigt tient le rail, même immobile */
   rail.classList.add('tire');
 });
 /* sur window : le doigt peut quitter le rail avant d'être levé. L'aimant part
@@ -4166,6 +4211,7 @@ timeRange.addEventListener('pointerdown', () => {
 function lacher(){
   if(!tire) return;
   tire = false;
+  libere('rail', FIN_GESTE_MS);
   rail.classList.remove('tire');
   setTimeout(aimanter, 0);
 }
@@ -4484,6 +4530,8 @@ CARTES.forEach(c => etiqueter(c.slug));
 /* --- défilement : glisser au doigt (avec un peu d'élan), molette, focus clavier --- */
 let defil = 0;
 let elan = 0;
+/* l'élan d'un glissé est un geste à part (clé « elan ») : il fige l'ambiance jusqu'à 300 ms après sa fin */
+function arreterElan(){ cancelAnimationFrame(elan); libere('elan', FIN_GESTE_MS); }
 function poserDefil(x){
   defil = Math.max(DEFIL_MIN, Math.min(0, x));
   boiteRail.style.transform = `translate(${defil}px,0)`;
@@ -4495,7 +4543,8 @@ function appuyer(carte){ carte.querySelector('.carte-corps').classList.add('appu
 function relacherAppui(){ boiteRail.querySelectorAll('.appui').forEach(el => el.classList.remove('appui')); }
 boite.addEventListener('pointerdown', e => {
   if(e.pointerType === 'mouse' && e.button !== 0) return;
-  cancelAnimationFrame(elan);
+  arreterElan();
+  occupe('boite');   /* du doigt posé (carte ou glissé) jusqu'à 300 ms après son lever (plus bas) */
   const carte = e.target.closest('.carte');
   tenu = { id: e.pointerId, x0: e.clientX, d0: defil, bouge: false, pts: [[e.timeStamp, e.clientX]], carte };
   if(carte && !boiteDort()) appuyer(carte);
@@ -4528,7 +4577,9 @@ function lacherBoite(e){
         poserDefil(defil + v * dt);
         v *= Math.pow(.94, dt / 16);
         if(Math.abs(v) > .02 && defil > DEFIL_MIN && defil < 0) elan = requestAnimationFrame(glisser);
+        else libere('elan', FIN_GESTE_MS);
       };
+      occupe('elan');
       elan = requestAnimationFrame(glisser);
     }
   }
@@ -4537,12 +4588,16 @@ function lacherBoite(e){
 boite.addEventListener('pointerup', lacherBoite);
 boite.addEventListener('pointercancel', lacherBoite);
 boite.addEventListener('lostpointercapture', lacherBoite);
+/* sur window : le doigt peut se lever hors de la boîte (appui sans glissé, donc sans capture) */
+addEventListener('pointerup', () => libere('boite', FIN_GESTE_MS));
+addEventListener('pointercancel', () => libere('boite', FIN_GESTE_MS));
 /* molette : défile la boîte ; en butée, on laisse la page défiler */
 boite.addEventListener('wheel', e => {
   const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   if(!d) return;
   const avant = defil;
-  cancelAnimationFrame(elan);
+  arreterElan();
+  occupe('molette'); libere('molette', FIN_GESTE_MS);
   poserDefil(defil - d * (e.deltaMode === 1 ? 16 : 1) * pxVersScene());
   if(defil !== avant) e.preventDefault();
 }, { passive: false });
@@ -4823,7 +4878,8 @@ function voler(slug, images, ms){
   return a;
 }
 /* Dehors : de la boîte au décor (qui sort de terre en rebondissant), ou dans la
-   tête de l'enfant par l'œil ou l'oreille quand la carte n'a pas de décor */
+   tête de l'enfant par l'œil ou l'oreille quand la carte n'a pas de décor.
+   volDehors et volDedans renvoient la durée du voyage (ms), pour figer l'ambiance d'ici là. */
 function volDehors(c, x0, y0, decor){
   if(decor){
     const [x1, y1] = cibleDecor(c);
@@ -4834,12 +4890,14 @@ function volDehors(c, x0, y0, decor){
     decor.firstElementChild.animate([
       { transform: 'scale(.15)', opacity: 0 }, { transform: 'scale(1.08)', opacity: 1, offset: .65 }, { transform: 'scale(1)', opacity: 1 }],
       { duration: 480, delay: 520, easing: 'ease-out', fill: 'backwards' });
+    return 1000;
   }else{
     const [x1, y1] = ENTREE[c.entree];
     voler(c.slug, [
       { transform: tr(x0, y0), opacity: 1 },
       { transform: tr((x0 + x1) / 2 + 40, Math.min(y0, y1) - 40, 1.1), opacity: 1, offset: .5 },
       { transform: tr(x1, y1, .15), opacity: .2 }], 700);
+    return 700;
   }
 }
 /* Dedans : de la boîte à l'œil (ou l'oreille), au thalamus, puis à l'hippocampe (≈ 1,2 s) ;
@@ -4857,6 +4915,7 @@ function volDedans(c, x0, y0, mini){
     { duration: 360, delay: 1200, easing: RESSORT, fill: 'backwards' });
   hippocampe.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
     { duration: 400, delay: 1250, easing: 'ease-in-out' });
+  return 1650;
 }
 
 /* --- la journée --- */
@@ -4916,8 +4975,10 @@ function pickCard(slug, opts = {}){
     /* seule la vue qu'on regarde voyage ; l'autre est déjà à jour */
     const x0 = CARTE.x0 + c.i * CARTE.pas + defil, y0 = CARTE.y - 7;
     const vue = Math.round(cutCourant);
-    if(vue === 0) volDehors(c, x0, y0, decor);
-    else if(vue === 1) volDedans(c, x0, y0, mini);
+    /* l'ambiance reste figée jusqu'à la fin du voyage (Tout près : l'épingle, 420 ms) */
+    const fin = vue === 0 ? volDehors(c, x0, y0, decor) : vue === 1 ? volDedans(c, x0, y0, mini) : 420;
+    occupe('voyage');
+    libere('voyage', fin + FIN_GESTE_MS);
   }
   if(phaseCourante >= 2 && phaseCourante <= 4) ranger(slug, journee.indexOf(slug), false);   /* la nuit : rangée tout de suite */
   emettreJournee();
@@ -4934,7 +4995,7 @@ function resetDay(){
 document.getElementById('journee').addEventListener('click', () => {
   stopStory();   /* l'histoire a besoin de ses cartes : une nouvelle journée la ferme */
   resetDay();
-  cancelAnimationFrame(elan);   /* un élan de glissé en cours ne doit pas repousser la boîte */
+  arreterElan();   /* un élan de glissé en cours ne doit pas repousser la boîte */
   poserDefil(0);
   animateTime(0);
 });
@@ -6089,6 +6150,7 @@ function confettis(parent, n){
 }
 /* une fête : `etoiles` étoiles en rang en haut de la scène, le « Bravo ! » épinglé, 24 confettis */
 function feter(etoiles){
+  occupe('fete'); libere('fete', 2100);   /* étoiles, « Bravo ! » et confettis (≈ 1,8 s) : l'ambiance attend */
   viderFete();
   const pas = 64, x0 = 450 - (etoiles - 1) * pas / 2;
   for(let k = 0; k < etoiles; k++) etoileFeutre(gFete, x0 + k * pas, 64, 26, k * 170);
@@ -6108,6 +6170,7 @@ function setBadge(on, opts = {}){
   afficherBadge(on);
   prefs.set('badge', on);
   if(!on || !opts.anim) return;
+  occupe('badge'); libere('badge', (opts.delai || 0) + 760 + FIN_GESTE_MS);   /* une récompense : l'ambiance attend */
   const pop = badgeEl.querySelector('.badge-in');
   if(deja) animer(pop, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-8deg) scale(1.08)' }, { transform: 'rotate(6deg)' }, { transform: 'rotate(0deg)' }],
     { duration: 600, easing: 'ease-in-out' });   /* déjà gagné : il frétille */
