@@ -80,6 +80,7 @@ L'épisode d'origine (réveils multiples, récit de l'ogre, enfant consolable) e
 - **Le parent lit à voix haute** : la page n'a aucun son, pas de synthèse vocale. Le volet d'information, la phrase du rêve et l'histoire sont écrits en gros pour être lus avec l'enfant.
 - « L'histoire du pouce » raconte l'épisode vrai, de bout en bout. « Nouvelle journée » remet les cartes dans la boîte.
 - La chanson ne se charge que si l'enfant appuie sur la télécommande, via `youtube-nocookie.com`. Hors ligne (ou en ouvrant le fichier directement), la fenêtre affiche « Chante avec elle ! » et le titre : on chante soi-même. Le parent peut changer la chanson dans les réglages (collez un lien YouTube).
+- **Sur un téléphone, la page se regarde, et c'est l'adulte qui la pilote.** La scène y est dessinée à ~0,43 : les zones et les cartes de la scène ne mesurent que 15 à 30 px. « Encore un rêve » et la télécommande y sont agrandis, et la phrase du rêve est recopiée en gros sous la scène, mais jouer avec les cartes et les zones est prévu pour une tablette ou un ordinateur (900 px de large ou plus).
 - Prénom, chanson, thème, avatar et badge restent dans le `localStorage` du navigateur. Aucun suivi, aucun compte, aucun serveur.
 
 ## Comment c'est fait
@@ -103,7 +104,7 @@ Le projet a été conçu avec le propriétaire (choix du style, de la spec, de l
 node --test test/
 ```
 
-69 tests, sans dépendance (Node récent) : données des cartes et des zones, 253 paires de cartes (rêve et phrase), génération du rêve, télécommande, zones (couverture, cibles, accessibilité), mini-jeux, analyse des liens YouTube (`parseYt`), absence de tout son, unicité des `id`. La vérification visuelle se fait par captures (`test/shot.sh`) et par un parcours complet au navigateur, notes dans `NOTES.md`.
+71 tests, sans dépendance (Node récent) : données des cartes et des zones, 253 paires de cartes (rêve et phrase, avec et sans le câlin comme carte réconfort), génération du rêve, télécommande, zones (couverture, cibles, accessibilité), mini-jeux, analyse des liens YouTube (`parseYt`), absence de tout son, unicité des `id`. La vérification visuelle se fait par captures (`test/shot.sh`) et par un parcours complet au navigateur, notes dans `NOTES.md`.
 
 ## Licence
 
