@@ -990,14 +990,20 @@ body[data-vue="2"]{--tc-vis:hidden}
 /* zone touchée qui n'est pas la bonne : un liseré corail qui se dandine (animer, section 13) */
 .hs.non,.hs.non:hover,.hs.non:focus-visible{stroke:var(--ui-corail);stroke-width:2.6;stroke-dasharray:var(--fil-dash-couture, 3.2 1.3);filter:var(--fil-filter, none)}
 /* récompenses dans la scène (#g-ui) : étoiles de feutre, confettis de laine, « Bravo ! » brodé ;
-   les mouvements passent par animer() (rien en mouvement réduit : étoiles posées, pas de confettis) */
+   les mouvements passent par animer() (rien en mouvement réduit : étoiles posées, pas de confettis ;
+   en version allégée, pas de confettis non plus — 24 pièces de laine qui tombent coûtent cher) */
 #g-fete{pointer-events:none}
 .fete-pop,.badge-in{transform-box:fill-box;transform-origin:50% 50%}
 .fete-texte{font-family:var(--font-display);font-weight:700;font-size:27px;text-anchor:middle;dominant-baseline:central;fill:var(--fil-encre, var(--fil-rouge))}
 .badge{display:none;pointer-events:none}
 .badge.on{display:inline}
-.badge-emoji{font-size:23px;text-anchor:middle;dominant-baseline:central}
-.badge-texte{font-family:var(--font-display);font-weight:600;font-size:10.5px;text-anchor:middle;fill:var(--riso-papier, var(--fil-blanc))}
+/* téléphone : la scène est dessinée à ~0,43 ; le badge grossit (ancré en haut à droite) pour rester lisible */
+.badge-zoom{transform-box:fill-box;transform-origin:100% 0}
+@media (max-width:899px){.badge-zoom{transform:scale(1.45)}}
+.badge-emoji{font-size:22px;text-anchor:middle;dominant-baseline:central}
+/* 13 unités sur deux lignes, avec un halo (paint-order) ; riso : encre bleue sur le papier du ruban */
+.badge-texte{font-family:var(--font-display);font-weight:600;font-size:13.5px;text-anchor:middle;dominant-baseline:central;
+  fill:var(--fil-encre, var(--fil-blanc));stroke:var(--riso-papier, #8f2f26);stroke-width:2.6px;stroke-linejoin:round;paint-order:stroke}
 
 /* ===== 9. Dock : trois gros boutons d'activité, trois outils sable ===== */
 .dock{
@@ -1007,6 +1013,10 @@ body[data-vue="2"]{--tc-vis:hidden}
 .dock-jeux,.dock-outils{display:flex;flex-wrap:wrap;gap:12px}
 .dock-outils{gap:8px}
 .dock-jeux .bouton{font-size:1.08rem;padding:.85em 1.25em}
+/* un jeu en cours (Task 16) : le bouton garde sa couleur, un anneau indigo le montre (aria-pressed) */
+#jeu1[aria-pressed="true"]{--b:var(--ui-corail)}
+#jeu2[aria-pressed="true"]{--b:var(--ui-indigo)}
+:is(#jeu1,#jeu2)[aria-pressed="true"]{box-shadow:0 6px 0 rgba(0,0,0,.14), 0 0 0 3px var(--ui-fond), 0 0 0 6px var(--ui-indigo)}
 .dock-outils .bouton{font-size:.95rem;padding:.6em 1em}
 
 /* ===== 10. Feuille de réglages (dialog#feuille) =====
@@ -2878,18 +2888,18 @@ html:not([data-pret]) *{transition:none!important}
                  occupent le haut à gauche de la vue Dehors), affiché par setBadge(true), mémorisé
                  (reves.badge). Rond de feutre cousu, ruban, épinglé. -->
             <g id="badge" class="badge" role="img" aria-label="Badge : je connais mon cerveau">
-              <g transform="translate(792 56)">
+              <g transform="translate(792 56)"><g class="badge-zoom">
                 <g class="badge-in">
                   <circle class="w lite" style="--p:var(--p-soleil)" data-ink="jaune" r="34"/>
                   <circle class="fil couture" style="--f:var(--fil-brun)" r="29"/>
-                  <text class="badge-emoji" y="-9">🧠</text>
-                  <path class="w lite" style="--p:var(--p-drapeau)" data-ink="rose" d="M-48 6H48L41 21L48 36H-48L-41 21Z"/>
-                  <path class="fil couture" style="--f:var(--fil-blanc)" d="M-41 10H41M-41 32H41"/>
-                  <text class="badge-texte" y="19">Je connais</text>
-                  <text class="badge-texte" y="30">mon cerveau</text>
+                  <text class="badge-emoji" y="-15">🧠</text>
+                  <path class="w lite reserve" style="--p:var(--riso-papier, var(--p-drapeau))" d="M-56 1H56L48 20L56 39H-56L-48 20Z"/>
+                  <path class="fil couture" style="--f:var(--fil-blanc)" d="M-48 5H48M-48 35H48"/>
+                  <text class="badge-texte" y="13">Je connais</text>
+                  <text class="badge-texte" y="28">mon cerveau</text>
                   <g transform="translate(3 -31) rotate(12)"><use href="#pin" style="color:var(--glass-blue)"/></g>
                 </g>
-              </g>
+              </g></g>
             </g>
           </g>
         </g>
@@ -5817,7 +5827,7 @@ function etiquetteBravo(parent){
 }
 const LAINES = [['--p-soleil', 'jaune'], ['--p-drapeau', 'rose'], ['--p-couverture', 'bleu'], ['--p-pyjama', 'bleu']];
 function confettis(parent, n){
-  if(REDUIT.matches) return;   /* mouvement réduit : pas de confettis */
+  if(REDUIT.matches || root.dataset.lite === '1') return;   /* mouvement réduit ou version allégée : pas de confettis */
   const g = svgEl('g', {}, parent);
   for(let k = 0; k < n; k++){
     const [p, encre] = LAINES[k % LAINES.length];
@@ -5845,11 +5855,14 @@ function feter(etoiles){
 }
 
 /* --- le badge « Je connais mon cerveau » --- */
+function afficherBadge(on){
+  badgeEl.classList.toggle('on', on);
+  badgeEl.setAttribute('aria-hidden', String(!on));
+}
 function setBadge(on, opts = {}){
   on = !!on;
   const deja = badgeEl.classList.contains('on');
-  badgeEl.classList.toggle('on', on);
-  badgeEl.setAttribute('aria-hidden', String(!on));
+  afficherBadge(on);
   prefs.set('badge', on);
   if(!on || !opts.anim) return;
   const pop = badgeEl.querySelector('.badge-in');
@@ -5858,7 +5871,7 @@ function setBadge(on, opts = {}){
   else animer(pop, [{ transform: 'translateY(-40px) scale(.2) rotate(-30deg)', opacity: 0 }, { transform: 'translateY(0) scale(1) rotate(0deg)', opacity: 1 }],
     { duration: 760, delay: opts.delai || 0, easing: RESSORT, fill: 'backwards' });
 }
-if(prefs.get('badge', false) === true) setBadge(true); else badgeEl.setAttribute('aria-hidden', 'true');
+afficherBadge(prefs.get('badge', false) === true);   /* au chargement : on lit reves.badge, on ne le réécrit pas */
 document.addEventListener('histoire', e => { if(e.detail && e.detail.fin) setBadge(true, { anim: true }); });
 
 /* --- la fiche du jeu --- */
@@ -5867,7 +5880,11 @@ function majJeuBoutons(etape){   /* 'cherche' (jeu 1) | 'choix' (jeu 2) | 'repon
   jeuSuiteBtn.hidden = etape !== 'reponse';
   rejouerBtn.hidden = finiBtn.hidden = etape !== 'fin';
 }
-function majScore(){
+/* le score n'est réécrit (donc annoncé) que s'il change, ou quand on le demande (début, fin) */
+function majScore(annoncer){
+  const cle = `${jeu.score} sur ${JEU_N}`;
+  if(!annoncer && jeuScore.dataset.score === cle) return;
+  jeuScore.dataset.score = cle;
   const vu = document.createElement('span'), lu = document.createElement('span');
   vu.setAttribute('aria-hidden', 'true');
   vu.textContent = `⭐ ${jeu.score} / ${JEU_N}`;
@@ -5918,7 +5935,6 @@ function poserQuestion(){
   jeu.attente = false; jeu.essai = true;
   viderFete(); enleverIndice(); marquerZone(null);
   const k = jeu.ordre[jeu.i], compteur = `Question ${jeu.i + 1} / ${JEU_N}`;
-  majScore();
   if(jeuActif === 1){
     const q = JEU_PARTIES[k];
     emojiJeu(JEUX[1].emoji);
@@ -5926,7 +5942,7 @@ function poserQuestion(){
     infoText.textContent = `${q.q} Touche la bonne partie !`;
     majJeuBoutons('cherche');
     const v = vueDe(q.cible);
-    if(Math.round(cutCourant) !== v || Math.abs(cutCourant - v) > .001) animateCut(v);
+    if(Math.abs(cutCourant - v) > .001) animateCut(v);
   }else{
     const q = JEU_REVE[k];
     emojiJeu(q.emoji);
@@ -5944,12 +5960,12 @@ function finDuJeu(){
   jeu.attente = false;
   enleverIndice(); marquerZone(null);
   const etoiles = Math.max(1, jeu.score);
+  majScore(true);
   emojiJeu('🏆');
   majTitre('Bravo, tu connais ton cerveau !');
   infoText.textContent = jeu.score === JEU_N ? '3 sur 3 ! Regarde : tu as gagné un badge, en haut.'
     : jeu.score ? `Tu en as trouvé ${jeu.score} sur ${JEU_N}. On rejoue ?`
     : 'Tu as bien cherché ! On rejoue ?';
-  majScore();
   majJeuBoutons('fin');
   feter(etoiles);
   if(jeu.score === JEU_N) setBadge(true, { anim: true, delai: 700 });   /* gagné tout de suite, il arrive après les étoiles */
@@ -6014,7 +6030,11 @@ function lancerJeu(n){
   /* le texte arrive une image après l'ouverture : sinon la région live, encore cachée, ne le lit pas */
   const texte = infoText.textContent;
   infoText.textContent = '';
-  requestAnimationFrame(() => { if(jeuActif === n && !infoText.textContent) infoText.textContent = texte; });
+  requestAnimationFrame(() => {
+    if(jeuActif !== n) return;
+    if(!infoText.textContent) infoText.textContent = texte;
+    majScore(true);   /* « 0 sur 3 », annoncé une fois, au début */
+  });
   if(n === 2) vraiBtn.focus({ preventScroll: true });
 }
 finirJeu = function(){
@@ -6025,6 +6045,7 @@ finirJeu = function(){
   infoEmoji.classList.remove('pop');
   majJeuBoutons('');
   jeuScore.replaceChildren();
+  delete jeuScore.dataset.score;
   if(jeu.num) jeu.num.remove();
   Object.values(jeuBtns).forEach(b => b.setAttribute('aria-pressed', 'false'));
 };
