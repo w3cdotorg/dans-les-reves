@@ -216,6 +216,10 @@ body{
 .bouton.corail{--b:var(--ui-corail);color:#fff}
 .bouton.indigo{--b:var(--ui-indigo);color:#fff}
 .bouton.vert{--b:var(--ui-vert);color:#fff}
+/* blanc sur corail (3,01:1) et sur vert (3,02:1) : seul le seuil « grand texte » de WCAG
+   (3:1) s'applique, soit ≥ 18,66 px en gras. Graisse 700 ici, et 1.17rem (18,7 px) au moins
+   partout où ces boutons sont posés (dock, fiche des jeux), téléphone compris (Task 18) */
+.bouton:is(.corail,.vert){font-weight:700}
 .bouton[aria-pressed="true"]{--b:var(--ui-indigo);color:#fff}
 /* le « ⋯ » : rond, il tourne d'un quart de tour quand la feuille est ouverte */
 .rond{width:var(--ui-cible);padding:0;font-size:1.6rem}
@@ -232,7 +236,7 @@ body{
 .croix:active{transform:translateY(2px) scale(.94);transition-duration:.06s}
 
 /* focus clavier : un seul anneau, seulement au clavier */
-:is(.seg,.bouton,.croix,.dot,summary):focus-visible{outline:3px solid var(--ui-indigo);outline-offset:3px}
+:is(.seg,.bouton,.croix,.dot,summary,a):focus-visible{outline:3px solid var(--ui-indigo);outline-offset:3px}
 .seg:focus-visible{outline-offset:-2px}
 
 /* ===== 6. Scène : le cadre arrondi, le rail du temps ===== */
@@ -970,7 +974,9 @@ body[data-vue="2"]{--tc-vis:hidden}
 .volet.histoire .recit-bt{display:flex;align-items:center;gap:12px;margin-top:12px}
 .recit-puces i{width:12px;height:12px;border-radius:50%;background:var(--ui-sable);box-shadow:inset 0 -2px 0 rgba(0,0,0,.14);transition:transform .3s var(--ui-ressort), background-color .2s}
 .recit-puces i.now{background:var(--ui-indigo);transform:scale(1.35)}
-.recit-num{margin-left:.5em;font-size:.8em;font-weight:500;opacity:.7;white-space:nowrap}
+/* le compteur commence par une espace (dans le texte) : le titre se lit « L'histoire du pouce 1 / 11 »,
+   pas « pouce1 / 11 », par un lecteur d'écran (Task 18) */
+.recit-num{margin-left:.3em;font-size:.8em;font-weight:500;opacity:.7;white-space:nowrap}
 #suite{min-height:var(--ui-cible);font-size:1.15rem;padding:.7em 1.6em}
 #stop{font-size:1.2rem}
 #stop[hidden]{display:none}
@@ -981,7 +987,7 @@ body[data-vue="2"]{--tc-vis:hidden}
 .jeu-score,.jeu-bt{display:none}
 .volet.jeu .jeu-score{display:block;margin:.4em 0 0;font-family:var(--font-display);font-weight:600;font-size:1.05rem;color:var(--ui-gris-fonce)}
 .volet.jeu .jeu-bt{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
-.jeu-bt .bouton{font-size:1.15rem;padding:.7em 1.4em}
+.jeu-bt .bouton{font-size:1.17rem;padding:.7em 1.4em}
 .jeu-bt .bouton[hidden]{display:none}
 .volet.jeu2{padding-left:110px}
 .volet.jeu2 .volet-ic{width:76px;height:76px;border-radius:20px;font-size:2.8rem}
@@ -1012,7 +1018,7 @@ body[data-vue="2"]{--tc-vis:hidden}
 }
 .dock-jeux,.dock-outils{display:flex;flex-wrap:wrap;gap:12px}
 .dock-outils{gap:8px}
-.dock-jeux .bouton{font-size:1.08rem;padding:.85em 1.25em}
+.dock-jeux .bouton{font-size:1.17rem;font-weight:700;padding:.8em 1.2em}
 /* un jeu en cours (Task 16) : le bouton garde sa couleur, un anneau indigo le montre (aria-pressed) */
 #jeu1[aria-pressed="true"]{--b:var(--ui-corail)}
 #jeu2[aria-pressed="true"]{--b:var(--ui-indigo)}
@@ -1151,12 +1157,12 @@ body[data-vue="2"]{--tc-vis:hidden}
   .volet.jeu2 .volet-ic{display:grid;position:static;float:left;width:50px;height:50px;margin:2px 10px 2px 0;border-radius:14px;font-size:1.9rem}
   .volet.jeu .jeu-score{margin-top:.15em;font-size:.9rem}
   .volet.jeu .jeu-bt{clear:both;flex-wrap:nowrap;margin-top:6px;gap:8px}
-  .jeu-bt .bouton{flex:1 1 0;min-width:0;font-size:1.0625rem;padding:.5em .4em;gap:.35em}
+  .jeu-bt .bouton{flex:1 1 0;min-width:0;font-size:1.17rem;padding:.5em .4em;gap:.35em}
 
   .dock{flex-direction:column;align-items:stretch;padding:14px 0 18px}
   .dock-jeux,.dock-outils{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
   .dock .bouton{flex-direction:column;gap:.3em;text-align:center;white-space:normal;padding:.6em .4em}
-  .dock-jeux .bouton{min-height:88px;border-radius:22px;font-size:1.0625rem}   /* ≥ 17 px : seuil « grand texte » du contraste 3:1 */
+  .dock-jeux .bouton{min-height:88px;border-radius:22px;font-size:1.17rem}   /* 18,7 px en gras : seuil « grand texte » du contraste 3:1 */
   .dock-outils .bouton{min-height:var(--ui-cible);border-radius:18px;font-size:.85rem}
 
   .feuille{
@@ -3751,14 +3757,17 @@ const root = document.documentElement;
 const THEMES = ['feutrine', 'riso'];
 const themeBtns = [...document.querySelectorAll('#theme [data-theme-choix]')];
 
-function setTheme(name){
+/* memo : le choix est mémorisé (les boutons de la feuille) ; ?theme= dans l'URL (captures,
+   liens de démonstration) ne remplace pas la préférence enregistrée (Task 18) */
+function setTheme(name, memo = true){
   if(!THEMES.includes(name)) name = 'feutrine';
   root.dataset.theme = name;
-  prefs.set('theme', name);
+  if(memo) prefs.set('theme', name);
   themeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeChoix === name)));
 }
 themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeChoix)));
-setTheme(Q.get('theme') || prefs.get('theme', 'feutrine'));
+if(Q.has('theme')) setTheme(Q.get('theme'), false);
+else setTheme(prefs.get('theme', 'feutrine'));
 
 /* ===== 3. Version allégée =====
    data-lite="1" sur <html> : toutes les pièces passent de #wool à #woolLite.
@@ -3807,6 +3816,11 @@ const REDUIT = matchMedia('(prefers-reduced-motion: reduce)');
   if(REDUIT.matches){ setLite(true); return; }
   mesurerRendu();
 })();
+/* le mouvement réduit demandé PENDANT la visite (réglage du système) allège aussi, sauf choix
+   explicite (URL, case de la feuille) ; on ne « désallège » jamais tout seul (Task 18) */
+REDUIT.addEventListener('change', () => {
+  if(REDUIT.matches && Q.get('lite') === null && prefs.get('lite', null) === null) setLite(true);
+});
 
 function mesurerRendu(){
   if(document.visibilityState !== 'visible'){
@@ -4472,7 +4486,12 @@ const boiteDort = () => (phaseCourante ?? 0) >= 2;
 function griserBoite(){
   const dort = boiteDort();
   boite.classList.toggle('dort', dort);
-  Object.values(cartesEls).forEach(({ g }) => g.setAttribute('aria-disabled', String(dort)));
+  /* la nuit, les 23 cartes refusées sortent aussi du parcours au clavier (Task 18 : 23 arrêts
+     inutiles avant les zones) ; la zone « boîte » reste, et son volet dit pourquoi */
+  Object.values(cartesEls).forEach(({ g }) => {
+    g.setAttribute('aria-disabled', String(dort));
+    g.setAttribute('tabindex', dort ? '-1' : '0');
+  });
 }
 document.addEventListener('temps', griserBoite);
 griserBoite();
@@ -5751,7 +5770,7 @@ function majPuces(i){
   [...recitPuces.children].forEach((p, k) => p.classList.toggle('now', k === i));
   if(!recit.num){ recit.num = document.createElement('span'); recit.num.className = 'recit-num'; infoTitle.appendChild(recit.num); }
   else if(!recit.num.isConnected) infoTitle.appendChild(recit.num);
-  recit.num.textContent = `${i + 1} / ${HISTOIRE.length}`;
+  recit.num.textContent = ` ${i + 1} / ${HISTOIRE.length}`;
   const dernier = HISTOIRE[i].action === 'fin';
   suiteBtn.textContent = dernier ? "C'est parti !" : 'Et après ?';
   stopBtn.hidden = dernier;
@@ -5849,7 +5868,7 @@ suiteBtn.addEventListener('click', () => {
    confettis. Badge (#badge) : setBadge(on) (mémorisé : reves.badge) ; gagné à la fin de
    l'histoire du pouce (événement « histoire », fin:true) ou à un 3 sur 3. */
 const JEU_N = 3;
-const JEUX = { 1: { emoji: '🎯', titre: 'Trouve la partie !' }, 2: { emoji: '💭', titre: 'Rêve ou pour de vrai ?' } };
+const JEUX = { 1: { emoji: '🎯', titre: 'Trouve la partie !' }, 2: { emoji: '💭', titre: 'Rêve ou pour de vrai ?' } };   /* insécables : jamais « ? » seul en début de ligne */
 const jeuBtns = { 1: document.getElementById('jeu1'), 2: document.getElementById('jeu2') };
 const vraiBtn = document.getElementById('vrai');
 const reveBtn = document.getElementById('reve');
@@ -6020,7 +6039,7 @@ function majTitre(titre, compteur){
   infoTitle.textContent = titre;
   if(!compteur) return;
   if(!jeu.num){ jeu.num = document.createElement('span'); jeu.num.className = 'recit-num'; }
-  jeu.num.textContent = compteur;
+  jeu.num.textContent = ' ' + compteur;
   infoTitle.appendChild(jeu.num);
 }
 function emojiJeu(e){
@@ -6086,7 +6105,7 @@ function finDuJeu(){
   const etoiles = Math.max(1, jeu.score);
   majScore(true);
   emojiJeu('🏆');
-  majTitre('Bravo, tu connais ton cerveau !');
+  majTitre('Bravo, tu connais ton cerveau\u00a0!');
   infoText.textContent = jeu.score === JEU_N ? '3 sur 3 ! Regarde : tu as gagné un badge, en haut.'
     : jeu.score ? `Tu en as trouvé ${jeu.score} sur ${JEU_N}. On rejoue ?`
     : 'Tu as bien cherché ! On rejoue ?';
