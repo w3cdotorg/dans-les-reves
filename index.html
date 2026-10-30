@@ -4330,6 +4330,7 @@ requestAnimationFrame(() => requestAnimationFrame(() => { root.dataset.pret = '1
     if(hors > 0 && Math.abs(hors - pose) >= 2){ pose = hors; app.style.setProperty('--hors-scene', hors + 'px'); }
   }
   new ResizeObserver(mesurer).observe(app);
+  addEventListener('resize', mesurer);   /* un élargissement de fenêtre ne change pas toujours la taille de .app */
   if(document.fonts) document.fonts.ready.then(mesurer);
   mesurer();
 })();
