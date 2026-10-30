@@ -322,7 +322,7 @@ svg#scene{display:block;width:100%;height:auto;isolation:isolate}
 [data-theme=riso]{
   --w-filter:url(#riso); --w-lite-filter:url(#riso); --w-blend:multiply;
   --encre-jaune:var(--ink-jaune); --encre-rose:var(--ink-rose); --encre-bleu:var(--ink-bleu);
-  --off-jaune:translate(-2.2px,1.1px); --off-rose:translate(1.5px,-1.3px); --off-bleu:translate(.6px,.4px);
+  --off-jaune:translate(-1.6px,1.1px); --off-rose:translate(1.5px,-1.3px); --off-bleu:translate(.6px,.4px);
   --fil-filter:url(#riso); --fil-dash:none; --fil-dash-couture:none;
   --fil-encre:var(--ink-bleu);     /* tous les fils sont imprimés en bleu */
   --riso-papier:var(--papier);     /* les petits points « en réserve » */
@@ -619,7 +619,7 @@ html.loupe-active,#scene.loupe-active{--amb-play:paused}
 @keyframes cligne{0%,92%,100%{opacity:0}94.5%,96%{opacity:1}}
 #fil-oeil-ferme{transform-box:fill-box;transform-origin:center}
 #fil-oeil-ferme.rem{animation:var(--amb-anim, rem) 1.3s ease-in-out infinite}
-@keyframes rem{0%,100%{transform:translateX(0)}18%{transform:translateX(-2.2px)}40%{transform:translateX(1.5px)}55%{transform:translateX(-.6px)}78%{transform:translateX(1.7px)}}
+@keyframes rem{0%,100%{transform:translateX(0)}18%{transform:translateX(-1.6px)}40%{transform:translateX(1.5px)}55%{transform:translateX(-.6px)}78%{transform:translateX(1.7px)}}
 
 /* la tête respire (×1,01) : sur les groupes (Dedans entier, l'enfant de Dehors),
    par la propriété « scale », qui se compose avec la transform posée en style
@@ -866,7 +866,7 @@ body[data-vue="2"]{--tc-vis:hidden}
 .tc-boutons.appui{transform:translateY(2px) scale(.97);transition-duration:.06s}
 @media (hover:hover){#telecommande:hover .tc-corps:not(.appui){transform:translateY(-2px) rotate(-1.5deg)}}
 /* le halo d'appel : immobile en mouvement réduit, mais toujours là */
-.tc-halo{fill:none;stroke:var(--glass-yellow);stroke-width:5;opacity:0;filter:blur(2.2px);transition:opacity .4s}
+.tc-halo{fill:none;stroke:var(--glass-yellow);stroke-width:5;opacity:0;filter:blur(1.6px);transition:opacity .4s}
 .tc-halo.pulse{opacity:.95;animation:tc-halo 1.5s ease-in-out infinite}
 @keyframes tc-halo{45%{opacity:.35}}
 .tc-focus{fill:none;stroke:var(--ui-indigo);stroke-width:3;opacity:0}
