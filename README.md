@@ -2,7 +2,7 @@
 
 Un petit explorateur du cerveau et des rêves, pour un enfant de 4 ans ½ – 5 ans qui ne lit pas encore, en français. Une seule page, dessinée à la main en laine feutrée (ou en risographe), à regarder **de jour, avec un adulte qui lit à voix haute**.
 
-**Bientôt en ligne :** https://w3cdotorg.github.io/dans-les-reves/ (la page n'est pas encore publiée ; en attendant, ouvrez `index.html` dans un navigateur, ça marche aussi hors ligne).
+**En ligne :** https://w3cdotorg.github.io/dans-les-reves/ (ou ouvrez `index.html` dans un navigateur : ça marche aussi hors ligne).
 
 Petit frère de [*Dans mon corps*](https://github.com/w3cdotorg/dans-mon-corps) et de [*Dans le volcan*](https://github.com/w3cdotorg/dans-le-volcan), dont il reprend les mécanismes (curseurs croisés, zones à toucher, loupe), pas l'esthétique.
 

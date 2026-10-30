@@ -1184,7 +1184,7 @@ La page est complète : trois vues croisées avec cinq moments, une journée de 
 
 ## Clôture (30 octobre 2026)
 
-La page est finie, documentée (`README.md`) et prête à être publiée ; la publication sur GitHub Pages attend le feu vert du propriétaire (rien n'est poussé ni mis en ligne à ce stade).
+La page est finie et documentée (`README.md`). Le 30 octobre 2026 au matin, avec l'accord du propriétaire : licence MIT (w3cdotorg), fusion de `realisation` dans `main`, publication sur GitHub Pages à https://w3cdotorg.github.io/dans-les-reves/ (en ligne).
 
 **Ce qui a marché.**
 - **Une page, zéro build.** `index.html` seul, données et fonctions pures dans un bloc `PURE-BEGIN/END` que `node --test test/` exécute dans un `vm` : 69 tests, dont les 253 paires de cartes, l'absence de tout son et l'unicité des `id`. Ce qui se vérifie par un test ne casse plus en silence.
